@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { useCategories, Category, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
 import { useMarquee } from "@/hooks/useMarquee";
 import ReviewCarousel from "@/components/ReviewCarousel";
@@ -111,9 +110,23 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-export default function Home() {
-  const { loading: authLoading } = useAuth();
+function CategorySkeleton({ className }: { className?: string }) {
+  return (
+    <div className={`aspect-square border border-[#E8E0D8] bg-[#F3EDE4] animate-pulse ${className || ""}`} />
+  );
+}
 
+function ProductSkeleton({ className }: { className?: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className={`aspect-square border border-[#E8E0D8] bg-white animate-pulse w-full mb-2.5 sm:mb-3.5 ${className || ""}`} />
+      <div className="h-3 w-3/4 bg-[#E8E0D8] animate-pulse mb-2" />
+      <div className="h-3 w-1/2 bg-[#E8E0D8] animate-pulse" />
+    </div>
+  );
+}
+
+export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
 
@@ -260,23 +273,7 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const isReady = !authLoading && !categoriesLoading && productsLoaded;
-
   const doubledMarquee = [...marqueeItems, ...marqueeItems];
-
-  if (!isReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#F9F6F0]">
-        <div className="w-8 h-8 border-2 border-[#E0D0B8] border-t-[#D2693F] animate-spin" />
-        <p
-          className="text-[#6B5A47] tracking-wide"
-          style={{ fontFamily: "Tenor Sans", fontSize: "14px" }}
-        >
-          Loading Kria...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -331,51 +328,70 @@ export default function Home() {
             Browse By Category
           </h2>
 
-          {/* Mobile: 2-col grid */}
-          <div className="lg:hidden grid grid-cols-2 gap-2 sm:gap-3">
-            {firestoreCategories.map(cat => (
-              <CategoryCard key={cat.id} cat={cat} />
-            ))}
-          </div>
+          {categoriesLoading ? (
+            <>
+              {/* Mobile: 2-col grid */}
+              <div className="lg:hidden grid grid-cols-2 gap-2 sm:gap-3">
+                {[0, 1, 2, 3, 4, 5].map(i => (
+                  <CategorySkeleton key={i} />
+                ))}
+              </div>
+              {/* Desktop: 4 across */}
+              <div className="hidden lg:grid grid-cols-4 gap-3">
+                {[0, 1, 2, 3].map(i => (
+                  <CategorySkeleton key={i} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Mobile: 2-col grid */}
+              <div className="lg:hidden grid grid-cols-2 gap-2 sm:gap-3">
+                {firestoreCategories.map(cat => (
+                  <CategoryCard key={cat.id} cat={cat} />
+                ))}
+              </div>
 
-          {/* Desktop: carousel showing 4 at a time */}
-          <div className="hidden lg:block relative">
-            <button
-              ref={leftBtnRef}
-              onClick={() => scrollCarousel("left")}
-              className="absolute left-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-30 cursor-default"
-              aria-label="Scroll left"
-            >
-              <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
-                <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                </svg>
-              </span>
-            </button>
-            <button
-              ref={rightBtnRef}
-              onClick={() => scrollCarousel("right")}
-              className="absolute right-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-100 cursor-pointer"
-              aria-label="Scroll right"
-            >
-              <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
-                <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </button>
-            <div
-              ref={carouselRef}
-              className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {firestoreCategories.map(cat => (
-                <div key={cat.id} className="flex-none w-[calc(25%-9px)]">
-                  <CategoryCard cat={cat} />
+              {/* Desktop: carousel showing 4 at a time */}
+              <div className="hidden lg:block relative">
+                <button
+                  ref={leftBtnRef}
+                  onClick={() => scrollCarousel("left")}
+                  className="absolute left-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-30 cursor-default"
+                  aria-label="Scroll left"
+                >
+                  <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </span>
+                </button>
+                <button
+                  ref={rightBtnRef}
+                  onClick={() => scrollCarousel("right")}
+                  className="absolute right-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-100 cursor-pointer"
+                  aria-label="Scroll right"
+                >
+                  <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </button>
+                <div
+                  ref={carouselRef}
+                  className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                  {firestoreCategories.map(cat => (
+                    <div key={cat.id} className="flex-none w-[calc(25%-9px)]">
+                      <CategoryCard cat={cat} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -393,7 +409,22 @@ export default function Home() {
                 Most Loved Handcrafted Pieces
               </h2>
 
-              {featured.length === 0 ? null : (
+              {!productsLoaded ? (
+                <>
+                  {/* Mobile: 2x2 grid, max 4 */}
+                  <div className="lg:hidden grid grid-cols-2 gap-4 sm:gap-5">
+                    {[0, 1, 2, 3].map(i => (
+                      <ProductSkeleton key={i} />
+                    ))}
+                  </div>
+                  {/* Desktop: 4 across */}
+                  <div className="hidden lg:grid grid-cols-4 gap-5">
+                    {[0, 1, 2, 3].map(i => (
+                      <ProductSkeleton key={i} />
+                    ))}
+                  </div>
+                </>
+              ) : featured.length === 0 ? null : (
                 <>
                   {/* Mobile: 2x2 grid, max 4 */}
                   <div className="lg:hidden grid grid-cols-2 gap-4 sm:gap-5">

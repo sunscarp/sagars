@@ -7,8 +7,11 @@ import {
   ref as storageRef,
   uploadBytes,
   getDownloadURL,
+  getStorage,
 } from "firebase/storage";
-import { storage } from "@/firebase";
+import { app } from "@/firebase";
+
+const storage = getStorage(app);
 
 export default function CategoriesManager() {
   const { categories, loading, addCategory, removeCategory, updateCategory, addSubcategory, removeSubcategory, updateSubcategory } = useCategories();

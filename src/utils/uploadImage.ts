@@ -92,9 +92,10 @@ export async function uploadReviewImage(
   reviewId: string,
   onProgress?: (fraction: number) => void
 ): Promise<ReviewImageResult> {
-  const { ref, uploadBytesResumable, getDownloadURL } = await import("firebase/storage");
-  const { storage } = await import("@/firebase");
+  const { ref, uploadBytesResumable, getDownloadURL, getStorage } = await import("firebase/storage");
+  const { app } = await import("@/firebase");
 
+  const storage = getStorage(app);
   onProgress?.(0.05);
   const variants = await generateImageVariants(file);
   onProgress?.(0.4);
@@ -150,9 +151,10 @@ export async function uploadProductImage(
   productId: string,
   slot: 1 | 2 | 3
 ): Promise<UploadResult> {
-  const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-  const { storage } = await import("@/firebase");
+  const { ref, uploadBytes, getDownloadURL, getStorage } = await import("firebase/storage");
+  const { app } = await import("@/firebase");
 
+  const storage = getStorage(app);
   const variants = await generateImageVariants(file);
 
   const basePath = `products/${productId}/image${slot}`;
