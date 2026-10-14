@@ -9,7 +9,7 @@ import ProductImage from "@/components/ProductImage";
 function ReviewThumb({ review }: { review: Review }) {
   const hasImage = !!(review.image || review.imageThumb);
   return (
-    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0 relative">
+    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-[#E1DFDC] bg-[#F1EEE7] flex-shrink-0 relative">
       {hasImage ? (
         <ProductImage
           src={review.image}
@@ -19,7 +19,7 @@ function ReviewThumb({ review }: { review: Review }) {
           className="w-full h-full"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-slate-300">
+        <div className="w-full h-full flex items-center justify-center text-[#D8D5CD]">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
@@ -43,7 +43,7 @@ function MoveButtons({
       <button
         onClick={() => onMove(index, "up")}
         disabled={index === 0}
-        className="p-1 sm:p-0 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-1 sm:p-0 text-[#9B998F] hover:text-[#595B53] disabled:opacity-30 disabled:cursor-not-allowed"
         title="Move up"
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@ function MoveButtons({
       <button
         onClick={() => onMove(index, "down")}
         disabled={index === total - 1}
-        className="p-1 sm:p-0 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-1 sm:p-0 text-[#9B998F] hover:text-[#595B53] disabled:opacity-30 disabled:cursor-not-allowed"
         title="Move down"
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+      className="p-2 text-[#9B998F] hover:text-red-500 transition-colors"
       title="Remove review"
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ function PhotoButtons({
       <button
         onClick={() => onPick(index)}
         disabled={uploading}
-        className="text-[11px] px-3 py-1.5 sm:px-2 sm:py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-[#D2693F] hover:text-[#D2693F] transition-colors whitespace-nowrap disabled:opacity-50"
+        className="text-[11px] px-3 py-1.5 sm:px-2 sm:py-1 rounded border border-[#E1DFDC] text-[#595B53] hover:bg-[#F1EEE7] hover:border-[#171813] hover:text-[#171813] transition-colors whitespace-nowrap disabled:opacity-50"
       >
         {uploading ? "Uploading…" : hasImage ? "Change Photo" : "Add Photo"}
       </button>
@@ -224,7 +224,7 @@ export default function ReviewsManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -232,8 +232,8 @@ export default function ReviewsManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Customer Reviews</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-lg font-semibold text-[#171813]">Customer Reviews</h2>
+        <p className="text-sm text-[#595B53] mt-1">
           Manage the customer reviews shown on the homepage. Add a photo, review text and the
           customer&apos;s name. Photos are cropped to a uniform square and optimised as WebP.
         </p>
@@ -249,27 +249,27 @@ export default function ReviewsManager() {
       )}
 
       {/* Current reviews */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider">
             Reviews ({draft.length})
           </p>
           <button
             onClick={addReview}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-[#F1EEE7] hover:bg-[#E1DFDC] text-[#595B53] text-xs font-medium rounded-lg transition-colors"
           >
             + Add Review
           </button>
         </div>
 
         {draft.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">No reviews yet. Add one above.</p>
+          <p className="text-sm text-[#9B998F] py-4 text-center">No reviews yet. Add one above.</p>
         ) : (
           <div className="space-y-3">
             {draft.map((review, index) => (
               <div
                 key={index}
-                className="border border-gray-200 rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:gap-4"
+                className="border border-[#E1DFDC] rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:gap-4"
               >
                 {/* Mobile: header row with arrows + thumb + delete */}
                 <div className="flex items-center gap-2 sm:hidden">
@@ -304,14 +304,14 @@ export default function ReviewsManager() {
                     value={review.name}
                     onChange={(e) => updateField(index, "name", e.target.value)}
                     placeholder="Customer name"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                    className="w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                   />
                   <textarea
                     value={review.text}
                     onChange={(e) => updateField(index, "text", e.target.value)}
                     placeholder="Their review..."
                     rows={3}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all resize-none"
+                    className="w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all resize-none"
                   />
                   {/* Mobile: photo controls */}
                   <div className="flex flex-wrap items-center gap-2 sm:hidden">
@@ -337,13 +337,13 @@ export default function ReviewsManager() {
 
       {/* Preview */}
       {draft.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Preview</p>
+        <div className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+          <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider mb-3">Preview</p>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {draft.map((review, i) => (
               <div key={i} className="flex-shrink-0 w-[220px]">
-                <div className="h-full bg-[#F9F6F0] border border-[#E8E0D8] shadow-sm flex flex-col overflow-hidden">
-                  <div className="relative w-full aspect-square overflow-hidden bg-white border-b border-[#E8E0D8]">
+                <div className="h-full bg-[#FFFFFF] border border-[#D8D5CD] shadow-sm flex flex-col overflow-hidden">
+                  <div className="relative w-full aspect-square overflow-hidden bg-white border-b border-[#D8D5CD]">
                     {review.image ? (
                       <ProductImage
                         src={review.image}
@@ -352,16 +352,16 @@ export default function ReviewsManager() {
                         className="w-full h-full"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#D2693F]/10 text-[#D2693F] font-semibold text-4xl">
+                      <div className="w-full h-full flex items-center justify-center bg-[#171813]/10 text-[#171813] font-semibold text-4xl">
                         {(review.name || "K").charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div className="p-4 flex flex-col flex-1">
-                    <p className="text-[#2D2D2D] text-xs leading-relaxed flex-1">
+                    <p className="text-[#171813] text-xs leading-relaxed flex-1">
                       &ldquo;{review.text || "Review text..."}&rdquo;
                     </p>
-                    <span className="text-[#D2693F] font-semibold text-xs mt-2">
+                    <span className="text-[#171813] font-semibold text-xs mt-2">
                       — {review.name || "Name"}
                     </span>
                   </div>
@@ -377,7 +377,7 @@ export default function ReviewsManager() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#D2693F] text-white text-sm font-medium rounded-lg hover:bg-[#B85A34] disabled:opacity-50 transition-colors"
+          className="px-6 py-2.5 bg-[#171813] text-white text-sm font-medium rounded-lg hover:bg-[#171813] disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
@@ -397,19 +397,19 @@ export default function ReviewsManager() {
         onChange={handleFileSelect}
       />
       {uploadProgress !== null && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="fixed inset-0 z-[60] bg-[#171813]/70 flex items-end sm:items-center justify-center sm:p-4">
           <div className="bg-white w-full sm:max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#2D2D2D]">Uploading Photo</h3>
-              <span className="text-xs font-semibold text-[#D2693F]">{uploadProgress}%</span>
+              <h3 className="text-sm font-bold text-[#171813]">Uploading Photo</h3>
+              <span className="text-xs font-semibold text-[#171813]">{uploadProgress}%</span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-[#F1EEE7] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#D2693F] rounded-full transition-all duration-200"
+                className="h-full bg-[#171813] rounded-full transition-all duration-200"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[#9B998F]">
               {uploadProgress < 40
                 ? "Processing & optimising image…"
                 : "Uploading to storage…"}

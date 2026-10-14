@@ -63,7 +63,7 @@ const CategorySection = forwardRef<
                 className="border-2 p-6 text-center font-bold"
               >
                 {/* Product Placeholder */}
-                <div className="bg-gray-200 h-32 mb-4 flex items-center justify-center">
+                <div className="bg-[#F1EEE7] h-32 mb-4 flex items-center justify-center">
                   {id}
                 </div>
 
@@ -74,7 +74,7 @@ const CategorySection = forwardRef<
                       startAutoSlide();
                       addItem(id);
                     }}
-                    className="px-3 py-1 bg-black text-white"
+                    className="px-3 py-1 rounded-full bg-[#171813] text-white"
                   >
                     +
                   </button>

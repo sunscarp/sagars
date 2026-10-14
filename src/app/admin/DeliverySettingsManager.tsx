@@ -8,13 +8,9 @@ import {
 } from "@/hooks/useDeliverySettings";
 
 const ZONE_KEYS = [
-  "state",
   "metro",
-  "zone_a",
-  "zone_b",
-  "zone_c",
-  "zone_d",
-  "oda",
+  "peninsular",
+  "east",
   "intl_asia",
   "intl_europe",
   "intl_namerica",
@@ -87,7 +83,7 @@ export default function DeliverySettingsManager() {
   if (loading || !draft) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -95,22 +91,22 @@ export default function DeliverySettingsManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Delivery Settings</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-lg font-semibold text-[#171813]">Delivery Settings</h2>
+        <p className="text-sm text-[#595B53] mt-1">
           Configure shipping rates per zone and free delivery threshold.
         </p>
       </div>
 
       {/* Free Delivery Threshold */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+        <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider mb-3">
           Free Delivery Threshold
         </p>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-[#595B53] mb-4">
           Orders above this value get free delivery. Set to 0 to disable free delivery.
         </p>
         <div className="flex items-center gap-3 max-w-xs">
-          <span className="text-sm text-gray-500">Rs.</span>
+          <span className="text-sm text-[#595B53]">RM</span>
           <input
             type="number"
             min={0}
@@ -119,18 +115,18 @@ export default function DeliverySettingsManager() {
             onChange={(e) =>
               update({ freeDeliveryThreshold: Math.max(0, Number(e.target.value) || 0) })
             }
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+            className="flex-1 border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
           />
         </div>
       </div>
 
       {/* Zone Rates */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+        <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider mb-3">
           Shipping Zone Rates
         </p>
-        <p className="text-sm text-gray-600 mb-4">
-          Base rate is charged for the first item. Per-item rate applies to each additional item. GST (18%) is applied on top automatically.
+        <p className="text-sm text-[#595B53] mb-4">
+          Base rate is charged for the first item. Per-item rate applies to each additional item. Service tax (8%) is applied on top automatically.
         </p>
 
         <div className="space-y-4">
@@ -140,23 +136,23 @@ export default function DeliverySettingsManager() {
             return (
               <div
                 key={key}
-                className="border border-gray-100 rounded-lg p-4 bg-gray-50/50"
+                className="border border-[#F1EEE7] rounded-lg p-4 bg-[#F1EEE7]/50"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-[#171813]">
                       {zone.label}
                     </span>
-                    <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-[#9B998F] bg-[#F1EEE7] px-1.5 py-0.5 rounded">
                       {key}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">{zone.days} days</span>
+                  <span className="text-xs text-[#9B998F]">{zone.days} days</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-gray-500 mb-1">
-                      Base Rate (Rs.)
+                    <label className="block text-[11px] font-medium text-[#595B53] mb-1">
+                      Base Rate (RM)
                     </label>
                     <input
                       type="number"
@@ -165,12 +161,12 @@ export default function DeliverySettingsManager() {
                       onChange={(e) =>
                         updateZone(key, "rate", Math.max(0, Number(e.target.value) || 0))
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+                      className="w-full border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-gray-500 mb-1">
-                      Per Item (Rs.)
+                    <label className="block text-[11px] font-medium text-[#595B53] mb-1">
+                      Per Item (RM)
                     </label>
                     <input
                       type="number"
@@ -179,18 +175,18 @@ export default function DeliverySettingsManager() {
                       onChange={(e) =>
                         updateZone(key, "perItem", Math.max(0, Number(e.target.value) || 0))
                       }
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+                      className="w-full border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-gray-500 mb-1">
+                    <label className="block text-[11px] font-medium text-[#595B53] mb-1">
                       Est. Days
                     </label>
                     <input
                       type="text"
                       value={zone.days}
                       onChange={(e) => updateZone(key, "days", e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+                      className="w-full border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
                       placeholder="e.g. 3-5"
                     />
                   </div>
@@ -218,7 +214,7 @@ export default function DeliverySettingsManager() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#D2693F] text-white text-sm font-medium rounded-lg hover:bg-[#B85A34] disabled:opacity-50 transition-colors"
+          className="px-6 py-2.5 bg-[#171813] text-white text-sm font-medium rounded-lg hover:bg-[#171813] disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>

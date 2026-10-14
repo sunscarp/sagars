@@ -1,17 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef } from "react";
 import { useCategories, Category, FONT_OPTIONS, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
-import { convertToWebP } from "@/utils/uploadImage";
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-  getStorage,
-} from "firebase/storage";
-import { app } from "@/firebase";
-
-const storage = getStorage(app);
+import { uploadCategoryImage } from "@/utils/uploadImage";
 
 export default function CategoriesManager() {
   const { categories, loading, addCategory, removeCategory, updateCategory, addSubcategory, removeSubcategory, updateSubcategory } = useCategories();
@@ -20,8 +11,8 @@ export default function CategoriesManager() {
   // Add form
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState("");
-  const [newBgColor, setNewBgColor] = useState("#F3EDE4");
-  const [newMainTextFont, setNewMainTextFont] = useState("'Great Vibes', cursive");
+  const [newBgColor, setNewBgColor] = useState("#F1EEE7");
+  const [newMainTextFont, setNewMainTextFont] = useState("var(--font-cormorant)");
   const [newMainTextSize, setNewMainTextSize] = useState(4);
 
   // Edit state
@@ -29,8 +20,8 @@ export default function CategoriesManager() {
   const [editName, setEditName] = useState("");
   const [editImage, setEditImage] = useState("");
   const [editMainText, setEditMainText] = useState("");
-  const [editBgColor, setEditBgColor] = useState("#F3EDE4");
-  const [editMainTextFont, setEditMainTextFont] = useState("'Great Vibes', cursive");
+  const [editBgColor, setEditBgColor] = useState("#F1EEE7");
+  const [editMainTextFont, setEditMainTextFont] = useState("var(--font-cormorant)");
   const [editMainTextSize, setEditMainTextSize] = useState(4);
   const [editOrder, setEditOrder] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -57,8 +48,8 @@ export default function CategoriesManager() {
       await addCategory(newName.trim(), newImage.trim(), undefined, newBgColor, newMainTextFont, newMainTextSize);
       setNewName("");
       setNewImage("");
-      setNewBgColor("#F3EDE4");
-      setNewMainTextFont("'Great Vibes', cursive");
+      setNewBgColor("#F1EEE7");
+      setNewMainTextFont("var(--font-cormorant)");
       setNewMainTextSize(4);
     } catch (err: any) {
       setError(err.message || "Failed to add category");
@@ -80,8 +71,8 @@ export default function CategoriesManager() {
     setEditName(cat.name);
     setEditImage(cat.image || "");
     setEditMainText(cat.mainText || "");
-    setEditBgColor(cat.bgColor || "#F3EDE4");
-    setEditMainTextFont(cat.mainTextFont || "'Great Vibes', cursive");
+    setEditBgColor(cat.bgColor || "#F1EEE7");
+    setEditMainTextFont(cat.mainTextFont || "var(--font-cormorant)");
     setEditMainTextSize(cat.mainTextSize || 4);
     setEditOrder(cat.order);
   };
@@ -121,11 +112,7 @@ export default function CategoriesManager() {
   const handleImageUpload = async (file: File) => {
     setUploadingImg(true);
     try {
-      const converted = await convertToWebP(file);
-      const path = `categories/${Date.now()}-${file.name.replace(/\.[^.]+$/, "")}.webp`;
-      const fileRef = storageRef(storage, path);
-      await uploadBytes(fileRef, converted, { contentType: "image/webp" });
-      const url = await getDownloadURL(fileRef);
+      const url = await uploadCategoryImage(file);
       setEditImage(url);
     } catch (err: any) {
       setError(err.message || "Failed to upload image");
@@ -180,23 +167,23 @@ export default function CategoriesManager() {
   function PreviewCard({ bgColor, name, mainText, mainTextFont, mainTextSize }: { bgColor: string; name: string; mainText?: string; mainTextFont: string; mainTextSize: number }) {
     return (
       <div className="sm:col-span-2 mt-2">
-        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Preview</label>
+        <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-2">Preview</label>
         <div className="flex gap-6 items-start flex-wrap">
           <div>
-            <div className="text-[10px] text-slate-400 text-center mb-1.5 font-medium">Mobile</div>
-            <div className="w-[180px] aspect-[3/4] flex flex-col items-center justify-center p-2 border border-slate-200 rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
-              <div className="border border-black/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
-                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
+            <div className="text-[10px] text-[#9B998F] text-center mb-1.5 font-medium">Mobile</div>
+            <div className="w-[180px] aspect-[3/4] flex flex-col items-center justify-center p-2 border border-[#E1DFDC] rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
+              <div className="border border-[#171813]/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
+                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#171813] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
                   {mainText || name}
                 </span>
               </div>
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 text-center mb-1.5 font-medium">Desktop</div>
-            <div className="w-[260px] aspect-[3/4] flex flex-col items-center justify-center p-4 border border-slate-200 rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
-              <div className="border border-black/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
-                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
+            <div className="text-[10px] text-[#9B998F] text-center mb-1.5 font-medium">Desktop</div>
+            <div className="w-[260px] aspect-[3/4] flex flex-col items-center justify-center p-4 border border-[#E1DFDC] rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
+              <div className="border border-[#171813]/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
+                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#171813] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
                   {mainText || name}
                 </span>
               </div>
@@ -217,8 +204,8 @@ export default function CategoriesManager() {
       )}
 
       {/* Add form */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Add New Category</h3>
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-6">
+        <h3 className="text-sm font-semibold text-[#171813] mb-4">Add New Category</h3>
         <form onSubmit={handleAdd} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-3">
             <input
@@ -226,20 +213,20 @@ export default function CategoriesManager() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Category name"
-              className="flex-1 rounded-lg border border-gray-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+              className="flex-1 rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-4 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
             />
             <div className="flex items-center gap-2 shrink-0">
-              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Bg</label>
+              <label className="text-[10px] font-semibold text-[#595B53] uppercase tracking-wider">Bg</label>
               <input
                 type="color"
                 value={newBgColor}
                 onChange={(e) => setNewBgColor(e.target.value)}
-                className="w-9 h-9 rounded border border-gray-200 cursor-pointer"
+                className="w-9 h-9 rounded border border-[#E1DFDC] cursor-pointer"
               />
             </div>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-lg bg-[#D2693F] text-white text-sm font-semibold hover:bg-[#B85A34] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
+              className="px-6 py-2.5 rounded-lg bg-[#171813] text-white text-sm font-semibold hover:bg-[#171813] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
             >
               Add Category
             </button>
@@ -248,7 +235,7 @@ export default function CategoriesManager() {
             <select
               value={newMainTextFont}
               onChange={(e) => setNewMainTextFont(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+              className="rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
             >
               {FONT_OPTIONS.map(f => (
                 <option key={f.value} value={f.value}>{f.label}</option>
@@ -257,7 +244,7 @@ export default function CategoriesManager() {
             <select
               value={newMainTextSize}
               onChange={(e) => setNewMainTextSize(Number(e.target.value))}
-              className="rounded-lg border border-gray-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+              className="rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
             >
               {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
             </select>
@@ -266,92 +253,92 @@ export default function CategoriesManager() {
       </div>
 
       {/* List */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[#F1EEE7]">
+          <h3 className="text-sm font-semibold text-[#171813]">
             Categories
-            <span className="ml-2 text-xs font-normal text-gray-400">({categories.length})</span>
+            <span className="ml-2 text-xs font-normal text-[#9B998F]">({categories.length})</span>
           </h3>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 text-sm text-gray-400">No categories yet.</div>
+          <div className="text-center py-12 text-sm text-[#9B998F]">No categories yet.</div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-[#F1EEE7]">
             {categories.map((cat) => {
               const isEditing = editingId === cat.id;
 
               if (isEditing) {
                 return (
-                  <li key={cat.id} className="px-6 py-5 bg-[#F9F6F0]/30">
+                  <li key={cat.id} className="px-6 py-5 bg-[#FFFFFF]/30">
 
                       {/* Fields */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name</label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Name</label>
                           <input
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Order</label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Order</label>
                           <input
                             type="number"
                             value={editOrder}
                             onChange={(e) => setEditOrder(Number(e.target.value))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Text <span className="text-slate-300 font-normal normal-case">(override display)</span></label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Main Text <span className="text-[#D8D5CD] font-normal normal-case">(override display)</span></label>
                           <input
                             type="text"
                             value={editMainText}
                             onChange={(e) => setEditMainText(e.target.value)}
                             placeholder="Leave blank to use Name"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Background Color</label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Background Color</label>
                           <div className="flex items-center gap-2">
                             <input
                               type="color"
                               value={editBgColor}
                               onChange={(e) => setEditBgColor(e.target.value)}
-                              className="w-9 h-9 rounded border border-gray-200 cursor-pointer shrink-0"
+                              className="w-9 h-9 rounded border border-[#E1DFDC] cursor-pointer shrink-0"
                             />
                             <input
                               type="text"
                               value={editBgColor}
                               onChange={(e) => setEditBgColor(e.target.value)}
-                              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all font-mono"
+                              className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all font-mono"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Font</label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Main Font</label>
                           <select
                             value={editMainTextFont}
                             onChange={(e) => setEditMainTextFont(e.target.value)}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                           >
                             {FONT_OPTIONS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Size</label>
+                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Main Size</label>
                           <select
                             value={editMainTextSize}
                             onChange={(e) => setEditMainTextSize(Number(e.target.value))}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                           >
                             {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
                           </select>
@@ -369,14 +356,14 @@ export default function CategoriesManager() {
                     <div className="flex items-center gap-2 mt-4">
                       <button
                         onClick={cancelEdit}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                        className="px-4 py-2 rounded-lg border border-[#E1DFDC] text-sm font-medium text-[#595B53] hover:bg-[#F1EEE7] transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleSave}
                         disabled={saving || uploadingImg}
-                        className="px-5 py-2 rounded-lg bg-[#D2693F] text-white text-sm font-semibold hover:bg-[#B85A34] shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-5 py-2 rounded-lg bg-[#171813] text-white text-sm font-semibold hover:bg-[#171813] shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {saving ? "Saving…" : "Save Changes"}
                       </button>
@@ -390,23 +377,23 @@ export default function CategoriesManager() {
 
               return (
                 <li key={cat.id} className="group">
-                  <div className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50/50 transition-colors">
-                    <span className="text-xs text-gray-300 font-mono w-4 text-center flex-shrink-0">{cat.order}</span>
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-200" style={{ backgroundColor: cat.bgColor || '#F3EDE4' }}>
-                      <span style={{ fontFamily: cat.mainTextFont || "'Great Vibes', cursive", wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight px-1 " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}>
+                  <div className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#F1EEE7]/50 transition-colors">
+                    <span className="text-xs text-[#D8D5CD] font-mono w-4 text-center flex-shrink-0">{cat.order}</span>
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#E1DFDC]" style={{ backgroundColor: cat.bgColor || '#F1EEE7' }}>
+                      <span style={{ fontFamily: cat.mainTextFont || "var(--font-cormorant)", wordBreak: 'keep-all' }} className={"text-[#171813] tracking-wide font-bold leading-tight px-1 " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}>
                         {cat.mainText ? cat.mainText.split(' ')[0] : cat.name.split(' ')[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{cat.name}</p>
+                      <p className="text-sm font-medium text-[#171813] truncate">{cat.name}</p>
                       {catSubs.length > 0 && (
-                        <p className="text-[11px] text-gray-400 mt-0.5">{catSubs.length} subcategories</p>
+                        <p className="text-[11px] text-[#9B998F] mt-0.5">{catSubs.length} subcategories</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setExpandedCategoryId(isExpanded ? null : cat.id)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-[#C5A059] hover:bg-[#F9F6F0] transition-colors"
+                        className="p-2 rounded-lg text-[#9B998F] hover:text-[#595B53] hover:bg-[#FFFFFF] transition-colors"
                         title={isExpanded ? "Hide subcategories" : "Manage subcategories"}
                       >
                         <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +402,7 @@ export default function CategoriesManager() {
                       </button>
                       <button
                         onClick={() => startEdit(cat)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-[#D2693F] hover:bg-[#F9F6F0] transition-colors"
+                        className="p-2 rounded-lg text-[#9B998F] hover:text-[#171813] hover:bg-[#FFFFFF] transition-colors"
                         title="Edit category"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,7 +423,7 @@ export default function CategoriesManager() {
 
                   {/* Expanded subcategory panel */}
                   {isExpanded && (
-                    <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+                    <div className="px-6 py-4 bg-[#F1EEE7] border-t border-[#F1EEE7]">
                       <div className="flex items-center gap-2 mb-3">
                         <input
                           type="text"
@@ -444,18 +431,18 @@ export default function CategoriesManager() {
                           onChange={(e) => setNewSubName(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(cat.id); } }}
                           placeholder="New subcategory name"
-                          className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                          className="flex-1 rounded-lg border border-[#E1DFDC] bg-white px-3 py-2 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
                         />
                         <button
                           onClick={() => handleAddSubcategory(cat.id)}
-                          className="px-4 py-2 rounded-lg bg-[#C5A059] text-white text-sm font-semibold hover:bg-[#A88640] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
+                          className="px-4 py-2 rounded-lg bg-[#595B53] text-white text-sm font-semibold hover:bg-[#595B53] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
                         >
                           Add
                         </button>
                       </div>
 
                       {catSubs.length === 0 ? (
-                        <p className="text-xs text-gray-400 py-2">No subcategories yet.</p>
+                        <p className="text-xs text-[#9B998F] py-2">No subcategories yet.</p>
                       ) : (
                         <ul className="space-y-1">
                           {catSubs.map((sub: any, subIdx: number) => (
@@ -466,17 +453,17 @@ export default function CategoriesManager() {
                                     type="text"
                                     value={editSubName}
                                     onChange={(e) => setEditSubName(e.target.value)}
-                                    className="flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#C5A059]/40"
+                                    className="flex-1 rounded border border-[#E1DFDC] bg-white px-2 py-1 text-sm text-[#171813] focus:outline-none focus:ring-1 focus:ring-[#595B53]/40"
                                   />
-                                  <button onClick={() => handleSaveSubcategory(cat.id, subIdx)} className="text-xs text-[#D2693F] font-semibold hover:underline">Save</button>
-                                  <button onClick={() => setEditingSubId(null)} className="text-xs text-gray-400 hover:underline">Cancel</button>
+                                  <button onClick={() => handleSaveSubcategory(cat.id, subIdx)} className="text-xs text-[#171813] font-semibold hover:underline">Save</button>
+                                  <button onClick={() => setEditingSubId(null)} className="text-xs text-[#9B998F] hover:underline">Cancel</button>
                                 </>
                               ) : (
                                 <>
-                                  <span className="flex-1 text-sm text-gray-700">{sub.name}</span>
+                                  <span className="flex-1 text-sm text-[#595B53]">{sub.name}</span>
                                   <button
                                     onClick={() => { setEditingSubId(`${cat.id}-${subIdx}`); setEditSubName(sub.name); }}
-                                    className="text-xs text-slate-400 hover:text-[#D2693F] transition-colors"
+                                    className="text-xs text-[#9B998F] hover:text-[#171813] transition-colors"
                                   >
                                     Edit
                                   </button>

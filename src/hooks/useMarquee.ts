@@ -4,8 +4,8 @@ import { db } from "@/firebase";
 
 const DEFAULT_ITEMS = [
   "Worldwide shipping available",
-  "Free Shipping on all orders above Rs.1000 within India",
-  "Handcrafted with love by Indian artisans",
+  "Free Shipping on all orders above RM1000 within Malaysia",
+  "Handcrafted with love by our artisans",
 ];
 
 const DOC_ID = "marquee";

@@ -1,6 +1,7 @@
-// DTDC zone-based shipping calculation from Pune (411033)
-// Uses India Post API for pincode validation, zone-based rates for shipping
-// Supports international shipping by continent
+// J&T Express zone-based shipping calculation from Kuala Lumpur
+// Uses Malaysian postcode prefixes for zone/state resolution, zone-based
+// rates for shipping. Supports international shipping by continent.
+import { SHIPPING_SERVICE_TAX_RATE } from "@/utils/tax";
 
 export type ShippingResult = {
   available: boolean;
@@ -19,36 +20,32 @@ export type PincodeInfo = {
   available: boolean;
 };
 
-// Zone-based rates from Pune (411033) via DTDC
-// Rates include fuel surcharge (~20%). GST (18%) applied on top.
+// Zone-based rates from Kuala Lumpur via J&T Express (RM).
+// Rates include fuel surcharge. Service tax is applied on top.
 type ZoneDef = { rate: number; perItem: number; days: string; label: string };
 
 const ZONES: Record<string, ZoneDef> = {
-  state:  { rate: 50,  perItem: 15, days: "2-4", label: "Maharashtra" },
-  metro:  { rate: 65,  perItem: 20, days: "3-5", label: "Metro" },
-  zone_a: { rate: 75,  perItem: 20, days: "4-6", label: "Regional" },
-  zone_b: { rate: 85,  perItem: 25, days: "5-7", label: "North India" },
-  zone_c: { rate: 80,  perItem: 20, days: "5-7", label: "South India" },
-  zone_d: { rate: 90,  perItem: 25, days: "6-8", label: "East India" },
-  oda:    { rate: 130, perItem: 30, days: "8-12", label: "Remote / ODA" },
-  intl_asia:       { rate: 350,  perItem: 100, days: "7-14",  label: "Asia" },
-  intl_europe:     { rate: 450,  perItem: 150, days: "10-18", label: "Europe" },
-  intl_namerica:   { rate: 500,  perItem: 180, days: "10-18", label: "North America" },
-  intl_samerica:   { rate: 550,  perItem: 200, days: "12-20", label: "South America" },
-  intl_africa:     { rate: 500,  perItem: 160, days: "10-18", label: "Africa" },
-  intl_oceania:    { rate: 480,  perItem: 170, days: "10-18", label: "Australia / Oceania" },
+  metro:      { rate: 8,  perItem: 3, days: "1-3", label: "Klang Valley / Metro" },
+  peninsular: { rate: 12, perItem: 4, days: "2-4", label: "Peninsular Malaysia" },
+  east:       { rate: 20, perItem: 6, days: "4-7", label: "Sabah & Sarawak" },
+  intl_asia:       { rate: 60,  perItem: 25, days: "7-14",  label: "Asia" },
+  intl_europe:     { rate: 90,  perItem: 35, days: "10-18", label: "Europe" },
+  intl_namerica:   { rate: 100, perItem: 40, days: "10-18", label: "North America" },
+  intl_samerica:   { rate: 110, perItem: 45, days: "12-20", label: "South America" },
+  intl_africa:     { rate: 100, perItem: 40, days: "10-18", label: "Africa" },
+  intl_oceania:    { rate: 95,  perItem: 38, days: "10-18", label: "Australia / Oceania" },
 };
 
 // Country to continent mapping
 const COUNTRY_CONTINENT: Record<string, string> = {
-  india: "asia",
+  malaysia: "asia",
   // Asia
   afghanistan: "asia", armenia: "asia", azerbaijan: "asia", bahrain: "asia",
   bangladesh: "asia", bhutan: "asia", brunei: "asia", cambodia: "asia",
   china: "asia", cyprus: "asia", georgia: "asia", "hong kong": "asia",
   indonesia: "asia", iran: "asia", iraq: "asia", israel: "asia",
   japan: "asia", jordan: "asia", kazakhstan: "asia", kuwait: "asia",
-  kyrgyzstan: "asia", laos: "asia", lebanon: "asia", malaysia: "asia",
+  kyrgyzstan: "asia", laos: "asia", lebanon: "asia",
   maldives: "asia", mongolia: "asia", myanmar: "asia", nepal: "asia",
   oman: "asia", pakistan: "asia", philippines: "asia", qatar: "asia",
   "saudi arabia": "asia", singapore: "asia", "south korea": "asia",
@@ -106,50 +103,39 @@ const COUNTRY_CONTINENT: Record<string, string> = {
   tuvalu: "oceania", vanuatu: "oceania",
 };
 
-// Metro pincodes (3-digit prefix)
-const METRO_PREFIXES = new Set([
-  "110", // Delhi
-  "400", // Mumbai
-  "500", // Hyderabad
-  "560", // Bangalore
-  "600", // Chennai
-  "700", // Kolkata
-]);
+// Malaysian postcode (first 2 digits) -> state mapping (approximate)
+const MY_STATE_RANGES: [number, number, string][] = [
+  [1, 2, "Perlis"],
+  [5, 9, "Kedah"],
+  [10, 14, "Penang"],
+  [15, 18, "Kelantan"],
+  [20, 24, "Terengganu"],
+  [25, 28, "Pahang"],
+  [30, 36, "Perak"],
+  [39, 39, "Pahang"],
+  [40, 48, "Selangor"],
+  [49, 49, "Pahang"],
+  [50, 60, "Kuala Lumpur"],
+  [62, 62, "Putrajaya"],
+  [63, 68, "Selangor"],
+  [69, 69, "Pahang"],
+  [70, 73, "Negeri Sembilan"],
+  [75, 78, "Melaka"],
+  [79, 86, "Johor"],
+  [87, 87, "Labuan"],
+  [88, 91, "Sabah"],
+  [93, 98, "Sarawak"],
+];
 
-// ODA pincodes (3-digit prefix)
-const ODA_PREFIXES = new Set([
-  "790", "791", "792", "793", "794", "795", "796", "797", "798",
-  "180", "181", "182", "183", "184", "185", "186", "187", "188", "189",
-  "190", "191", "192", "193", "194",
-]);
-
-const MAHARASHTRA_PREFIXES = new Set(["40", "41", "42", "43", "44"]);
-
-const NEIGHBORING_PREFIXES = new Set([
-  "36", "37", "38", "39",
-  "57", "58", "59",
-  "45", "46", "47", "48",
-  "49",
-]);
-
-const SOUTH_PREFIXES = new Set([
-  "51", "52", "53",
-  "60", "61", "62", "63",
-  "67", "68", "69",
-]);
-
-const EAST_PREFIXES = new Set([
-  "71", "72",
-  "75", "76",
-  "80", "81", "82", "83",
-]);
-
-const NORTH_PREFIXES = new Set([
-  "12", "13",
-  "14", "15", "16", "17",
-  "20", "21", "22", "23", "24", "25", "26", "27", "28",
-  "30", "31", "32", "33", "34",
-]);
+export function stateFromPostcode(postcode: string): string {
+  const digits = String(postcode || "").replace(/\D/g, "");
+  if (digits.length < 2) return "";
+  const p2 = parseInt(digits.slice(0, 2), 10);
+  for (const [lo, hi, name] of MY_STATE_RANGES) {
+    if (p2 >= lo && p2 <= hi) return name;
+  }
+  return "";
+}
 
 function getContinentKey(country: string): string {
   const key = country.trim().toLowerCase();
@@ -158,52 +144,48 @@ function getContinentKey(country: string): string {
 
 export function getZone(pincode: string, country?: string): string {
   // International shipping
-  if (country && country.trim().toLowerCase() !== "india") {
+  if (country && country.trim().toLowerCase() !== "malaysia") {
     const continent = getContinentKey(country);
     if (continent === "intl") return "intl_asia";
     return `intl_${continent}`;
   }
 
-  // Domestic pincode checks
-  const p3 = pincode.slice(0, 3);
-  const p2 = pincode.slice(0, 2);
+  // Domestic (Malaysia) postcode checks
+  const digits = String(pincode || "").replace(/\D/g, "");
+  const p2 = parseInt(digits.slice(0, 2), 10) || 0;
 
-  if (ODA_PREFIXES.has(p3)) return "oda";
-  if (p3 === "411") return "state";
-  if (METRO_PREFIXES.has(p3)) return "metro";
-  if (MAHARASHTRA_PREFIXES.has(p2)) return "state";
-  if (NEIGHBORING_PREFIXES.has(p2)) return "zone_a";
-  if (SOUTH_PREFIXES.has(p2)) return "zone_c";
-  if (EAST_PREFIXES.has(p2)) return "zone_d";
-  if (NORTH_PREFIXES.has(p2)) return "zone_b";
-  return "zone_b";
+  // Sabah & Sarawak & Labuan
+  if (p2 >= 87 && p2 <= 98) return "east";
+
+  // Klang Valley / Metro (KL, Putrajaya, Selangor)
+  if (
+    (p2 >= 40 && p2 <= 48) ||
+    (p2 >= 50 && p2 <= 60) ||
+    p2 === 62 ||
+    (p2 >= 63 && p2 <= 68)
+  ) {
+    return "metro";
+  }
+
+  return "peninsular";
 }
 
 export async function validatePincode(pincode: string, country?: string): Promise<PincodeInfo> {
-  // International: skip India Post API
-  if (country && country.trim().toLowerCase() !== "india") {
+  // International: just mark as available
+  if (country && country.trim().toLowerCase() !== "malaysia") {
     return { pincode, city: "", state: "", district: "", available: true };
   }
 
-  try {
-    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-    const data = await res.json();
-
-    if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
-      const po = data[0].PostOffice[0];
-      return {
-        pincode,
-        city: po.District || po.Name || "",
-        state: po.State || "",
-        district: po.District || "",
-        available: true,
-      };
-    }
-
-    return { pincode, city: "", state: "", district: "", available: false };
-  } catch {
-    return { pincode, city: "", state: "", district: "", available: true };
-  }
+  const digits = String(pincode || "").replace(/\D/g, "");
+  const valid = /^\d{5}$/.test(digits);
+  const state = stateFromPostcode(digits);
+  return {
+    pincode: digits,
+    city: "",
+    state,
+    district: state,
+    available: valid,
+  };
 }
 
 export function calculateShipping(
@@ -218,15 +200,17 @@ export function calculateShipping(
   const zones = customZones && Object.keys(customZones).length > 0 ? customZones : ZONES;
   const z = zones[zone] || ZONES[zone] || zones["intl_asia"] || ZONES["intl_asia"];
 
+  const taxMultiplier = 1 + SHIPPING_SERVICE_TAX_RATE / 100;
+
   // Free delivery only applies domestically
-  if (country && country.trim().toLowerCase() !== "india") {
+  if (country && country.trim().toLowerCase() !== "malaysia") {
     const baseCharge = z.rate + Math.max(0, totalItems - 1) * z.perItem;
-    const charge = Math.round(baseCharge * 1.18);
+    const charge = Math.round(baseCharge * taxMultiplier);
     return {
       available: true,
       charge,
       estimatedDays: z.days,
-      courierPartner: "DTDC",
+      courierPartner: "J&T Express",
       zone: z.label,
     };
   }
@@ -236,19 +220,19 @@ export function calculateShipping(
       available: true,
       charge: 0,
       estimatedDays: z.days,
-      courierPartner: "DTDC",
+      courierPartner: "J&T Express",
       zone: z.label,
     };
   }
 
   const baseCharge = z.rate + Math.max(0, totalItems - 1) * z.perItem;
-  const charge = Math.round(baseCharge * 1.18);
+  const charge = Math.round(baseCharge * taxMultiplier);
 
   return {
     available: true,
     charge,
     estimatedDays: z.days,
-    courierPartner: "DTDC",
+    courierPartner: "J&T Express",
     zone: z.label,
   };
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -21,14 +21,10 @@ import {
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
 import {
-  splitInclusiveGst,
-  PRODUCT_GST_RATE,
-  PRODUCT_CGST_RATE,
-  PRODUCT_SGST_RATE,
-  SHIPPING_GST_RATE,
-  SHIPPING_CGST_RATE,
-  SHIPPING_SGST_RATE,
-} from "@/utils/gst";
+  splitInclusiveTax,
+  PRODUCT_SST_RATE,
+  SHIPPING_SERVICE_TAX_RATE,
+} from "@/utils/tax";
 import { calculateShipping, type ShippingResult } from "@/utils/shipping";
 import { useDeliverySettings } from "@/hooks/useDeliverySettings";
 import { useCartSidebar } from "@/context/CartSidebarContext";
@@ -49,7 +45,7 @@ type CartItem = {
 };
 
 const COUNTRIES = [
-  { label: "India", value: "India" },
+  { label: "Malaysia", value: "Malaysia" },
   { label: "Afghanistan", value: "Afghanistan" },
   { label: "Australia", value: "Australia" },
   { label: "Bangladesh", value: "Bangladesh" },
@@ -65,7 +61,6 @@ const COUNTRIES = [
   { label: "Italy", value: "Italy" },
   { label: "Japan", value: "Japan" },
   { label: "Kenya", value: "Kenya" },
-  { label: "Malaysia", value: "Malaysia" },
   { label: "Maldives", value: "Maldives" },
   { label: "Nepal", value: "Nepal" },
   { label: "New Zealand", value: "New Zealand" },
@@ -158,7 +153,6 @@ const PHONE_CODES = [
   { code: "+852", label: "HK +852", country: "Hong Kong" },
   { code: "+36", label: "HU +36", country: "Hungary" },
   { code: "+354", label: "IS +354", country: "Iceland" },
-  { code: "+91", label: "IN +91", country: "India" },
   { code: "+62", label: "ID +62", country: "Indonesia" },
   { code: "+98", label: "IR +98", country: "Iran" },
   { code: "+964", label: "IQ +964", country: "Iraq" },
@@ -306,7 +300,7 @@ function readCookie(name: string) {
 }
 
 const formatCurrency = (n: number) => {
-  return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  return n.toLocaleString("en-MY", { maximumFractionDigits: 0 });
 };
 
 declare global {
@@ -330,11 +324,11 @@ function CheckoutContent() {
     name: "",
     email: user?.email || "",
     phone: "",
-    phoneCode: "+91",
+    phoneCode: "+60",
     address: "",
     pinCode: "",
     stateCity: "",
-    country: "India",
+    country: "Malaysia",
   });
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
@@ -347,7 +341,7 @@ function CheckoutContent() {
     available: true,
     charge: 0,
     estimatedDays: "5-7",
-    courierPartner: "DTDC",
+    courierPartner: "J&T Express",
     zone: "",
   });
   const [pincodeChecked, setPincodeChecked] = useState(false);
@@ -358,7 +352,7 @@ function CheckoutContent() {
         ...prev,
         email: user.email || "",
         name: user.displayName || prev.name,
-        phone: user.phoneNumber?.replace("+91", "") || prev.phone,
+        phone: user.phoneNumber?.replace("+60", "") || prev.phone,
       }));
       emailInitializedRef.current = true;
     }
@@ -488,13 +482,13 @@ function CheckoutContent() {
   const discountedTotal = grandTotal - discountAmount;
   const finalTotal = discountedTotal + shippingInfo.charge;
 
-  const productGst = splitInclusiveGst(discountedTotal, PRODUCT_GST_RATE);
-  const shippingGstSplit = splitInclusiveGst(shippingInfo.charge, SHIPPING_GST_RATE);
+  const productSst = splitInclusiveTax(discountedTotal, PRODUCT_SST_RATE);
+  const shippingSstSplit = splitInclusiveTax(shippingInfo.charge, SHIPPING_SERVICE_TAX_RATE);
 
   // Calculate shipping when pincode or cart changes
   useEffect(() => {
-    const isIntl = customerDetails.country !== "India";
-    const minLen = isIntl ? 3 : 6;
+    const isIntl = customerDetails.country !== "Malaysia";
+    const minLen = isIntl ? 3 : 5;
     if (customerDetails.pinCode.length >= minLen) {
       setPincodeChecked(true);
       const totalItems = items.reduce((sum, it) => sum + Number(it.Quantity || 0), 0);
@@ -509,14 +503,14 @@ function CheckoutContent() {
       setShippingInfo(result);
     } else {
       setPincodeChecked(false);
-      setShippingInfo({ available: true, charge: 0, estimatedDays: "5-7", courierPartner: "DTDC", zone: "" });
+      setShippingInfo({ available: true, charge: 0, estimatedDays: "5-7", courierPartner: "J&T Express", zone: "" });
     }
   }, [customerDetails.pinCode, customerDetails.country, grandTotal, items, deliverySettings]);
 
   const lookupPincodeAuto = async (pincode: string, country?: string) => {
     const ctry = country || customerDetails.country;
-    const isIntl = ctry !== "India";
-    if (!isIntl && pincode.length !== 6) return;
+    const isIntl = ctry !== "Malaysia";
+    if (!isIntl && pincode.length !== 5) return;
     if (isIntl && pincode.length < 3) return;
     try {
       const res = await fetch(`/api/lookup-pincode?pincode=${pincode}&country=${encodeURIComponent(ctry)}`);
@@ -543,38 +537,38 @@ function CheckoutContent() {
       value = value.replace(/\D/g, "").slice(0, 15);
     }
     if (field === "pinCode") {
-      const isIntl = customerDetails.country !== "India";
-      value = value.replace(/\D/g, "").slice(0, isIntl ? 20 : 6);
+      const isIntl = customerDetails.country !== "Malaysia";
+      value = value.replace(/\D/g, "").slice(0, isIntl ? 20 : 5);
     }
     if (field === "country") {
-      const phoneCode = COUNTRY_PHONE_MAP[value.toLowerCase()] || "+91";
-      const changedToIntl = value !== "India";
+      const phoneCode = COUNTRY_PHONE_MAP[value.toLowerCase()] || "+60";
+      const changedToIntl = value !== "Malaysia";
       setCustomerDetails((prev) => ({
         ...prev,
         country: value,
         phoneCode,
         phone: prev.phone.replace(/\D/g, "").slice(0, 15),
-        pinCode: changedToIntl ? prev.pinCode.replace(/\D/g, "").slice(0, 20) : prev.pinCode.replace(/\D/g, "").slice(0, 6),
+        pinCode: changedToIntl ? prev.pinCode.replace(/\D/g, "").slice(0, 20) : prev.pinCode.replace(/\D/g, "").slice(0, 5),
         stateCity: changedToIntl ? "" : prev.stateCity,
       }));
       return;
     }
     setCustomerDetails((prev) => ({ ...prev, [field]: value }));
     if (field === "pinCode") {
-      const isIntl = customerDetails.country !== "India";
+      const isIntl = customerDetails.country !== "Malaysia";
       if (isIntl && value.length >= 3) {
         lookupPincodeAuto(value);
-      } else if (!isIntl && value.length === 6) {
+      } else if (!isIntl && value.length === 5) {
         lookupPincodeAuto(value);
       }
     }
   };
 
   const isFormValid = () => {
-    const isIntl = customerDetails.country !== "India";
+    const isIntl = customerDetails.country !== "Malaysia";
     const pinValid = isIntl
       ? customerDetails.pinCode.trim().length >= 3
-      : customerDetails.pinCode.trim().length === 6;
+      : customerDetails.pinCode.trim().length === 5;
     const phoneValid = customerDetails.phone.trim().length >= 5;
     return (
       customerDetails.name.trim() &&
@@ -665,19 +659,13 @@ function CheckoutContent() {
       discountCode: discountCodeStatus === "valid" ? discountCode : "",
       discountPercent: discountCodeStatus === "valid" ? discountPercent : 0,
       discountAmount: discountCodeStatus === "valid" ? discountAmount : 0,
-      taxableValue: productGst.taxable,
-      gstRate: PRODUCT_GST_RATE,
-      cgstRate: PRODUCT_CGST_RATE,
-      sgstRate: PRODUCT_SGST_RATE,
-      cgst: productGst.cgst,
-      sgst: productGst.sgst,
-      gst: productGst.gst,
-      tax: productGst.gst + shippingGstSplit.gst,
+      taxableValue: productSst.taxable,
+      sstRate: PRODUCT_SST_RATE,
+      sst: productSst.sst,
+      tax: productSst.sst + shippingSstSplit.sst,
       shippingCharge: shippingInfo.charge,
-      shippingTaxable: shippingGstSplit.taxable,
-      shippingGst: shippingGstSplit.gst,
-      shippingCgst: shippingGstSplit.cgst,
-      shippingSgst: shippingGstSplit.sgst,
+      shippingTaxable: shippingSstSplit.taxable,
+      shippingSst: shippingSstSplit.sst,
       shippingZone: shippingInfo.zone,
       courierPartner: shippingInfo.courierPartner,
       estimatedDelivery: shippingInfo.estimatedDays,
@@ -690,8 +678,8 @@ function CheckoutContent() {
     const options = {
       key: razorpayKeyId,
       amount: finalTotal * 100,
-      currency: "INR",
-      name: "Kria",
+      currency: "MYR",
+      name: "The Sagar's Design House",
       description: `Order for ${items.length} items`,
       handler: async function (response: any) {
         try {
@@ -779,19 +767,13 @@ function CheckoutContent() {
               status: "placed",
               total: finalTotal,
               subtotal: grandTotal,
-              taxableValue: productGst.taxable,
-              gstRate: PRODUCT_GST_RATE,
-              cgstRate: PRODUCT_CGST_RATE,
-              sgstRate: PRODUCT_SGST_RATE,
-              cgst: productGst.cgst,
-              sgst: productGst.sgst,
-              gst: productGst.gst,
-              tax: productGst.gst + shippingGstSplit.gst,
+              taxableValue: productSst.taxable,
+              sstRate: PRODUCT_SST_RATE,
+              sst: productSst.sst,
+              tax: productSst.sst + shippingSstSplit.sst,
               shippingCharge: shippingInfo.charge,
-              shippingTaxable: shippingGstSplit.taxable,
-              shippingGst: shippingGstSplit.gst,
-              shippingCgst: shippingGstSplit.cgst,
-              shippingSgst: shippingGstSplit.sgst,
+              shippingTaxable: shippingSstSplit.taxable,
+              shippingSst: shippingSstSplit.sst,
               shippingZone: shippingInfo.zone,
               courierPartner: shippingInfo.courierPartner,
               estimatedDelivery: shippingInfo.estimatedDays,
@@ -831,7 +813,7 @@ function CheckoutContent() {
         contact: `${customerDetails.phoneCode}${customerDetails.phone}`,
       },
       theme: {
-        color: "#D2693F",
+        color: "#171813",
       },
     };
 
@@ -856,10 +838,10 @@ function CheckoutContent() {
 
   if (loading || loadingItems) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F9F6F0" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#FFFFFF" }}>
         <div className="text-center">
-          <div className="animate-spin h-10 w-10 mx-auto mb-4" style={{ border: "3px solid #E0D0B8", borderTopColor: "#D2693F", borderRadius: "50%" }} />
-          <p className="text-sm" style={{ color: "#9A6E50" }}>Loading checkout...</p>
+          <div className="animate-spin h-10 w-10 mx-auto mb-4" style={{ border: "3px solid #D8D5CD", borderTopColor: "#171813", borderRadius: "50%" }} />
+          <p className="text-sm" style={{ color: "#595B53" }}>Loading checkout...</p>
         </div>
       </div>
     );
@@ -867,38 +849,38 @@ function CheckoutContent() {
 
   if (orderStatus === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#FFFFFF" }}>
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}>
-            <svg className="w-8 h-8" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F1EEE7", border: "2px solid #171813" }}>
+            <svg className="w-8 h-8" style={{ color: "#171813" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "Tenor Sans, serif" }}>Order Confirmed!</h1>
-          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>Thank you for shopping with Kria</p>
+          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>Order Confirmed!</h1>
+          <p className="text-sm mb-6" style={{ color: "#595B53" }}>Thank you for shopping with The Sagar's Design House</p>
 
-          <div className="rounded-xl px-5 py-4 mb-4" style={{ backgroundColor: "#fff", border: "1px solid #E0D0B8" }}>
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#9A6E50" }}>Order ID</p>
-            <p className="text-sm font-bold" style={{ color: "#2D2D2D" }}>#{orderDetails?.orderId}</p>
+          <div className="rounded-xl px-5 py-4 mb-4" style={{ backgroundColor: "#fff", border: "1px solid #D8D5CD" }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#595B53" }}>Order ID</p>
+            <p className="text-sm font-bold" style={{ color: "#171813" }}>#{orderDetails?.orderId}</p>
           </div>
 
           {orderDetails?.estimatedDelivery && (
-            <p className="text-sm mb-3" style={{ color: "#9A6E50" }}>
-              Estimated delivery: <span className="font-semibold" style={{ color: "#2D2D2D" }}>{orderDetails.estimatedDelivery} business days</span>
+            <p className="text-sm mb-3" style={{ color: "#595B53" }}>
+              Estimated delivery: <span className="font-semibold" style={{ color: "#171813" }}>{orderDetails.estimatedDelivery} business days</span>
             </p>
           )}
 
-          {orderDetails?.country && orderDetails.country !== "India" && (
-            <p className="text-sm mb-4" style={{ color: "#9A6E50" }}>
-              Shipping to: <span className="font-semibold" style={{ color: "#2D2D2D" }}>{orderDetails.country}</span>
+          {orderDetails?.country && orderDetails.country !== "Malaysia" && (
+            <p className="text-sm mb-4" style={{ color: "#595B53" }}>
+              Shipping to: <span className="font-semibold" style={{ color: "#171813" }}>{orderDetails.country}</span>
             </p>
           )}
 
-          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>A confirmation has been sent to your email.</p>
+          <p className="text-sm mb-6" style={{ color: "#595B53" }}>A confirmation has been sent to your email.</p>
 
-          <div className="rounded-xl px-5 py-4 mb-6" style={{ backgroundColor: "#fff", border: "1px solid #E0D0B8" }}>
-            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#9A6E50" }}>Need Help?</p>
-            <a href="https://wa.me/919894414445" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "#D2693F" }}>
+          <div className="rounded-xl px-5 py-4 mb-6" style={{ backgroundColor: "#fff", border: "1px solid #D8D5CD" }}>
+            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#595B53" }}>Need Help?</p>
+            <a href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "#171813" }}>
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
               </svg>
@@ -906,7 +888,7 @@ function CheckoutContent() {
             </a>
           </div>
 
-          <button onClick={() => router.push("/")} className="w-full py-3 text-sm font-bold tracking-wide rounded-xl transition-all" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
+          <button onClick={() => router.push("/")} className="w-full py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] rounded-full transition-all" style={{ backgroundColor: "#171813", color: "#fff" }}>
             Continue Shopping
           </button>
         </div>
@@ -916,20 +898,20 @@ function CheckoutContent() {
 
   if (orderStatus === "failed") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#FFFFFF" }}>
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}>
-            <svg className="w-8 h-8" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F1EEE7", border: "2px solid #171813" }}>
+            <svg className="w-8 h-8" style={{ color: "#171813" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Tenor Sans, serif" }}>Payment Unsuccessful</h1>
-          <p className="text-sm mb-8" style={{ color: "#9A6E50" }}>Your payment could not be processed. Please try again.</p>
+          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>Payment Unsuccessful</h1>
+          <p className="text-sm mb-8" style={{ color: "#595B53" }}>Your payment could not be processed. Please try again.</p>
           <div className="flex flex-col gap-3">
-            <button onClick={() => setOrderStatus("checkout")} className="py-3 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
+            <button onClick={() => setOrderStatus("checkout")} className="py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] rounded-full" style={{ backgroundColor: "#171813", color: "#fff" }}>
               Try Again
             </button>
-            <button onClick={() => router.push("/")} className="py-3 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#F3EDE4", color: "#2D2D2D", border: "1px solid #E0D0B8" }}>
+            <button onClick={() => router.push("/")} className="py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] rounded-full" style={{ backgroundColor: "#F1EEE7", color: "#171813", border: "1px solid #D8D5CD" }}>
               Return Home
             </button>
           </div>
@@ -940,18 +922,18 @@ function CheckoutContent() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#FFFFFF" }}>
         <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}>
-            <svg className="w-10 h-10" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-20 h-20 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F1EEE7", border: "1px solid #D8D5CD" }}>
+            <svg className="w-10 h-10" style={{ color: "#595B53" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Tenor Sans, serif" }}>Your Cart is Empty</h1>
-          <p className="text-sm mb-8 max-w-xs mx-auto" style={{ color: "#9A6E50" }}>
+          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>Your Cart is Empty</h1>
+          <p className="text-sm mb-8 max-w-xs mx-auto" style={{ color: "#595B53" }}>
             Looks like you haven't added any items yet. Start shopping to see your items here.
           </p>
-          <button onClick={() => router.push("/")} className="py-3 px-8 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
+          <button onClick={() => router.push("/")} className="py-3.5 px-8 text-[12px] font-medium uppercase tracking-[0.12em] rounded-full" style={{ backgroundColor: "#171813", color: "#fff" }}>
             Start Shopping
           </button>
         </div>
@@ -960,21 +942,21 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF", color: "#171813" }}>
       {/* Top Bar */}
-      <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "#F9F6F0", borderColor: "#E0D0B8" }}>
+      <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "#FFFFFF", borderColor: "#D8D5CD" }}>
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
           <button onClick={() => { sessionStorage.setItem("openCartAfterNav", "1"); router.push("/"); }} className="flex items-center gap-2">
-            <svg className="w-5 h-5" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <svg className="w-5 h-5" style={{ color: "#171813" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            <span className="text-sm font-semibold tracking-wide" style={{ fontFamily: "Tenor Sans, serif" }}>Back to Cart</span>
+            <span className="text-sm font-semibold tracking-wide" style={{ fontFamily: "var(--font-cormorant)" }}>Back to Cart</span>
           </button>
           <div className="flex items-center gap-2">
-            <svg className="w-4 h-4" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <svg className="w-4 h-4" style={{ color: "#595B53" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
-            <span className="text-xs" style={{ color: "#9A6E50" }}>Secure Checkout</span>
+            <span className="text-xs" style={{ color: "#595B53" }}>Secure Checkout</span>
           </div>
         </div>
       </header>
@@ -983,13 +965,13 @@ function CheckoutContent() {
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center gap-3 max-w-lg">
           <div className="flex items-center gap-2">
-            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#D2693F", color: "#fff" }}>1</span>
-            <span className="text-sm font-semibold" style={{ color: "#D2693F" }}>Shipping</span>
+            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#171813", color: "#fff" }}>1</span>
+            <span className="text-sm font-semibold" style={{ color: "#171813" }}>Shipping</span>
           </div>
-          <div className="flex-1 h-px" style={{ backgroundColor: "#E0D0B8" }} />
+          <div className="flex-1 h-px" style={{ backgroundColor: "#D8D5CD" }} />
           <div className="flex items-center gap-2">
-            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#E0D0B8", color: "#9A6E50" }}>2</span>
-            <span className="text-sm" style={{ color: "#9A6E50" }}>Payment</span>
+            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#D8D5CD", color: "#595B53" }}>2</span>
+            <span className="text-sm" style={{ color: "#595B53" }}>Payment</span>
           </div>
         </div>
       </div>
@@ -1004,10 +986,10 @@ function CheckoutContent() {
               autoComplete="on"
               className="mb-6"
             >
-              <h2 className="text-lg font-bold mb-4" style={{ fontFamily: "Tenor Sans, serif" }}>Shipping Details</h2>
+              <h2 className="text-lg font-bold mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>Shipping Details</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Full Name</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Full Name</label>
                   <input
                     type="text"
                     name="name"
@@ -1015,15 +997,15 @@ function CheckoutContent() {
                     value={customerDetails.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
                     placeholder="John Doe"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Email</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Email</label>
                   <input
                     type="email"
                     name="email"
@@ -1031,19 +1013,19 @@ function CheckoutContent() {
                     value={customerDetails.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
                     placeholder="you@example.com"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Phone</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Phone</label>
                   <div className="flex items-center">
                     <span
                       className="px-3 py-3 text-sm select-none rounded-l-lg shrink-0"
-                      style={{ border: "1px solid #E0D0B8", borderRight: "none", backgroundColor: "#F3EDE4", color: "#9A6E50" }}
+                      style={{ border: "1px solid #D8D5CD", borderRight: "none", backgroundColor: "#F1EEE7", color: "#595B53" }}
                     >
                       {customerDetails.phoneCode}
                     </span>
@@ -1054,24 +1036,24 @@ function CheckoutContent() {
                       value={customerDetails.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       className="w-full px-4 py-3 text-sm rounded-r-lg outline-none transition-colors"
-                      style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                      onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                      onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                      style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
                       placeholder="Phone number"
-                      maxLength={customerDetails.country === "India" ? 10 : 15}
+                      maxLength={customerDetails.country === "Malaysia" ? 10 : 15}
                     />
                   </div>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Country</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Country</label>
                   <select
                     value={customerDetails.country}
                     onChange={(e) => handleInputChange("country", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
                   >
                     {COUNTRIES.map((c) => (
                       <option key={c.value} value={c.value}>{c.label}</option>
@@ -1080,41 +1062,41 @@ function CheckoutContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Address</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Address</label>
                   <textarea
                     name="address"
                     autoComplete="street-address"
                     value={customerDetails.address}
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors resize-none"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
                     rows={2}
                     placeholder="Flat / House No., Building, Street, Area"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>PIN Code</label>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>Postcode</label>
                   <input
                     type="text"
                     name="postal-code"
                     autoComplete="postal-code"
                     value={customerDetails.pinCode}
                     onChange={(e) => handleInputChange("pinCode", e.target.value)}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = "#E0D0B8"; lookupPincodeAuto(customerDetails.pinCode); }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = "#D8D5CD"; lookupPincodeAuto(customerDetails.pinCode); }}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    placeholder={customerDetails.country === "India" ? "411033" : "Postal Code"}
-                    maxLength={customerDetails.country === "India" ? 6 : 20}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    placeholder={customerDetails.country === "Malaysia" ? "50000" : "Postal Code"}
+                    maxLength={customerDetails.country === "Malaysia" ? 5 : 20}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>
-                    {customerDetails.country === "India" ? "State / City" : "City / Region"}
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#595B53" }}>
+                    {customerDetails.country === "Malaysia" ? "State / City" : "City / Region"}
                   </label>
                   <input
                     type="text"
@@ -1123,14 +1105,14 @@ function CheckoutContent() {
                     value={customerDetails.stateCity}
                     onChange={(e) => handleInputChange("stateCity", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
-                    style={{ border: "1px solid #E0D0B8", backgroundColor: customerDetails.country !== "India" ? "#F9F6F0" : "#fff", color: "#2D2D2D" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
-                    placeholder={customerDetails.country === "India" ? "Auto-filled from PIN" : "Enter city/region"}
-                    readOnly={customerDetails.country !== "India" ? false : undefined}
+                    style={{ border: "1px solid #D8D5CD", backgroundColor: customerDetails.country !== "Malaysia" ? "#FFFFFF" : "#fff", color: "#171813" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#171813"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#D8D5CD"}
+                    placeholder={customerDetails.country === "Malaysia" ? "Auto-filled from postcode" : "Enter city/region"}
+                    readOnly={customerDetails.country !== "Malaysia" ? false : undefined}
                   />
-                  {customerDetails.country !== "India" && (
-                    <p className="text-[10px] mt-1" style={{ color: "#9A6E50" }}>Enter your city and region</p>
+                  {customerDetails.country !== "Malaysia" && (
+                    <p className="text-[10px] mt-1" style={{ color: "#595B53" }}>Enter your city and region</p>
                   )}
                 </div>
               </div>
@@ -1140,9 +1122,9 @@ function CheckoutContent() {
           {/* Right Column — Order Summary (sticky on desktop) */}
           <div className="w-full lg:w-[380px] lg:shrink-0">
             <div className="lg:sticky lg:top-20">
-              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff" }}>
-                <div className="px-5 py-4" style={{ borderBottom: "1px solid #E0D0B8" }}>
-                  <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#9A6E50" }}>
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #D8D5CD", backgroundColor: "#fff" }}>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid #D8D5CD" }}>
+                  <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#595B53" }}>
                     Order Summary · {items.length} item{items.length === 1 ? "" : "s"}
                   </h2>
                 </div>
@@ -1162,7 +1144,7 @@ function CheckoutContent() {
 
                       return (
                         <li key={String(item.docId ?? item.ID)} className="flex items-start gap-3">
-                          <div className="w-12 h-12 border border-[#E0D0B8] overflow-hidden flex-shrink-0 bg-white">
+                          <div className="w-12 h-12 border border-[#D8D5CD] overflow-hidden flex-shrink-0 bg-white">
                             <ProductImage
                               src={prod?.ImageUrl1 || "/placeholder.png"}
                               srcMedium={prod?.ImageUrl1Medium}
@@ -1173,22 +1155,22 @@ function CheckoutContent() {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate" style={{ color: "#2D2D2D" }}>
+                            <p className="text-sm font-medium truncate" style={{ color: "#171813" }}>
                               {prod?.ProductName ?? prod?.Description ?? `Item ${item.ID}`}
                             </p>
-                            <p className="text-xs mt-0.5" style={{ color: "#9A6E50" }}>
+                            <p className="text-xs mt-0.5" style={{ color: "#595B53" }}>
                               {item.Color && <>{item.Color}{item.Size ? " / " : ""}</>}
                               {item.Size && <>Size: {item.Size}</>}
                               {!item.Color && !item.Size && <>Qty: {item.Quantity}</>}
                               {item.Quantity > 1 && <> · Qty: {item.Quantity}</>}
                             </p>
                             {item.ItemNotes && (
-                              <p className="text-[11px] italic mt-0.5" style={{ color: "#9A6E50" }}>
+                              <p className="text-[11px] italic mt-0.5" style={{ color: "#595B53" }}>
                                 {item.ItemNotes}
                               </p>
                             )}
                           </div>
-                          <span className="text-sm font-medium shrink-0" style={{ color: "#2D2D2D" }}>
+                          <span className="text-sm font-medium shrink-0" style={{ color: "#171813" }}>
                             <PriceText amount={linePrice} />
                           </span>
                         </li>
@@ -1197,58 +1179,54 @@ function CheckoutContent() {
                   </ul>
                 </div>
 
-                <div className="px-5 py-4 space-y-2" style={{ borderTop: "1px solid #E0D0B8" }}>
+                <div className="px-5 py-4 space-y-2" style={{ borderTop: "1px solid #D8D5CD" }}>
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: "#9A6E50" }}>Subtotal</span>
+                    <span style={{ color: "#595B53" }}>Subtotal</span>
                     <span className="font-medium"><PriceText amount={grandTotal} /></span>
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex items-center justify-between text-sm">
-                      <span style={{ color: "#9A6E50" }}>Discount ({discountPercent}%)</span>
-                      <span className="font-medium" style={{ color: "#D2693F" }}>- <PriceText amount={discountAmount} /></span>
+                      <span style={{ color: "#595B53" }}>Discount ({discountPercent}%)</span>
+                      <span className="font-medium" style={{ color: "#171813" }}>- <PriceText amount={discountAmount} /></span>
                     </div>
                   )}
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: "#9A6E50" }}>Shipping</span>
-                    <span className="font-medium" style={{ color: "#2D2D2D" }}>
-                    {pincodeChecked && (customerDetails.country !== "India"
+                    <span style={{ color: "#595B53" }}>Shipping</span>
+                    <span className="font-medium" style={{ color: "#171813" }}>
+                    {pincodeChecked && (customerDetails.country !== "Malaysia"
                         ? customerDetails.pinCode.length >= 3
-                        : customerDetails.pinCode.length === 6
+                        : customerDetails.pinCode.length === 5
                       )
                       ? shippingInfo.charge === 0
-                        ? <span style={{ color: "#2D2D2D" }}>Free</span>
+                        ? <span style={{ color: "#171813" }}>Free</span>
                         : <PriceText amount={shippingInfo.charge} />
                       : "—"}
                     </span>
                   </div>
-                  {pincodeChecked && (customerDetails.country !== "India"
+                  {pincodeChecked && (customerDetails.country !== "Malaysia"
                     ? customerDetails.pinCode.length >= 3
-                    : customerDetails.pinCode.length === 6
+                    : customerDetails.pinCode.length === 5
                   ) && (
-                    <p className="text-[11px]" style={{ color: "#9A6E50" }}>
+                    <p className="text-[11px]" style={{ color: "#595B53" }}>
                       {shippingInfo.estimatedDays} business days via {shippingInfo.courierPartner}
                       {shippingInfo.zone && <span className="ml-1">· {shippingInfo.zone}</span>}
-                      {customerDetails.country !== "India" && <span className="ml-1">· International</span>}
+                      {customerDetails.country !== "Malaysia" && <span className="ml-1">· International</span>}
                     </p>
                   )}
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: "#9A6E50" }}>Taxable Value</span>
-                    <span className="font-medium"><PriceText amount={productGst.taxable} /></span>
+                    <span style={{ color: "#595B53" }}>Taxable Value</span>
+                    <span className="font-medium"><PriceText amount={productSst.taxable} /></span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: "#9A6E50" }}>CGST ({PRODUCT_CGST_RATE}%)</span>
-                    <span className="font-medium"><PriceText amount={productGst.cgst} /></span>
+                    <span style={{ color: "#595B53" }}>SST ({PRODUCT_SST_RATE}%)</span>
+                    <span className="font-medium"><PriceText amount={productSst.sst} /></span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: "#9A6E50" }}>SGST ({PRODUCT_SGST_RATE}%)</span>
-                    <span className="font-medium"><PriceText amount={productGst.sgst} /></span>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 mt-2" style={{ borderTop: "1px solid #E0D0B8" }}>
+                  <div className="flex items-center justify-between pt-2 mt-2" style={{ borderTop: "1px solid #D8D5CD" }}>
                     <span className="text-base font-bold">Total</span>
                     <span className="text-lg font-bold"><PriceText amount={finalTotal} /></span>
                   </div>
-                  <p className="text-[11px] pt-1" style={{ color: "#9A6E50" }}>
-                    Prices include GST (CGST {PRODUCT_CGST_RATE}% + SGST {PRODUCT_SGST_RATE}%). Shipping includes freight tax.
+                  <p className="text-[11px] pt-1" style={{ color: "#595B53" }}>
+                    Prices include SST ({PRODUCT_SST_RATE}%). Shipping includes service tax.
                   </p>
                 </div>
               </div>
@@ -1257,29 +1235,29 @@ function CheckoutContent() {
               <button
                 onClick={handlePayment}
                 disabled={!isFormValid() || orderStatus === "processing" || !razorpayLoaded}
-                className="w-full mt-4 py-3.5 text-sm font-bold tracking-wide rounded-xl transition-all"
+                className="w-full mt-4 py-4 text-[12px] font-medium uppercase tracking-[0.12em] rounded-full transition-all"
                 style={{
-                  backgroundColor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#D2693F" : "#E0D0B8",
-                  color: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#fff" : "#9A6E50",
+                  backgroundColor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#171813" : "#D8D5CD",
+                  color: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#fff" : "#595B53",
                   cursor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "pointer" : "not-allowed",
                 }}
               >
                 {orderStatus === "processing"
                   ? "Processing..."
-                  : `Pay Rs.${formatCurrency(finalTotal)}`}
+                  : `Pay RM${formatCurrency(finalTotal)}`}
               </button>
 
               {!razorpayLoaded && (
-                <p className="text-[11px] mt-2 text-center" style={{ color: "#9A6E50" }}>
+                <p className="text-[11px] mt-2 text-center" style={{ color: "#595B53" }}>
                   Initializing secure payment...
                 </p>
               )}
 
               <div className="flex items-center justify-center gap-2 mt-3">
-                <svg className="w-3.5 h-3.5" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <svg className="w-3.5 h-3.5" style={{ color: "#595B53" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
-                <span className="text-[11px]" style={{ color: "#9A6E50" }}>Payments via Razorpay · 256-bit SSL</span>
+                <span className="text-[11px]" style={{ color: "#595B53" }}>Payments via Razorpay · 256-bit SSL</span>
               </div>
             </div>
           </div>
@@ -1295,7 +1273,7 @@ export default function CheckoutPage() {
       fallback={
         <div
           className="min-h-screen flex items-center justify-center"
-          style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
+          style={{ backgroundColor: "#FFFFFF", color: "#171813" }}
         >
           Loading...
         </div>

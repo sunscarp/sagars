@@ -15,19 +15,15 @@ export type DeliverySettings = {
 };
 
 const DEFAULT_ZONES: Record<string, ZoneDef> = {
-  state:  { rate: 50,  perItem: 15, days: "2-4", label: "Maharashtra" },
-  metro:  { rate: 65,  perItem: 20, days: "3-5", label: "Metro" },
-  zone_a: { rate: 75,  perItem: 20, days: "4-6", label: "Regional" },
-  zone_b: { rate: 85,  perItem: 25, days: "5-7", label: "North India" },
-  zone_c: { rate: 80,  perItem: 20, days: "5-7", label: "South India" },
-  zone_d: { rate: 90,  perItem: 25, days: "6-8", label: "East India" },
-  oda:    { rate: 130, perItem: 30, days: "8-12", label: "Remote / ODA" },
-  intl_asia:       { rate: 350,  perItem: 100, days: "7-14",  label: "Asia" },
-  intl_europe:     { rate: 450,  perItem: 150, days: "10-18", label: "Europe" },
-  intl_namerica:   { rate: 500,  perItem: 180, days: "10-18", label: "North America" },
-  intl_samerica:   { rate: 550,  perItem: 200, days: "12-20", label: "South America" },
-  intl_africa:     { rate: 500,  perItem: 160, days: "10-18", label: "Africa" },
-  intl_oceania:    { rate: 480,  perItem: 170, days: "10-18", label: "Australia / Oceania" },
+  metro:      { rate: 8,  perItem: 3, days: "1-3", label: "Klang Valley / Metro" },
+  peninsular: { rate: 12, perItem: 4, days: "2-4", label: "Peninsular Malaysia" },
+  east:       { rate: 20, perItem: 6, days: "4-7", label: "Sabah & Sarawak" },
+  intl_asia:       { rate: 60,  perItem: 25, days: "7-14",  label: "Asia" },
+  intl_europe:     { rate: 90,  perItem: 35, days: "10-18", label: "Europe" },
+  intl_namerica:   { rate: 100, perItem: 40, days: "10-18", label: "North America" },
+  intl_samerica:   { rate: 110, perItem: 45, days: "12-20", label: "South America" },
+  intl_africa:     { rate: 100, perItem: 40, days: "10-18", label: "Africa" },
+  intl_oceania:    { rate: 95,  perItem: 38, days: "10-18", label: "Australia / Oceania" },
 };
 
 const DEFAULT_SETTINGS: DeliverySettings = {

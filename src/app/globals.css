@@ -2,22 +2,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F9F6F0;
-  --foreground: #2D2D2D;
-  --primary: #D2693F;
-  --primary-dark: #B85A34;
-  --primary-light: #E8875E;
-  --secondary: #F9F6F0;
-  --secondary-dark: #F3EDE4;
-  --secondary-light: #FDFCFA;
-  --tertiary: #C5A059;
-  --tertiary-dark: #A88640;
-  --tertiary-light: #D9BC7E;
-  --neutral: #2D2D2D;
-  --neutral-light: #5A5A5A;
-  --neutral-lighter: #9A9A9A;
-  --border: #E0D8CC;
-  --border-light: #EDE7DD;
+  /* Mahaniya design tokens */
+  --background: #ffffff;
+  --foreground: #171813;
+  --paper: #f1eee7;
+  --soft: #f6f5f3;
+  --ink: #171813;
+  --muted: #595b53;
+  --line: #d8d5cd;
+  --line-light: #e1dfdc;
+  --sale: #c52020;
+
+  /* Semantic aliases kept for compatibility */
+  --primary: #171813;
+  --primary-dark: #000000;
+  --primary-light: #595b53;
+  --secondary: #ffffff;
+  --secondary-dark: #f1eee7;
+  --secondary-light: #ffffff;
+  --tertiary: #595b53;
+  --tertiary-dark: #171813;
+  --tertiary-light: #8a877e;
+  --neutral: #171813;
+  --neutral-light: #595b53;
+  --neutral-lighter: #9b998f;
+  --border: #d8d5cd;
+  --border-light: #e1dfdc;
+
+  /* Font aliases -> Mahaniya typography */
+  --font-heading: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
+  --font-body: var(--font-dm-sans, "DM Sans", Arial, sans-serif);
+}
+
+/* Legacy font variable aliases so older references resolve to the new fonts */
+:root {
+  --font-tenor-sans: var(--font-dm-sans, "DM Sans", Arial, sans-serif);
+  --font-playfair: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
+  --font-great-vibes: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
+  --font-montserrat: var(--font-dm-sans, "DM Sans", Arial, sans-serif);
+  --font-alex-brush: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
 }
 
 * {
@@ -25,14 +48,79 @@
 }
 
 body {
-  background: #F9F6F0;
-  color: #2D2D2D;
-  font-family: 'Tenor Sans', var(--font-tenor-sans), sans-serif;
+  background: #ffffff;
+  color: #171813;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
   font-weight: 400;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Tenor Sans', var(--font-tenor-sans), sans-serif;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+/* Mahaniya-style primitives */
+.mh-eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 17px 24px;
+  min-height: 52px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.mh-button:hover { opacity: 0.88; }
+.mh-button.mh-light { background: #fff; color: var(--ink); border-color: #fff; }
+.mh-button.mh-outline { background: #fff; color: var(--ink); }
+.mh-button.mh-pill { border-radius: 40px; }
+
+.mh-input {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  min-height: 46px;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  width: 100%;
+}
+.mh-input:focus { outline: none; border-color: var(--ink); }
+
+.mh-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
 }
 
 .scrollbar-hide {

@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { orderGstBreakdown } from "@/utils/gst";
+import { orderTaxBreakdown } from "@/utils/tax";
 
 const tenorSansBase64 = readFileSync(
   join(process.cwd(), "public", "fonts", "TenorSans-Regular.ttf")
@@ -43,12 +43,12 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   doc.setFontSize(9);
   doc.setTextColor(...darkBrown);
-  doc.text("Vittlraj Krithika", 14, 56);
-  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 62);
-  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 68);
-  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 74);
-  doc.text("Email: support@kriastore.in", 14, 80);
-  doc.text("Phone: +91 98944 14445", 14, 86);
+  doc.text("The Sagar's Design House", 14, 56);
+  doc.text("No. 8, Jalan Bukit Bintang, Bukit Bintang,", 14, 62);
+  doc.text("55100 Kuala Lumpur, Malaysia", 14, 68);
+  doc.text("SST No.: 000000000000", 14, 74);
+  doc.text("Email: support@thesagarsdesignhouse.com", 14, 80);
+  doc.text("Phone: +60 12-345 6789", 14, 86);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
@@ -64,8 +64,8 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 99);
-  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 105);
+  doc.text(`Invoice No: TSDH-INV-${invoiceNo}`, 14, 99);
+  doc.text(`Order ID: TSDH-ORD-${orderId}`, 14, 105);
   doc.text(
     `Order Date: ${createdAtDate.toLocaleDateString()}`,
     14,
@@ -91,7 +91,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   doc.text("Shipping Address:", 14, 159);
   doc.text(
-    `${customer.address ?? ""}, ${stateCity} - ${pinCode}, India`,
+    `${customer.address ?? ""}, ${stateCity} - ${pinCode}, Malaysia`,
     14,
     165,
   );
@@ -109,7 +109,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   const discount = order.discountAmount ?? order.discount ?? 0;
   const grandTotal = order.total ?? subtotal - discount + shipping;
 
-  const gst = orderGstBreakdown(order);
+  const tax = orderTaxBreakdown(order);
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
@@ -126,8 +126,8 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
       return [
         item.product?.ProductName ?? "Product",
         qty,
-        `Rs. ${itemPrice}`,
-        `Rs. ${itemTotal}`,
+        `RM ${itemPrice}`,
+        `RM ${itemTotal}`,
       ];
     }),
     styles: { fontSize: 10, textColor: darkBrown, font: "TenorSans" },
@@ -141,43 +141,41 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   const finalY = (doc as any).lastAutoTable?.finalY || 173;
 
-  // ===== PRICE BREAKDOWN (GST split) =====
+  // ===== PRICE BREAKDOWN (SST) =====
   let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
   doc.setFont("TenorSans", "normal");
 
-  doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
+  doc.text(`Subtotal: RM ${subtotal}`, 14, y);
   y += 6;
 
   if (discount > 0) {
-    doc.text(`Discount: -Rs. ${discount}`, 14, y);
+    doc.text(`Discount: -RM ${discount}`, 14, y);
     y += 6;
   }
 
-  doc.text(`Taxable Value: Rs. ${gst.taxableValue}`, 14, y);
+  doc.text(`Taxable Value: RM ${tax.taxableValue}`, 14, y);
   y += 6;
-  doc.text(`CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}`, 14, y);
-  y += 6;
-  doc.text(`SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}`, 14, y);
+  doc.text(`SST @ ${tax.sstRate}%: RM ${tax.sst}`, 14, y);
   y += 6;
 
   doc.text(
-    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : `(incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}`,
+    `Shipping: RM ${shipping} ${shipping === 0 ? "(Free)" : `(incl. service tax ${tax.shippingSst})`}`,
     14,
     y
   );
   y += 6;
 
-  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
+  doc.text(`Grand Total: RM ${grandTotal}`, 14, y);
 
   // ===== FOOTER =====
   y += 12;
-  doc.text("Thank you for shopping with KRIA.", 14, y);
+  doc.text("Thank you for shopping with The Sagar's Design House.", 14, y);
   y += 6;
-  doc.text("Keep supporting India handmade products.", 14, y);
+  doc.text("Keep supporting Malaysian handmade products.", 14, y);
   y += 6;
-  doc.text("For support, WhatsApp us at +91 9894414445", 14, y);
+  doc.text("For support, WhatsApp us at +60 12-345 6789", 14, y);
 
   const arrayBuffer = doc.output("arraybuffer");
   return Buffer.from(arrayBuffer);
@@ -207,7 +205,7 @@ export async function POST(req: Request) {
     const data = { ...order, orderId };
     const pdfBuffer = await generatePdfBuffer(data);
 
-    const senderName = process.env.SENDER_NAME || "Kria";
+    const senderName = process.env.SENDER_NAME || "The Sagar's Design House";
 
     const items = order?.items || [];
     const subtotal = items.reduce((sum: number, it: any) => {
@@ -218,7 +216,7 @@ export async function POST(req: Request) {
     const shipping = order.shippingCharge ?? 0;
     const discount = order.discountAmount ?? order.discount ?? 0;
     const grandTotal = order.total ?? subtotal - discount + shipping;
-    const gst = orderGstBreakdown(order);
+    const tax = orderTaxBreakdown(order);
 
     const plainItems = items
       .map((it: any) => {
@@ -228,42 +226,41 @@ export async function POST(req: Request) {
         const itemPrice = basePrice + customPrice;
         const qty = it.Quantity || 0;
         const lineTotal = itemPrice * qty;
-        return `${name} | Qty: ${qty} | Price: Rs. ${itemPrice} | Total: Rs. ${lineTotal}`;
+        return `${name} | Qty: ${qty} | Price: RM ${itemPrice} | Total: RM ${lineTotal}`;
       })
       .join("\n");
 
     await transporter.sendMail({
       from: `${senderName} <${user}>`,
       to: recipient,
-      subject: `Your Kria Order ${orderId || order?.id}`,
+      subject: `Your The Sagar's Design House Order ${orderId || order?.id}`,
       text:
-        `Thank you for shopping with Kria.\n\n` +
+        `Thank you for shopping with The Sagar's Design House.\n\n` +
         `Order: ${orderId || order?.id}\n\n` +
         `Items (Name | Qty | Price | Total):\n${plainItems}\n\n` +
-        `Subtotal: Rs. ${subtotal}\n` +
-        (discount > 0 ? `Discount: -Rs. ${discount}\n` : "") +
-        `Taxable Value: Rs. ${gst.taxableValue}\n` +
-        `CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}\n` +
-        `SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}\n` +
-        `Shipping: Rs. ${shipping}${shipping === 0 ? " (Free)" : ` (incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}\n` +
-        `Grand Total: Rs. ${grandTotal}\n\n` +
+        `Subtotal: RM ${subtotal}\n` +
+        (discount > 0 ? `Discount: -RM ${discount}\n` : "") +
+        `Taxable Value: RM ${tax.taxableValue}\n` +
+        `SST @ ${tax.sstRate}%: RM ${tax.sst}\n` +
+        `Shipping: RM ${shipping}${shipping === 0 ? " (Free)" : ` (incl. service tax ${tax.shippingSst})`}\n` +
+        `Grand Total: RM ${grandTotal}\n\n` +
         `Your invoice is attached as a PDF.`,
       html:
-        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #2D2D2D;">` +
-        `<div style="background:#F3EDE4;padding:16px;border-radius:0;border:1px solid #E0D0B8;border-bottom:0;">` +
-        `<h2 style="margin:0;color:#2D2D2D;font-family:'Tenor Sans',serif;">Thank you for your order</h2>` +
-        `<p style="margin:4px 0 0 0;color:#9A6E50;">Kria</p>` +
+        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #171813;">` +
+        `<div style="background:#F1EEE7;padding:16px;border-radius:0;border:1px solid #D8D5CD;border-bottom:0;">` +
+        `<h2 style="margin:0;color:#171813;font-family:'Cormorant Garamond',Georgia,serif;">Thank you for your order</h2>` +
+        `<p style="margin:4px 0 0 0;color:#595B53;">The Sagar's Design House</p>` +
         `</div>` +
-        `<div style="border:1px solid #E0D0B8;border-top:0;padding:16px;border-radius:0;background:#F9F6F0;">` +
+        `<div style="border:1px solid #D8D5CD;border-top:0;padding:16px;border-radius:0;background:#FFFFFF;">` +
         `<p style="margin-top:0;">Order <strong>#${orderId || order?.id}</strong> has been received.</p>` +
         `<p style="margin-bottom:8px;"><strong>Order summary</strong></p>` +
-        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #E0D0B8;">` +
+        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #D8D5CD;">` +
         `<thead>` +
-        `<tr style="background:#F3EDE4;color:#2D2D2D;">` +
-        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #E0D0B8;">Item</th>` +
-        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">Qty</th>` +
-        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Price</th>` +
-        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Total</th>` +
+        `<tr style="background:#F1EEE7;color:#171813;">` +
+        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #D8D5CD;">Item</th>` +
+        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #D8D5CD;">Qty</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">Price</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">Total</th>` +
         `</tr>` +
         `</thead>` +
         `<tbody>` +
@@ -277,43 +274,42 @@ export async function POST(req: Request) {
                   const itemPrice = basePrice + customPrice;
                   const qty = it.Quantity || 0;
                   const lineTotal = itemPrice * qty;
-                  const rowBg = index % 2 === 0 ? "#F9F6F0" : "#ffffff";
+                  const rowBg = index % 2 === 0 ? "#FFFFFF" : "#ffffff";
                   return (
                     `<tr style="background:${rowBg};">` +
-                    `<td style="padding:8px 6px;border-bottom:1px solid #E0D0B8;">${name}</td>` +
-                    `<td style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">${qty}</td>` +
-                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${itemPrice}</td>` +
-                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${lineTotal}</td>` +
+                    `<td style="padding:8px 6px;border-bottom:1px solid #D8D5CD;">${name}</td>` +
+                    `<td style="padding:8px 6px;text-align:center;border-bottom:1px solid #D8D5CD;">${qty}</td>` +
+                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">RM ${itemPrice}</td>` +
+                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">RM ${lineTotal}</td>` +
                     `</tr>`
                   );
                 })
                 .join("")
-            : `<tr><td colspan="4" style="padding:8px 6px;text-align:center;color:#9A6E50;">(No items found)</td></tr>`
+            : `<tr><td colspan="4" style="padding:8px 6px;text-align:center;color:#595B53;">(No items found)</td></tr>`
         }` +
         `</tbody>` +
         `</table>` +
         `<p style="margin-top:12px;">` +
-        `Subtotal: <strong>Rs. ${subtotal}</strong><br/>` +
+        `Subtotal: <strong>RM ${subtotal}</strong><br/>` +
         (discount > 0
-          ? `Discount: <strong>-Rs. ${discount}</strong><br/>`
+          ? `Discount: <strong>-RM ${discount}</strong><br/>`
           : "") +
-        `Taxable Value: <strong>Rs. ${gst.taxableValue}</strong><br/>` +
-        `CGST @ ${gst.cgstRate}%: <strong>Rs. ${gst.cgst}</strong><br/>` +
-        `SGST @ ${gst.sgstRate}%: <strong>Rs. ${gst.sgst}</strong><br/>` +
-        `Shipping: <strong>Rs. ${shipping}${shipping === 0 ? " (Free)" : ` (incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}</strong><br/>` +
-        `Grand Total: <strong>Rs. ${grandTotal}</strong>` +
+        `Taxable Value: <strong>RM ${tax.taxableValue}</strong><br/>` +
+        `SST @ ${tax.sstRate}%: <strong>RM ${tax.sst}</strong><br/>` +
+        `Shipping: <strong>RM ${shipping}${shipping === 0 ? " (Free)" : ` (incl. service tax ${tax.shippingSst})`}</strong><br/>` +
+        `Grand Total: <strong>RM ${grandTotal}</strong>` +
         `</p>` +
         `<p style="margin-top:12px;">Your invoice PDF is attached to this email.</p>` +
-        `<p style="margin-top:12px;font-size:12px;color:#9A6E50;">If you have any questions, just reply to this email.</p>` +
+        `<p style="margin-top:12px;font-size:12px;color:#595B53;">If you have any questions, just reply to this email.</p>` +
         `</div>` +
         `</div>`,
       attachments: [
-        { filename: `KRIA_INVOICE_${orderId || order?.id}.pdf`, content: pdfBuffer },
+        { filename: `SAGARS_INVOICE_${orderId || order?.id}.pdf`, content: pdfBuffer },
       ],
     });
 
     // Send notification to support
-    const supportEmail = process.env.SUPPORT_EMAIL || "support@kriastore.in";
+    const supportEmail = process.env.SUPPORT_EMAIL || "support@thesagarsdesignhouse.com";
     await transporter.sendMail({
       from: `${senderName} <${user}>`,
       to: supportEmail,
@@ -326,24 +322,24 @@ export async function POST(req: Request) {
         `Phone: ${order?.customer?.phone || ""}\n` +
         `Address: ${order?.customer?.address || ""}, ${order?.customer?.stateCity || ""} ${order?.customer?.pinCode || ""}\n\n` +
         `Items:\n${plainItems}\n\n` +
-        `Grand Total: Rs. ${grandTotal}\n`,
+        `Grand Total: RM ${grandTotal}\n`,
       html:
-        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #2D2D2D;">` +
-        `<div style="background:#F3EDE4;padding:16px;border-radius:0;border:1px solid #E0D0B8;border-bottom:0;">` +
-        `<h2 style="margin:0;color:#2D2D2D;font-family:'Tenor Sans',serif;">New Order Received</h2>` +
-        `<p style="margin:4px 0 0 0;color:#9A6E50;">Order #${orderId || order?.id}</p>` +
+        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #171813;">` +
+        `<div style="background:#F1EEE7;padding:16px;border-radius:0;border:1px solid #D8D5CD;border-bottom:0;">` +
+        `<h2 style="margin:0;color:#171813;font-family:'Cormorant Garamond',Georgia,serif;">New Order Received</h2>` +
+        `<p style="margin:4px 0 0 0;color:#595B53;">Order #${orderId || order?.id}</p>` +
         `</div>` +
-        `<div style="border:1px solid #E0D0B8;border-top:0;padding:16px;border-radius:0;background:#F9F6F0;">` +
+        `<div style="border:1px solid #D8D5CD;border-top:0;padding:16px;border-radius:0;background:#FFFFFF;">` +
         `<p><strong>Customer:</strong> ${order?.customer?.name || ""}</p>` +
         `<p><strong>Email:</strong> ${recipient}</p>` +
         `<p><strong>Phone:</strong> ${order?.customer?.phone || ""}</p>` +
         `<p><strong>Address:</strong> ${order?.customer?.address || ""}, ${order?.customer?.stateCity || ""} ${order?.customer?.pinCode || ""}</p>` +
         `<h3 style="margin-top:16px;">Order Summary</h3>` +
-        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #E0D0B8;">` +
-        `<thead><tr style="background:#F3EDE4;">` +
-        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #E0D0B8;">Item</th>` +
-        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">Qty</th>` +
-        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Total</th>` +
+        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #D8D5CD;">` +
+        `<thead><tr style="background:#F1EEE7;">` +
+        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #D8D5CD;">Item</th>` +
+        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #D8D5CD;">Qty</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">Total</th>` +
         `</tr></thead><tbody>${
           items.length
             ? items.map((it: any, index: number) => {
@@ -353,11 +349,11 @@ export async function POST(req: Request) {
                 const itemPrice = basePrice + customPrice;
                 const qty = it.Quantity || 0;
                 const lineTotal = itemPrice * qty;
-                return `<tr style="background:${index % 2 === 0 ? "#F9F6F0" : "#ffffff"};"><td style="padding:8px 6px;border-bottom:1px solid #E0D0B8;">${name}</td><td style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">${qty}</td><td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${lineTotal}</td></tr>`;
+                return `<tr style="background:${index % 2 === 0 ? "#FFFFFF" : "#ffffff"};"><td style="padding:8px 6px;border-bottom:1px solid #D8D5CD;">${name}</td><td style="padding:8px 6px;text-align:center;border-bottom:1px solid #D8D5CD;">${qty}</td><td style="padding:8px 6px;text-align:right;border-bottom:1px solid #D8D5CD;">RM ${lineTotal}</td></tr>`;
               }).join("")
             : `<tr><td colspan="3" style="padding:8px 6px;text-align:center;">(No items)</td></tr>`
         }</tbody></table>` +
-        `<p style="margin-top:12px;"><strong>Grand Total: Rs. ${grandTotal}</strong></p>` +
+        `<p style="margin-top:12px;"><strong>Grand Total: RM ${grandTotal}</strong></p>` +
         `</div></div>`,
     });
 

@@ -13,23 +13,23 @@ export type ContactInfo = {
   instagramHomeDecor: string;
   facebookJewellery: string;
   facebookHomeDecor: string;
-  gstin: string;
+  sstNo: string;
   legalName: string;
   tradeName: string;
 };
 
 const DEFAULTS: ContactInfo = {
-  phone: "+91 98944 14445",
-  email: "support@kriastore.in",
-  address: "No 8, Thiruvalluvar Nagar main road,\nV.G.Rao nagar A sector,\nKatpadi, Vellore,\nTamilnadu -632007,\nIndia",
-  hours: "10:00 AM – 7:00 PM IST",
+  phone: "+60 12-345 6789",
+  email: "support@thesagarsdesignhouse.com",
+  address: "No. 8, Jalan Bukit Bintang,\nBukit Bintang,\n55100 Kuala Lumpur,\nMalaysia",
+  hours: "10:00 AM – 7:00 PM MYT",
   instagramJewellery: "https://www.instagram.com/kria_terracotta_jewellery",
   instagramHomeDecor: "https://www.instagram.com/kria_homedecor",
   facebookJewellery: "https://www.facebook.com/Kriastore/",
   facebookHomeDecor: "https://facebook.com/kriacrafts",
-  gstin: "33ATPPK2643B1ZZ",
-  legalName: "Vittlraj Krithika",
-  tradeName: "KRIA",
+  sstNo: "000000000000",
+  legalName: "The Sagar's Design House Sdn. Bhd.",
+  tradeName: "THE SAGAR'S DESIGN HOUSE",
 };
 
 const DOC_ID = "contactInfo";

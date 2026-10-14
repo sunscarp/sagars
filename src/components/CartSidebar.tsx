@@ -426,7 +426,7 @@ export default function CartSidebar() {
       {/* Sidebar Panel */}
       <div
         ref={panelRef}
-        className={`absolute top-0 right-0 h-full w-full max-w-md bg-[#F9F6F0] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`absolute top-0 right-0 h-full w-full max-w-md bg-[#FFFFFF] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         onTransitionEnd={() => {
@@ -434,22 +434,22 @@ export default function CartSidebar() {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E0D0B8]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#D8D5CD]">
           <div>
             <h2
-              className="text-lg tracking-wide text-[#2D2D2D]"
-              style={{ fontFamily: "'Tenor Sans', serif" }}
+              className="text-lg tracking-wide text-[#171813]"
+              style={{ fontFamily: "var(--font-cormorant)" }}
             >
               YOUR CART
             </h2>
-            <p className="text-xs text-[#9A6E50] mt-0.5">
+            <p className="text-xs text-[#595B53] mt-0.5">
               {itemCount} item{itemCount === 1 ? "" : "s"}
             </p>
           </div>
           <button
             type="button"
             onClick={closeCart}
-            className="w-9 h-9 flex items-center justify-center text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-[#171813] hover:bg-[#F1EEE7] transition-colors"
             aria-label="Close cart"
           >
             <svg
@@ -470,7 +470,7 @@ export default function CartSidebar() {
         <div className="flex-1 overflow-y-auto">
           {loading || loadingItems ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-[#9A6E50]">Loading cart...</p>
+              <p className="text-sm text-[#595B53]">Loading cart...</p>
             </div>
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-6 py-10 text-center">
@@ -483,24 +483,24 @@ export default function CartSidebar() {
                 priority
               />
               <p
-                className="text-base text-[#2D2D2D] mb-2"
-                style={{ fontFamily: "'Tenor Sans', serif" }}
+                className="text-base text-[#171813] mb-2"
+                style={{ fontFamily: "var(--font-cormorant)" }}
               >
                 Your cart is empty
               </p>
-              <p className="text-xs text-[#9A6E50] mb-6">
+              <p className="text-xs text-[#595B53] mb-6">
                 Start adding beautiful pieces to your bag.
               </p>
               <Link
                 href="/shop"
                 onClick={closeCart}
-                className="inline-flex items-center justify-center bg-[#D2693F] text-white px-6 py-2.5 text-sm font-semibold hover:bg-[#8B4513] transition-colors"
+                className="inline-flex items-center justify-center rounded-full bg-[#171813] text-white px-7 py-3 text-[11px] font-medium uppercase tracking-[0.12em] hover:opacity-90 transition-opacity"
               >
                 Continue Shopping
               </Link>
             </div>
           ) : (
-            <ul className="divide-y divide-[#E0D0B8]">
+            <ul className="divide-y divide-[#D8D5CD]">
               {items.map((it) => {
                 const key = String(it.ID);
                 const prod = inventoryMap[key];
@@ -527,7 +527,7 @@ export default function CartSidebar() {
                     key={String(it.docId ?? it.ID)}
                     className="px-5 py-4 flex gap-3"
                   >
-                    <div className="w-16 h-16 border border-[#E0D0B8] overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+                    <div className="w-16 h-16 rounded-lg border border-[#D8D5CD] overflow-hidden flex items-center justify-center flex-shrink-0 bg-[#F1EEE7]">
                       <Link
                         href={`/product/${encodeURIComponent(
                           getProductSlug(prod)
@@ -557,11 +557,11 @@ export default function CartSidebar() {
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-0.5 min-w-0">
-                          <p className="text-sm font-medium text-[#2D2D2D] leading-snug truncate">
+                          <p className="text-[16px] text-[#171813] leading-snug truncate" style={{ fontFamily: "var(--font-cormorant)" }}>
                             {prod?.ProductName ?? prod?.Description ?? ""}
                           </p>
                           {it.Size && (
-                            <p className="text-[11px] text-[#9A6E50]">
+                            <p className="text-[11px] text-[#595B53]">
                               {it.Color ? `${it.Color} / ` : ""}Size: {it.Size}
                             </p>
                           )}
@@ -576,14 +576,14 @@ export default function CartSidebar() {
                                 await updateDoc(firestoreDoc(db, "Cart", it.docId), { ItemNotes: val });
                               }
                             }}
-                            className="text-[10px] text-[#9A6E50] bg-transparent border-b border-[#E0D0B8] focus:border-[#D2693F] outline-none w-full mt-1 placeholder:text-[#C5B8A5]"
+                            className="text-[10px] text-[#595B53] bg-transparent border-b border-[#D8D5CD] focus:border-[#171813] outline-none w-full mt-1 placeholder:text-[#B0ADA6]"
                           />
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-semibold text-[#2D2D2D]">
+                          <p className="text-sm font-semibold text-[#171813]">
                             <PriceText amount={lineTotal} />
                           </p>
-                          <p className="text-[11px] text-[#9A6E50]">
+                          <p className="text-[11px] text-[#595B53]">
                             <PriceText amount={totalPerItem} /> each
                           </p>
                         </div>
@@ -593,20 +593,20 @@ export default function CartSidebar() {
                         <button
                           type="button"
                           onClick={() => removeItem(it)}
-                          className="text-xs text-[#9A6E50] hover:text-[#D2693F] transition-colors underline underline-offset-2"
+                          className="text-xs text-[#595B53] hover:text-[#171813] transition-colors underline underline-offset-2"
                         >
                           Remove
                         </button>
 
-                        <div className="inline-flex items-center border border-[#E0D0B8] text-sm">
+                        <div className="inline-flex items-center rounded-full border border-[#D8D5CD] text-sm">
                           <button
                             type="button"
                             onClick={() => changeQuantity(it, -1)}
-                            className="w-8 h-8 flex items-center justify-center text-[#2D2D2D] hover:bg-[#F3EDE4] active:scale-90 transition-all"
+                            className="w-8 h-8 flex items-center justify-center text-[#171813] hover:bg-[#F1EEE7] active:scale-90 transition-all"
                           >
                             -
                           </button>
-                          <span className="w-8 h-8 flex items-center justify-center text-[#2D2D2D] text-sm border-x border-[#E0D0B8]">
+                          <span className="w-8 h-8 flex items-center justify-center text-[#171813] text-sm border-x border-[#D8D5CD]">
                             {it.Quantity}
                           </span>
                           {(() => {
@@ -626,10 +626,10 @@ export default function CartSidebar() {
                                   changeQuantity(it, +1);
                                 }}
                                 disabled={atMax}
-                                className={`w-8 h-8 flex items-center justify-center text-[#2D2D2D] active:scale-90 transition-all ${
+                                className={`w-8 h-8 flex items-center justify-center text-[#171813] active:scale-90 transition-all ${
                                   atMax
                                     ? "opacity-30 cursor-not-allowed"
-                                    : "hover:bg-[#F3EDE4]"
+                                    : "hover:bg-[#F1EEE7]"
                                 }`}
                               >
                                 +
@@ -648,26 +648,26 @@ export default function CartSidebar() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-[#E0D0B8] px-5 py-4 bg-[#F9F6F0]">
+          <div className="border-t border-[#D8D5CD] px-5 py-4 bg-[#FFFFFF]">
             <div className="space-y-2 mb-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[#9A6E50]">Subtotal</span>
-                <span className="text-[#2D2D2D] font-medium">
+                <span className="text-[#595B53]">Subtotal</span>
+                <span className="text-[#171813] font-medium">
                   <PriceText amount={subtotal} />
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[#9A6E50]">Shipping</span>
-                <span className="text-[#9A6E50] text-xs">Calculated at checkout</span>
+                <span className="text-[#595B53]">Shipping</span>
+                <span className="text-[#595B53] text-xs">Calculated at checkout</span>
               </div>
-              <div className="border-t border-[#E0D0B8] pt-2 flex items-center justify-between text-sm">
-                <span className="text-[#2D2D2D] font-semibold">Total</span>
-                <span className="text-[#2D2D2D] font-semibold">
+              <div className="border-t border-[#D8D5CD] pt-2 flex items-center justify-between text-sm">
+                <span className="text-[#171813] font-semibold">Total</span>
+                <span className="text-[#171813] font-semibold">
                   <PriceText amount={total} />
                 </span>
               </div>
-              <p className="text-[11px] text-[#9A6E50]">
-                Prices include GST (CGST 1.5% + SGST 1.5%). Shipping calculated at checkout.
+              <p className="text-[11px] text-[#595B53]">
+                Prices include SST (10%). Shipping includes service tax.
               </p>
             </div>
 
@@ -678,7 +678,7 @@ export default function CartSidebar() {
                 closeCart();
                 router.push("/checkout");
               }}
-              className="w-full bg-[#D2693F] text-white py-3 text-sm font-semibold tracking-wide hover:bg-[#8B4513] transition-colors"
+              className="w-full rounded-full bg-[#171813] text-white py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] hover:opacity-90 transition-opacity"
             >
               Proceed to Checkout
             </button>
@@ -687,7 +687,7 @@ export default function CartSidebar() {
               <Link
                 href="/shop"
                 onClick={closeCart}
-                className="text-xs text-[#9A6E50] hover:text-[#D2693F] underline underline-offset-2 transition-colors"
+                className="text-xs text-[#595B53] hover:text-[#171813] underline underline-offset-2 transition-colors"
               >
                 Continue Shopping
               </Link>

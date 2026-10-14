@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useContactInfo, type ContactInfo } from "@/hooks/useContactInfo";
 
-const INPUT_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all";
-const TEXTAREA_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all min-h-[100px]";
+const INPUT_CLS = "w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3.5 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all";
+const TEXTAREA_CLS = "w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3.5 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all min-h-[100px]";
 
 export default function ContactInfoManager() {
   const { info, loading, saveContactInfo } = useContactInfo();
@@ -19,7 +19,7 @@ export default function ContactInfoManager() {
   if (loading || !draft) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -45,11 +45,11 @@ export default function ContactInfoManager() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Contact Info</h2>
+        <h2 className="text-lg font-semibold text-[#171813]">Contact Info</h2>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 bg-[#D2693F] text-white text-sm font-medium rounded-lg hover:bg-[#b85a35] disabled:opacity-50 transition-colors"
+          className="px-5 py-2 bg-[#171813] text-white text-sm font-medium rounded-lg hover:bg-[#171813] disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving..." : "Save All"}
         </button>
@@ -61,64 +61,64 @@ export default function ContactInfoManager() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-6 space-y-5">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Contact Details</h3>
+          <h3 className="text-sm font-semibold text-[#595B53] mb-3">Contact Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Phone</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Phone</label>
               <input type="text" value={draft.phone} onChange={(e) => update("phone", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Email</label>
               <input type="text" value={draft.email} onChange={(e) => update("email", e.target.value)} className={INPUT_CLS} />
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Address</label>
+            <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Address</label>
             <textarea value={draft.address} onChange={(e) => update("address", e.target.value)} className={TEXTAREA_CLS} rows={4} />
           </div>
           <div className="mt-4">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Business Hours</label>
+            <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Business Hours</label>
             <input type="text" value={draft.hours} onChange={(e) => update("hours", e.target.value)} className={INPUT_CLS} />
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Social Links</h3>
+        <div className="border-t border-[#F1EEE7] pt-5">
+          <h3 className="text-sm font-semibold text-[#595B53] mb-3">Social Links</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Instagram — Terracotta Jewellery</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram — Terracotta Jewellery</label>
               <input type="url" value={draft.instagramJewellery} onChange={(e) => update("instagramJewellery", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Instagram — Home Decor</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram — Home Decor</label>
               <input type="url" value={draft.instagramHomeDecor} onChange={(e) => update("instagramHomeDecor", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Facebook — Terracotta Jewellery</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook — Terracotta Jewellery</label>
               <input type="url" value={draft.facebookJewellery} onChange={(e) => update("facebookJewellery", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Facebook — Home Decor</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook — Home Decor</label>
               <input type="url" value={draft.facebookHomeDecor} onChange={(e) => update("facebookHomeDecor", e.target.value)} className={INPUT_CLS} />
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">GST Details</h3>
+        <div className="border-t border-[#F1EEE7] pt-5">
+          <h3 className="text-sm font-semibold text-[#595B53] mb-3">SST Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">GSTIN</label>
-              <input type="text" value={draft.gstin} onChange={(e) => update("gstin", e.target.value)} className={INPUT_CLS} />
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">SST No.</label>
+              <input type="text" value={draft.sstNo} onChange={(e) => update("sstNo", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Legal Name</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Legal Name</label>
               <input type="text" value={draft.legalName} onChange={(e) => update("legalName", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Trade Name</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Trade Name</label>
               <input type="text" value={draft.tradeName} onChange={(e) => update("tradeName", e.target.value)} className={INPUT_CLS} />
             </div>
           </div>

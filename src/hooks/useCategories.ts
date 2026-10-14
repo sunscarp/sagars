@@ -10,7 +10,33 @@ import {
   writeBatch,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "@/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "@/firebase";
+
+const ADMIN_EMAIL = "admin@gmail.com";
+
+function slugify(name: string) {
+  return (
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "category"
+  );
+}
+
+function localDefaults(): Category[] {
+  return DEFAULT_CATEGORIES.map((cat, i) => ({
+    id: `local-${i}`,
+    name: cat.name,
+    image: cat.image,
+    bgColor: cat.bgColor,
+    mainTextFont: "var(--font-cormorant)",
+    mainTextSize: 4,
+    order: i,
+    subcategories: cat.subcategories,
+  }));
+}
 
 export type Subcategory = {
   name: string;
@@ -18,11 +44,8 @@ export type Subcategory = {
 };
 
 export const FONT_OPTIONS = [
-  { label: "Tenor Sans", value: "'Tenor Sans', sans-serif", group: "sans" },
-  { label: "Montserrat", value: "'Montserrat', sans-serif", group: "sans" },
-  { label: "Playfair Display", value: "'Playfair Display', serif", group: "serif" },
-  { label: "Great Vibes", value: "'Great Vibes', cursive", group: "cursive" },
-  { label: "Alex Brush", value: "'Alex Brush', cursive", group: "cursive" },
+  { label: "DM Sans", value: "var(--font-dm-sans, 'DM Sans', sans-serif)", group: "sans" },
+  { label: "Cormorant Garamond", value: "var(--font-cormorant, 'Cormorant Garamond', serif)", group: "serif" },
   { label: "Georgia", value: "Georgia, serif", group: "serif" },
   { label: "Times New Roman", value: "'Times New Roman', serif", group: "serif" },
   { label: "Arial", value: "Arial, sans-serif", group: "sans" },
@@ -52,7 +75,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Terracotta Jewellery",
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=600&fit=crop",
-    bgColor: "#F3EDE4",
+    bgColor: "#F1EEE7",
     subcategories: [
       { name: "Studs", order: 0 },
       { name: "Jumuka", order: 1 },
@@ -63,7 +86,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Accessories",
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=600&fit=crop",
-    bgColor: "#EBE5DC",
+    bgColor: "#F1EEE7",
     subcategories: [
       { name: "Hairclips", order: 0 },
       { name: "Catcher Clips", order: 1 },
@@ -74,7 +97,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Home Decor",
     image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=600&fit=crop",
-    bgColor: "#E8E0D8",
+    bgColor: "#D8D5CD",
     subcategories: [
       { name: "Handpainted Wall Plates", order: 0 },
       { name: "Wooden Steps", order: 1 },
@@ -84,7 +107,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Sarees & Salwars",
     image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=600&fit=crop",
-    bgColor: "#F0EAE2",
+    bgColor: "#F1EEE7",
     subcategories: [
       { name: "Saree", order: 0 },
       { name: "Salwar", order: 1 },
@@ -94,7 +117,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Return Gifts",
     image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400&h=600&fit=crop",
-    bgColor: "#EDE6DC",
+    bgColor: "#F1EEE7",
     subcategories: [
       { name: "Handpainted Silk Purses", order: 0 },
       { name: "Hair Accessories", order: 1 },
@@ -105,7 +128,7 @@ const DEFAULT_CATEGORIES: { name: string; image: string; bgColor: string; subcat
   {
     name: "Wholesale",
     image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=600&fit=crop",
-    bgColor: "#E6DED4",
+    bgColor: "#E1DFDC",
     subcategories: [],
   },
 ];
@@ -120,40 +143,82 @@ export function useCategories() {
       return;
     }
 
+    let lastSnap: { empty: boolean } | null = null;
+    let isOwner = false;
+    let seeded = false;
+
+    const maybeSeed = async () => {
+      if (!isOwner || seeded || !lastSnap || !lastSnap.empty) return;
+      seeded = true;
+      try {
+        const batch = writeBatch(db!);
+        DEFAULT_CATEGORIES.forEach((cat, i) => {
+          const ref = doc(db!, "categories", slugify(cat.name));
+          batch.set(ref, {
+            name: cat.name,
+            image: cat.image,
+            bgColor: cat.bgColor,
+            mainTextFont: "var(--font-cormorant)",
+            mainTextSize: 4,
+            order: i,
+            subcategories: cat.subcategories,
+          });
+        });
+        await batch.commit();
+      } catch {
+        seeded = false;
+      }
+    };
+
     const q = query(collection(db!, "categories"), orderBy("order", "asc"));
     const unsub = onSnapshot(
       q,
-      async (snap) => {
+      (snap) => {
+        lastSnap = snap;
         if (snap.empty) {
-          const batch = writeBatch(db!);
-          DEFAULT_CATEGORIES.forEach((cat, i) => {
-            const ref = doc(collection(db!, "categories"));
-            batch.set(ref, {
-              name: cat.name,
-              image: cat.image,
-              bgColor: cat.bgColor,
-              mainTextFont: "'Great Vibes', cursive",
-              mainTextSize: 4,
-              order: i,
-              subcategories: cat.subcategories,
-            });
-          });
-          await batch.commit();
+          if (isOwner) {
+            void maybeSeed();
+          } else {
+            setCategories(localDefaults());
+            setLoading(false);
+          }
           return;
         }
-        setCategories(
-          snap.docs.map((d) => ({
+
+        const seen = new Set<string>();
+        const unique: Category[] = [];
+        snap.docs.forEach((d) => {
+          const data = d.data() as any;
+          const key = String(data?.name ?? "").trim().toLowerCase();
+          if (key && seen.has(key)) return;
+          if (key) seen.add(key);
+          unique.push({
             id: d.id,
-            ...(d.data() as any),
-            subcategories: (d.data() as any).subcategories || [],
-          }))
-        );
+            ...data,
+            subcategories: data.subcategories || [],
+          });
+        });
+        setCategories(unique);
         setLoading(false);
       },
-      () => setLoading(false)
+      () => {
+        setCategories(localDefaults());
+        setLoading(false);
+      }
     );
 
-    return () => unsub();
+    let unsubAuth: (() => void) | undefined;
+    if (auth) {
+      unsubAuth = onAuthStateChanged(auth, (user) => {
+        isOwner = user?.email === ADMIN_EMAIL;
+        void maybeSeed();
+      });
+    }
+
+    return () => {
+      unsub();
+      unsubAuth?.();
+    };
   }, []);
 
   const addCategory = async (name: string, image?: string, subcategories?: Subcategory[], bgColor?: string, mainTextFont?: string, mainTextSize?: number) => {
@@ -162,8 +227,8 @@ export function useCategories() {
     await addDoc(collection(db!, "categories"), {
       name: name.trim(),
       image: image || "",
-      bgColor: bgColor || "#F3EDE4",
-      mainTextFont: mainTextFont || "'Great Vibes', cursive",
+      bgColor: bgColor || "#F1EEE7",
+      mainTextFont: mainTextFont || "var(--font-cormorant)",
       mainTextSize: mainTextSize || 4,
       order: maxOrder + 1,
       subcategories: subcategories || [],

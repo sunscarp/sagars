@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     qualities: [75, 90, 100],
     minimumCacheTTL: 86400,
     remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "firebasestorage.googleapis.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },

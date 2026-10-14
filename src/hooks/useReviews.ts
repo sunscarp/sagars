@@ -24,7 +24,7 @@ const DEFAULT_REVIEWS: Review[] = [
   },
   {
     name: "Kavitha L.",
-    text: "Every piece tells a story. Love supporting handmade Indian craft. Will definitely order again!",
+    text: "Every piece tells a story. Love supporting handmade craft. Will definitely order again!",
   },
   {
     name: "Shreya P.",
@@ -32,7 +32,7 @@ const DEFAULT_REVIEWS: Review[] = [
   },
   {
     name: "Deepa N.",
-    text: "Kria has the most elegant handcrafted collection. It feels special to wear something made with such care.",
+    text: "The Sagar's Design House has the most elegant handcrafted collection. It feels special to wear something made with such care.",
   },
 ];
 

@@ -13,11 +13,11 @@ const PAGE_KEYS: { key: keyof PoliciesData; label: string }[] = [
   { key: "cancellationRefund", label: "Cancellation & Refund" },
   { key: "shippingReturn", label: "Shipping & Return" },
   { key: "faq", label: "FAQs" },
-  { key: "whatMakesKriaSpecial", label: "What Makes Kria Special" },
+  { key: "whatMakesKriaSpecial", label: "What Makes The Sagar's Design House Special" },
   { key: "productCare", label: "Product Care" },
 ];
 
-const INPUT_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all";
+const INPUT_CLS = "w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3.5 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all";
 
 export default function PoliciesManager() {
   const { policies, loading, savePolicies } = usePolicies();
@@ -33,7 +33,7 @@ export default function PoliciesManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -86,11 +86,11 @@ export default function PoliciesManager() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Policies</h2>
+        <h2 className="text-lg font-semibold text-[#171813]">Policies</h2>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 bg-[#D2693F] text-white text-sm font-medium rounded-lg hover:bg-[#b85a35] disabled:opacity-50 transition-colors"
+          className="px-5 py-2 bg-[#171813] text-white text-sm font-medium rounded-lg hover:bg-[#171813] disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving..." : "Save All"}
         </button>
@@ -103,15 +103,15 @@ export default function PoliciesManager() {
       )}
 
       {/* Page tabs */}
-      <div className="flex gap-2 flex-wrap border-b border-gray-200 pb-3">
+      <div className="flex gap-2 flex-wrap border-b border-[#E1DFDC] pb-3">
         {PAGE_KEYS.map((pk) => (
           <button
             key={pk.key}
             onClick={() => setActivePage(pk.key)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               activePage === pk.key
-                ? "bg-[#D2693F] text-white"
-                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                ? "bg-[#171813] text-white"
+                : "bg-white text-[#595B53] border border-[#E1DFDC] hover:bg-[#F1EEE7]"
             }`}
           >
             {pk.label}
@@ -120,10 +120,10 @@ export default function PoliciesManager() {
       </div>
 
       {/* Page editor */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-6 space-y-4">
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Title</label>
+            <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Title</label>
             <input
               type="text"
               value={page.title}
@@ -132,7 +132,7 @@ export default function PoliciesManager() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Subtitle</label>
+            <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Subtitle</label>
             <input
               type="text"
               value={page.subtitle}
@@ -142,31 +142,31 @@ export default function PoliciesManager() {
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-4">
+        <div className="border-t border-[#F1EEE7] pt-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">Sections</h3>
-            <button onClick={addSection} className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+            <h3 className="text-sm font-semibold text-[#595B53]">Sections</h3>
+            <button onClick={addSection} className="text-xs px-3 py-1.5 bg-[#F1EEE7] text-[#595B53] rounded-lg hover:bg-[#E1DFDC] transition-colors">
               + Add Section
             </button>
           </div>
 
           <div className="space-y-4">
             {page.sections.map((section, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <div key={i} className="border border-[#E1DFDC] rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-400">Section {i + 1}</span>
+                  <span className="text-xs font-medium text-[#9B998F]">Section {i + 1}</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => moveSection(i, "up")}
                       disabled={i === 0}
-                      className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                      className="p-1 text-[#9B998F] hover:text-[#595B53] disabled:opacity-30"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
                     </button>
                     <button
                       onClick={() => moveSection(i, "down")}
                       disabled={i === page.sections.length - 1}
-                      className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                      className="p-1 text-[#9B998F] hover:text-[#595B53] disabled:opacity-30"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
@@ -180,7 +180,7 @@ export default function PoliciesManager() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Heading</label>
+                  <label className="block text-xs font-medium text-[#595B53] mb-1">Heading</label>
                   <input
                     type="text"
                     value={section.heading}
@@ -191,7 +191,7 @@ export default function PoliciesManager() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Body</label>
+                  <label className="block text-xs font-medium text-[#595B53] mb-1">Body</label>
                   <RichTextEditor
                     value={section.body}
                     onChange={(val) => updateSection(i, "body", val)}

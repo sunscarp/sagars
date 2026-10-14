@@ -155,9 +155,9 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 shrink-0">
-          <h3 className="text-sm font-bold text-[#2D2D2D]">Edit Image</h3>
-          <button onClick={onCancel} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F1EEE7] shrink-0">
+          <h3 className="text-sm font-bold text-[#171813]">Edit Image</h3>
+          <button onClick={onCancel} className="w-8 h-8 flex items-center justify-center text-[#9B998F] hover:text-[#595B53] transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -170,7 +170,7 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
               ref={canvasRef}
               width={CANVAS_SIZE}
               height={CANVAS_SIZE}
-              className="border border-gray-200 cursor-grab active:cursor-grabbing w-full max-w-[350px] aspect-square"
+              className="border border-[#E1DFDC] cursor-grab active:cursor-grabbing w-full max-w-[350px] aspect-square"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -181,14 +181,14 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
             />
           </div>
 
-          <p className="text-center text-[10px] text-gray-400 px-5 pb-4">Drag to reposition. Zoom out for portrait images to fit inside the square.</p>
+          <p className="text-center text-[10px] text-[#9B998F] px-5 pb-4">Drag to reposition. Zoom out for portrait images to fit inside the square.</p>
 
           {/* Controls */}
           <div className="px-5 pb-5 space-y-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-gray-600">Zoom</label>
-                <span className="text-[10px] text-gray-400">{Math.round(zoom * 100)}%</span>
+                <label className="text-xs font-semibold text-[#595B53]">Zoom</label>
+                <span className="text-[10px] text-[#9B998F]">{Math.round(zoom * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -197,27 +197,27 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
                 step="0.05"
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full accent-[#D2693F]"
+                className="w-full accent-[#171813]"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-gray-600">Rotate</label>
-                <span className="text-[10px] text-gray-400">{rotation}°</span>
+                <label className="text-xs font-semibold text-[#595B53]">Rotate</label>
+                <span className="text-[10px] text-[#9B998F]">{rotation}°</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setRotation((r) => r - 90)}
-                  className="flex-1 py-2 text-xs font-medium border border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2 text-xs font-medium border border-[#E1DFDC] hover:bg-[#F1EEE7] transition-colors"
                 >
                   ↺ -90°
                 </button>
                 <button
                   type="button"
                   onClick={() => setRotation((r) => r + 90)}
-                  className="flex-1 py-2 text-xs font-medium border border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2 text-xs font-medium border border-[#E1DFDC] hover:bg-[#F1EEE7] transition-colors"
                 >
                   ↻ +90°
                 </button>
@@ -227,7 +227,7 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
             <button
               type="button"
               onClick={reset}
-              className="text-xs text-[#D2693F] hover:underline font-medium"
+              className="text-xs text-[#171813] hover:underline font-medium"
             >
               Reset all
             </button>
@@ -235,18 +235,18 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
         </div>
 
         {/* Sticky footer */}
-        <div className="flex gap-3 px-5 py-3.5 border-t border-gray-100 shrink-0 bg-white">
+        <div className="flex gap-3 px-5 py-3.5 border-t border-[#F1EEE7] shrink-0 bg-white">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2.5 text-sm font-semibold border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex-1 py-2.5 text-sm font-semibold border border-[#E1DFDC] hover:bg-[#F1EEE7] transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleApply}
-            className="flex-1 py-2.5 text-sm font-semibold bg-[#D2693F] text-white hover:bg-[#B85A34] transition-colors"
+            className="flex-1 py-2.5 text-sm font-semibold bg-[#171813] text-white hover:bg-[#171813] transition-colors"
           >
             Apply
           </button>

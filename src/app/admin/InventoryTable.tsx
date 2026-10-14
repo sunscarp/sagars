@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { db } from "@/firebase";
@@ -51,9 +51,9 @@ export type FormState = {
   FallbackDeliveryTime: string;
 };
 
-const INPUT_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all";
-const LABEL_CLS = "block text-xs font-semibold text-slate-600 mb-1.5 tracking-wide uppercase";
-const SECTION_TITLE_CLS = "text-xs font-bold text-[#D2693F] uppercase tracking-widest pb-2 border-b border-slate-100";
+const INPUT_CLS = "w-full rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3.5 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all";
+const LABEL_CLS = "block text-xs font-semibold text-[#595B53] mb-1.5 tracking-wide uppercase";
+const SECTION_TITLE_CLS = "text-xs font-bold text-[#171813] uppercase tracking-widest pb-2 border-b border-[#F1EEE7]";
 
 function ImageUploadField({
   label,
@@ -74,22 +74,22 @@ function ImageUploadField({
 }) {
   return (
     <div className="flex flex-col">
-      <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
-      <label className="relative flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#C5A059] hover:bg-[#F9F6F0]/40 transition-all overflow-hidden group">
+      <label className="block text-xs font-medium text-[#595B53] mb-1.5">{label}</label>
+      <label className="relative flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-[#E1DFDC] rounded-xl cursor-pointer hover:border-[#595B53] hover:bg-[#FFFFFF]/40 transition-all overflow-hidden group">
         {isUploading ? (
           <div className="flex flex-col items-center gap-1.5">
-            <div className="w-5 h-5 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[10px] text-[#D2693F] font-medium">Uploading…</span>
+            <div className="w-5 h-5 border-2 border-[#595B53] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[10px] text-[#171813] font-medium">Uploading…</span>
           </div>
         ) : value ? (
           <>
             <img src={value} alt={label} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-[10px] text-white font-medium bg-black/50 px-2 py-1 rounded">Change</span>
+            <div className="absolute inset-0 bg-[#171813]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-[10px] text-white font-medium bg-[#171813]/50 px-2 py-1 rounded">Change</span>
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-1.5 text-slate-400 group-hover:text-[#C5A059] transition-colors">
+          <div className="flex flex-col items-center gap-1.5 text-[#9B998F] group-hover:text-[#595B53] transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -206,7 +206,7 @@ function ProductForm({
         <section className="space-y-4">
           <h4 className={SECTION_TITLE_CLS}>Pricing</h4>
           <div>
-            <label className={LABEL_CLS}>Original Price (MRP) Rs.</label>
+            <label className={LABEL_CLS}>Original Price (MRP) RM</label>
             <input type="number" className={INPUT_CLS} value={form.OriginalPrice} onChange={(e) => updateForm('OriginalPrice', e.target.value)} placeholder="e.g. 999" />
           </div>
           <div>
@@ -217,8 +217,8 @@ function ProductForm({
                 onClick={() => { updateForm('PricingMode', 'price'); updateForm('DiscountPercent', ''); }}
                 className={`py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                   form.PricingMode === "price"
-                    ? "border-[#D2693F] bg-[#D2693F]/5 text-[#D2693F]"
-                    : "border-slate-200 text-slate-500 hover:border-slate-300"
+                    ? "border-[#171813] bg-[#171813]/5 text-[#171813]"
+                    : "border-[#E1DFDC] text-[#595B53] hover:border-[#D8D5CD]"
                 }`}
               >
                 Selling Price
@@ -228,8 +228,8 @@ function ProductForm({
                 onClick={() => { updateForm('PricingMode', 'discount'); updateForm('Price', ''); }}
                 className={`py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                   form.PricingMode === "discount"
-                    ? "border-[#D2693F] bg-[#D2693F]/5 text-[#D2693F]"
-                    : "border-slate-200 text-slate-500 hover:border-slate-300"
+                    ? "border-[#171813] bg-[#171813]/5 text-[#171813]"
+                    : "border-[#E1DFDC] text-[#595B53] hover:border-[#D8D5CD]"
                 }`}
               >
                 Discount %
@@ -238,7 +238,7 @@ function ProductForm({
           </div>
           {form.PricingMode === "price" ? (
             <div>
-              <label className={LABEL_CLS}>Selling Price (Rs.)</label>
+              <label className={LABEL_CLS}>Selling Price (RM)</label>
               <input type="number" className={INPUT_CLS} value={form.Price} onChange={(e) => updateForm('Price', e.target.value)} placeholder="e.g. 799" />
             </div>
           ) : (
@@ -246,26 +246,26 @@ function ProductForm({
               <label className={LABEL_CLS}>Discount (%)</label>
               <div className="relative">
                 <input type="number" min="1" max="90" className={INPUT_CLS + " pr-8"} value={form.DiscountPercent} onChange={(e) => updateForm('DiscountPercent', e.target.value)} placeholder="e.g. 20" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#9B998F]">%</span>
               </div>
             </div>
           )}
           {form.OriginalPrice && (
-            <div className="rounded-lg bg-[#F9F6F0] border border-[#E0D0B8] px-4 py-3">
-              <p className="text-xs font-semibold text-[#D2693F] uppercase tracking-wide mb-1">Customer Sees</p>
+            <div className="rounded-lg bg-[#FFFFFF] border border-[#D8D5CD] px-4 py-3">
+              <p className="text-xs font-semibold text-[#171813] uppercase tracking-wide mb-1">Customer Sees</p>
               <div className="flex items-baseline gap-3">
-                <span className="text-lg font-bold text-[#D2693F]">
-                  Rs.{form.PricingMode === "price" && form.Price
-                    ? Number(form.Price).toLocaleString("en-IN")
+                <span className="text-lg font-bold text-[#171813]">
+                  RM{form.PricingMode === "price" && form.Price
+                    ? Number(form.Price).toLocaleString("en-MY")
                     : form.PricingMode === "discount" && form.DiscountPercent
-                      ? Math.round(Number(form.OriginalPrice) * (1 - Number(form.DiscountPercent) / 100)).toLocaleString("en-IN")
-                      : Number(form.OriginalPrice).toLocaleString("en-IN")
+                      ? Math.round(Number(form.OriginalPrice) * (1 - Number(form.DiscountPercent) / 100)).toLocaleString("en-MY")
+                      : Number(form.OriginalPrice).toLocaleString("en-MY")
                   }
                 </span>
                 {((form.PricingMode === "price" && form.Price && Number(form.Price) < Number(form.OriginalPrice)) ||
                   (form.PricingMode === "discount" && form.DiscountPercent)) && (
                   <>
-                    <span className="text-sm text-slate-400 line-through">Rs.{Number(form.OriginalPrice).toLocaleString("en-IN")}</span>
+                    <span className="text-sm text-[#9B998F] line-through">RM{Number(form.OriginalPrice).toLocaleString("en-MY")}</span>
                     <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
                       {form.PricingMode === "discount"
                         ? `${form.DiscountPercent}% OFF`
@@ -292,8 +292,8 @@ function ProductForm({
                   onClick={() => updateForm('StockType', t)}
                   className={`py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                     form.StockType === t
-                      ? "border-[#D2693F] bg-[#D2693F]/5 text-[#D2693F]"
-                      : "border-slate-200 text-slate-500 hover:border-slate-300"
+                      ? "border-[#171813] bg-[#171813]/5 text-[#171813]"
+                      : "border-[#E1DFDC] text-[#595B53] hover:border-[#D8D5CD]"
                   }`}
                 >
                   {t === "ready_stock" ? "Ready Stock" : "Made to Order"}
@@ -311,17 +311,17 @@ function ProductForm({
             <div className="space-y-3">
               <div>
                 <label className={LABEL_CLS}>Stock by Variant</label>
-                <p className="text-xs text-slate-400 mb-2">Allocate stock to each colour × size combination. Unfilled cells = made-to-order.</p>
+                <p className="text-xs text-[#9B998F] mb-2">Allocate stock to each colour × size combination. Unfilled cells = made-to-order.</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
                     <tr>
-                      <th className="px-2 py-1.5 text-left font-semibold text-slate-500 border border-slate-200 bg-slate-50"></th>
+                      <th className="px-2 py-1.5 text-left font-semibold text-[#595B53] border border-[#E1DFDC] bg-[#F1EEE7]"></th>
                       {gridSizes.map((size) => (
-                        <th key={size} className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">{size || "All"}</th>
+                        <th key={size} className="px-2 py-1.5 text-center font-semibold text-[#595B53] border border-[#E1DFDC] bg-[#F1EEE7] min-w-[60px]">{size || "All"}</th>
                       ))}
-                      <th className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">Row Total</th>
+                      <th className="px-2 py-1.5 text-center font-semibold text-[#595B53] border border-[#E1DFDC] bg-[#F1EEE7] min-w-[60px]">Row Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -329,13 +329,13 @@ function ProductForm({
                       const rowTotal = gridSizes.reduce((sum, size) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
                       return (
                         <tr key={color || "_"}>
-                          <td className="px-2 py-1 font-medium text-slate-700 border border-slate-200 bg-slate-50 whitespace-nowrap">{color || "All"}</td>
+                          <td className="px-2 py-1 font-medium text-[#595B53] border border-[#E1DFDC] bg-[#F1EEE7] whitespace-nowrap">{color || "All"}</td>
                           {gridSizes.map((size) => (
-                            <td key={size} className="px-1 py-1 border border-slate-200">
+                            <td key={size} className="px-1 py-1 border border-[#E1DFDC]">
                               <input
                                 type="number"
                                 min="0"
-                                className="w-full text-center border border-slate-200 rounded px-1 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                                className="w-full text-center border border-[#E1DFDC] rounded px-1 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#595B53]"
                                 value={form.VariantStock[`${color}|${size}`] || ""}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -345,21 +345,21 @@ function ProductForm({
                               />
                             </td>
                           ))}
-                          <td className={`px-2 py-1.5 text-center font-semibold border border-slate-200 ${rowTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{rowTotal}</td>
+                          <td className={`px-2 py-1.5 text-center font-semibold border border-[#E1DFDC] ${rowTotal > 0 ? "text-[#171813]" : "text-[#9B998F]"}`}>{rowTotal}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td className="px-2 py-1.5 font-semibold text-slate-500 border border-slate-200 bg-slate-50">Col Total</td>
+                      <td className="px-2 py-1.5 font-semibold text-[#595B53] border border-[#E1DFDC] bg-[#F1EEE7]">Col Total</td>
                       {gridSizes.map((size) => {
                         const colTotal = gridColors.reduce((sum, color) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
                         return (
-                          <td key={size} className={`px-2 py-1.5 text-center font-semibold border border-slate-200 bg-slate-50 ${colTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{colTotal}</td>
+                          <td key={size} className={`px-2 py-1.5 text-center font-semibold border border-[#E1DFDC] bg-[#F1EEE7] ${colTotal > 0 ? "text-[#171813]" : "text-[#9B998F]"}`}>{colTotal}</td>
                         );
                       })}
-                      <td className={`px-2 py-1.5 text-center font-bold border border-slate-200 bg-slate-50 ${variantTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{variantTotal}</td>
+                      <td className={`px-2 py-1.5 text-center font-bold border border-[#E1DFDC] bg-[#F1EEE7] ${variantTotal > 0 ? "text-[#171813]" : "text-[#9B998F]"}`}>{variantTotal}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -368,19 +368,19 @@ function ProductForm({
                 <p className="text-xs text-red-600 font-medium">Warning: Variant total ({variantTotal}) exceeds stock ({form.Stock}).</p>
               )}
               {Number(form.Stock || 0) > 0 && variantTotal < Number(form.Stock || 0) && (
-                <p className="text-xs text-slate-400">{Number(form.Stock) - variantTotal} units unallocated (will be made-to-order).</p>
+                <p className="text-xs text-[#9B998F]">{Number(form.Stock) - variantTotal} units unallocated (will be made-to-order).</p>
               )}
               <div>
                 <label className={LABEL_CLS}>Fallback Delivery Time (for unallocated variants)</label>
                 <input className={INPUT_CLS} value={form.FallbackDeliveryTime} onChange={(e) => updateForm('FallbackDeliveryTime', e.target.value)} placeholder="e.g. 10-15 days" />
-                <p className="text-xs text-slate-400 mt-1">Shown when a variant has 0 stock but total stock is available</p>
+                <p className="text-xs text-[#9B998F] mt-1">Shown when a variant has 0 stock but total stock is available</p>
               </div>
             </div>
           )}
           <div>
             <label className={LABEL_CLS}>Delivery Time</label>
             <input className={INPUT_CLS} value={form.DeliveryTime} onChange={(e) => updateForm('DeliveryTime', e.target.value)} placeholder="e.g. 2-4 days" />
-            <p className="text-xs text-slate-400 mt-1">Displayed to customers on the product page</p>
+            <p className="text-xs text-[#9B998F] mt-1">Displayed to customers on the product page</p>
           </div>
         </section>
 
@@ -396,7 +396,7 @@ function ProductForm({
                   onChange={(e) => updateForm('IsCustomizable', e.target.checked)}
                   className="peer sr-only"
                 />
-                <div className="w-5 h-5 rounded border-2 border-slate-300 peer-checked:border-[#D2693F] peer-checked:bg-[#D2693F] transition-all flex items-center justify-center">
+                <div className="w-5 h-5 rounded border-2 border-[#D8D5CD] peer-checked:border-[#171813] peer-checked:bg-[#171813] transition-all flex items-center justify-center">
                   {form.IsCustomizable && (
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -404,7 +404,7 @@ function ProductForm({
                   )}
                 </div>
               </div>
-              <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Customizable</span>
+              <span className="text-sm text-[#595B53] group-hover:text-[#171813] transition-colors">Customizable</span>
             </label>
             <label className="flex items-center gap-2.5 cursor-pointer group">
               <div className="relative">
@@ -414,7 +414,7 @@ function ProductForm({
                   onChange={(e) => updateForm('IsFeatured', e.target.checked)}
                   className="peer sr-only"
                 />
-                <div className="w-5 h-5 rounded border-2 border-slate-300 peer-checked:border-[#C5A059] peer-checked:bg-[#C5A059] transition-all flex items-center justify-center">
+                <div className="w-5 h-5 rounded border-2 border-[#D8D5CD] peer-checked:border-[#595B53] peer-checked:bg-[#595B53] transition-all flex items-center justify-center">
                   {form.IsFeatured && (
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -422,7 +422,7 @@ function ProductForm({
                   )}
                 </div>
               </div>
-              <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Featured</span>
+              <span className="text-sm text-[#595B53] group-hover:text-[#171813] transition-colors">Featured</span>
             </label>
           </div>
           {form.IsCustomizable && (
@@ -434,28 +434,28 @@ function ProductForm({
           <div>
             <label className={LABEL_CLS}>Colour Options</label>
             <input className={INPUT_CLS} value={form.Colors} onChange={(e) => updateForm('Colors', e.target.value)} placeholder="e.g. Red, Green, Blue (comma-separated, leave blank if none)" />
-            <p className="text-xs text-slate-400 mt-1">Leave empty if product has no colour variants</p>
+            <p className="text-xs text-[#9B998F] mt-1">Leave empty if product has no colour variants</p>
           </div>
           <div>
             <label className={LABEL_CLS}>Size Options</label>
             <input className={INPUT_CLS} value={form.Sizes} onChange={(e) => updateForm('Sizes', e.target.value)} placeholder="e.g. S, M, L, XL (comma-separated, leave blank if none)" />
-            <p className="text-xs text-slate-400 mt-1">Leave empty if product has no size variants</p>
+            <p className="text-xs text-[#9B998F] mt-1">Leave empty if product has no size variants</p>
           </div>
         </section>
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-end gap-3 px-5 sm:px-7 py-4 border-t border-slate-100 bg-slate-50/50">
+      <div className="flex items-center justify-end gap-3 px-5 sm:px-7 py-4 border-t border-[#F1EEE7] bg-[#F1EEE7]/50">
         <button
           type="button"
           onClick={onCancel}
-          className="px-5 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+          className="px-5 py-2.5 rounded-lg border border-[#E1DFDC] text-sm font-medium text-[#595B53] hover:bg-[#F1EEE7] transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-6 py-2.5 rounded-lg bg-[#D2693F] text-white text-sm font-semibold hover:bg-[#B85A34] shadow-sm transition-all active:scale-[0.98]"
+          className="px-6 py-2.5 rounded-lg bg-[#171813] text-white text-sm font-semibold hover:bg-[#171813] shadow-sm transition-all active:scale-[0.98]"
         >
           {mode === "add" ? "Add Product" : "Save Changes"}
         </button>
@@ -479,7 +479,7 @@ function formatValue(val: any) {
 
 export default function InventoryTable() {
   const { categories: firestoreCategories } = useCategories();
-  const CATEGORIES = firestoreCategories.map((c) => c.name);
+  const CATEGORIES = Array.from(new Set(firestoreCategories.map((c) => c.name)));
   const [allItems, setAllItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -753,16 +753,16 @@ export default function InventoryTable() {
       <div className="relative">
         <div className="mb-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-amber-800">Inventory <span className="text-xs text-slate-500">({filteredItems.length})</span></h3>
+            <h3 className="text-sm font-semibold text-amber-800">Inventory <span className="text-xs text-[#595B53]">({filteredItems.length})</span></h3>
             <button
               onClick={() => { setForm({ ...emptyForm, Category: CATEGORIES[0] || "" }); setShowAddModal(true); }}
-              className="rounded-lg bg-[#D2693F] text-white px-4 py-2 text-sm font-medium hover:bg-[#B85A34] transition-colors"
+              className="rounded-lg bg-[#171813] text-white px-4 py-2 text-sm font-medium hover:bg-[#171813] transition-colors"
             >
               + Add Product
             </button>
           </div>
           <div className="mt-2">
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by product name or description" className="w-full max-w-sm rounded border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E0D0B8] text-black" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by product name or description" className="w-full max-w-sm rounded border border-[#E1DFDC] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D8D5CD] text-[#171813]" />
           </div>
         </div>
 
@@ -773,8 +773,8 @@ export default function InventoryTable() {
             {filteredItems.map((it) => {
               const img = it?.ImageUrl1 || it?.ImageUrl2 || it?.ImageUrl3 || "/placeholder.png";
               return (
-              <div key={it.id ?? it.ID ?? it.Product} className="group relative bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative aspect-[4/3] bg-slate-100">
+              <div key={it.id ?? it.ID ?? it.Product} className="group relative bg-white rounded-xl border border-[#E1DFDC] shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative aspect-[4/3] bg-[#F1EEE7]">
                   <ProductImage
                     src={it?.ImageUrl1}
                     srcMedium={it?.ImageUrl1Medium}
@@ -783,7 +783,7 @@ export default function InventoryTable() {
                     alt={it?.Product ?? "item"}
                     className="w-full h-full"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#171813]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute top-2.5 right-2.5 flex gap-1.5 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 transition-opacity">
                     <button onClick={(e) => { e.stopPropagation(); openEditModal(it); }} aria-label="Edit item" className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/20 transition-colors">Edit</button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(it.id); }} aria-label="Delete item" className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-red-500/80 backdrop-blur-sm hover:bg-red-500 transition-colors">Delete</button>
@@ -791,16 +791,16 @@ export default function InventoryTable() {
                 </div>
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className="text-sm font-semibold text-[#2D2D2D] leading-tight line-clamp-2">{it?.ProductName ?? it?.Description ?? "Untitled"}</h4>
-                    <span className="text-[10px] text-slate-400 whitespace-nowrap">#{it?.ID ?? ""}</span>
+                    <h4 className="text-sm font-semibold text-[#171813] leading-tight line-clamp-2">{it?.ProductName ?? it?.Description ?? "Untitled"}</h4>
+                    <span className="text-[10px] text-[#9B998F] whitespace-nowrap">#{it?.ID ?? ""}</span>
                   </div>
-                  <p className="text-xs text-slate-400 mb-2.5">{it?.Category ?? it?.Product}</p>
+                  <p className="text-xs text-[#9B998F] mb-2.5">{it?.Category ?? it?.Product}</p>
                   <div className="flex items-baseline gap-2 mb-3">
                     {(() => { const p = resolvePricing({ Price: it?.Price, OriginalPrice: it?.OriginalPrice, DiscountPercent: it?.DiscountPercent }); return (
                       <>
-                        <span className="text-base font-bold text-[#D2693F]">Rs.{p.selling.toLocaleString("en-IN")}</span>
+                        <span className="text-base font-bold text-[#171813]">RM{p.selling.toLocaleString("en-MY")}</span>
                         {p.discount > 0 && (
-                          <span className="text-xs text-slate-400 line-through">Rs.{p.original.toLocaleString("en-IN")}</span>
+                          <span className="text-xs text-[#9B998F] line-through">RM{p.original.toLocaleString("en-MY")}</span>
                         )}
                         {p.discount > 0 && (
                           <span className="text-[10px] font-semibold text-red-600">{p.discount}% OFF</span>
@@ -809,8 +809,8 @@ export default function InventoryTable() {
                     ); })()}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F9F6F0] text-[#9A6E50] border border-[#E8E0D8]">{it.StockType === "made_to_order" ? "Made to Order" : "Ready Stock"}</span>
-                    {it.IsCustomizable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F9F6F0] text-[#D2693F] border border-[#E0D0B8]">Customisable</span>}
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFFFFF] text-[#595B53] border border-[#D8D5CD]">{it.StockType === "made_to_order" ? "Made to Order" : "Ready Stock"}</span>
+                    {it.IsCustomizable && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFFFFF] text-[#171813] border border-[#D8D5CD]">Customisable</span>}
                     {it.IsFeatured && <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Featured</span>}
                   </div>
                 </div>
@@ -823,14 +823,14 @@ export default function InventoryTable() {
 
       {/* Add modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4" onClick={() => setShowAddModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#171813]/40 backdrop-blur-sm sm:p-4" onClick={() => setShowAddModal(false)}>
           <div className="w-full sm:max-w-2xl h-[95vh] sm:h-[90vh] bg-white sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-slate-100 shrink-0">
+            <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-[#F1EEE7] shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-[#2D2D2D]">Add New Product</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Fill in the details below</p>
+                <h3 className="text-lg font-bold text-[#171813]">Add New Product</h3>
+                <p className="text-xs text-[#9B998F] mt-0.5">Fill in the details below</p>
               </div>
-              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-lg hover:bg-[#F1EEE7] text-[#9B998F] hover:text-[#595B53] transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -840,14 +840,14 @@ export default function InventoryTable() {
       )}
       {/* Edit modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4" onClick={() => { setShowEditModal(false); setEditingId(null); }}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#171813]/40 backdrop-blur-sm sm:p-4" onClick={() => { setShowEditModal(false); setEditingId(null); }}>
           <div className="w-full sm:max-w-2xl h-[95vh] sm:h-[90vh] bg-white sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-slate-100 shrink-0">
+            <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-[#F1EEE7] shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-[#2D2D2D]">Edit Product</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Update product details</p>
+                <h3 className="text-lg font-bold text-[#171813]">Edit Product</h3>
+                <p className="text-xs text-[#9B998F] mt-0.5">Update product details</p>
               </div>
-              <button onClick={() => { setShowEditModal(false); setEditingId(null); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => { setShowEditModal(false); setEditingId(null); }} className="p-2 rounded-lg hover:bg-[#F1EEE7] text-[#9B998F] hover:text-[#595B53] transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>

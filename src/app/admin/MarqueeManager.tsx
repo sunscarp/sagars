@@ -73,7 +73,7 @@ export default function MarqueeManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -81,18 +81,18 @@ export default function MarqueeManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Marquee Banner Text</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-lg font-semibold text-[#171813]">Marquee Banner Text</h2>
+        <p className="text-sm text-[#595B53] mt-1">
           Manage the scrolling text banners shown at the top and bottom of the homepage.
         </p>
       </div>
 
       {/* Current items */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Banner Items</p>
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-5 space-y-3">
+        <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider">Banner Items</p>
 
         {draft.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">No items yet. Add one below.</p>
+          <p className="text-sm text-[#9B998F] py-4 text-center">No items yet. Add one below.</p>
         ) : (
           <div className="space-y-2">
             {draft.map((item, index) => (
@@ -101,7 +101,7 @@ export default function MarqueeManager() {
                   <button
                     onClick={() => moveItem(index, "up")}
                     disabled={index === 0}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="text-[#9B998F] hover:text-[#595B53] disabled:opacity-30 disabled:cursor-not-allowed"
                     title="Move up"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ export default function MarqueeManager() {
                   <button
                     onClick={() => moveItem(index, "down")}
                     disabled={index === draft.length - 1}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="text-[#9B998F] hover:text-[#595B53] disabled:opacity-30 disabled:cursor-not-allowed"
                     title="Move down"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,11 +123,11 @@ export default function MarqueeManager() {
                   type="text"
                   value={item}
                   onChange={(e) => updateItem(index, e.target.value)}
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+                  className="flex-1 border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
                 />
                 <button
                   onClick={() => removeItem(index)}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-2 text-[#9B998F] hover:text-red-500 transition-colors"
                   title="Remove"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,20 +141,20 @@ export default function MarqueeManager() {
       </div>
 
       {/* Add new item */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Add New Item</p>
+      <div className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+        <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider mb-3">Add New Item</p>
         <div className="flex gap-2">
           <input
             type="text"
             value={newItem}
             onChange={(e) => { setNewItem(e.target.value); setSuccess(false); }}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
-            placeholder="e.g. Free Shipping on orders above Rs.1000"
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D2693F]/30 focus:border-[#D2693F]"
+            placeholder="e.g. Free Shipping on orders above RM1000"
+            className="flex-1 border border-[#E1DFDC] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#171813]/30 focus:border-[#171813]"
           />
           <button
             onClick={addItem}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-[#F1EEE7] hover:bg-[#E1DFDC] text-[#595B53] text-sm font-medium rounded-lg transition-colors"
           >
             Add
           </button>
@@ -176,7 +176,7 @@ export default function MarqueeManager() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-[#D2693F] text-white text-sm font-medium rounded-lg hover:bg-[#B85A34] disabled:opacity-50 transition-colors"
+          className="px-6 py-2.5 bg-[#171813] text-white text-sm font-medium rounded-lg hover:bg-[#171813] disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
@@ -184,10 +184,10 @@ export default function MarqueeManager() {
 
       {/* Preview */}
       {draft.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Preview</p>
-          <div className="bg-[#2D2D2D] py-2.5 overflow-hidden rounded">
-            <div className="animate-marquee text-xs sm:text-sm text-[#F9F6F0] tracking-wider font-medium">
+        <div className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+          <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider mb-3">Preview</p>
+          <div className="bg-[#171813] py-2.5 overflow-hidden rounded">
+            <div className="animate-marquee text-xs sm:text-sm text-[#FFFFFF] tracking-wider font-medium">
               {[...draft, ...draft].map((text, i) => (
                 <span key={i} className="mx-6 sm:mx-8 inline-block whitespace-nowrap">✦ {text}</span>
               ))}

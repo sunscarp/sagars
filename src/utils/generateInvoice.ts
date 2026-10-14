@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { resolvePricing } from "@/utils/pricing";
-import { orderGstBreakdown } from "@/utils/gst";
+import { orderTaxBreakdown } from "@/utils/tax";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   let binary = "";
@@ -40,12 +40,12 @@ export async function generateInvoice(order: any) {
 
   doc.setFontSize(9);
   doc.setTextColor(...darkBrown);
-  doc.text("Vittlraj Krithika", 14, 56);
-  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 62);
-  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 68);
-  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 74);
-  doc.text("Email: support@kriastore.in", 14, 80);
-  doc.text("Phone: +91 98944 14445", 14, 86);
+  doc.text("The Sagar's Design House", 14, 56);
+  doc.text("No. 8, Jalan Bukit Bintang, Bukit Bintang,", 14, 62);
+  doc.text("55100 Kuala Lumpur, Malaysia", 14, 68);
+  doc.text("SST No.: 000000000000", 14, 74);
+  doc.text("Email: support@thesagarsdesignhouse.com", 14, 80);
+  doc.text("Phone: +60 12-345 6789", 14, 86);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
@@ -54,8 +54,8 @@ export async function generateInvoice(order: any) {
   // ===== INVOICE DETAILS =====
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 99);
-  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 105);
+  doc.text(`Invoice No: TSDH-INV-${order.invoiceNo ?? order.id}`, 14, 99);
+  doc.text(`Order ID: TSDH-ORD-${order.id}`, 14, 105);
   doc.text(
     `Order Date: ${order.createdAt?.toDate?.().toLocaleDateString()}`,
     14,
@@ -77,7 +77,7 @@ export async function generateInvoice(order: any) {
 
   doc.text("Shipping Address:", 14, 159);
   doc.text(
-    `${order.customer?.address}, ${order.customer?.stateCity ?? ""} - ${order.customer?.pinCode ?? ""}, India`,
+    `${order.customer?.address}, ${order.customer?.stateCity ?? ""} - ${order.customer?.pinCode ?? ""}, Malaysia`,
     14,
     165
   );
@@ -98,7 +98,7 @@ export async function generateInvoice(order: any) {
   const discount = order.discountAmount ?? order.discount ?? 0;
   const grandTotal = order.total;
 
-  const gst = orderGstBreakdown(order);
+  const tax = orderTaxBreakdown(order);
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
@@ -118,8 +118,8 @@ export async function generateInvoice(order: any) {
       return [
         item.product?.ProductName ?? "Product",
         item.Quantity,
-        `Rs. ${itemPrice}`,
-        `Rs. ${itemTotal}`,
+        `RM ${itemPrice}`,
+        `RM ${itemTotal}`,
       ];
     }),
     styles: { fontSize: 10, textColor: darkBrown, font: "TenorSans" },
@@ -133,44 +133,42 @@ export async function generateInvoice(order: any) {
 
   const finalY = (doc as any).lastAutoTable.finalY || 173;
 
-  // ===== PRICE BREAKDOWN (GST split) =====
+  // ===== PRICE BREAKDOWN (SST) =====
   let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
   doc.setFont("TenorSans", "normal");
 
-  doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
+  doc.text(`Subtotal: RM ${subtotal}`, 14, y);
   y += 6;
 
   if (discount > 0) {
-    doc.text(`Discount: -Rs. ${discount}`, 14, y);
+    doc.text(`Discount: -RM ${discount}`, 14, y);
     y += 6;
   }
 
-  doc.text(`Taxable Value: Rs. ${gst.taxableValue}`, 14, y);
+  doc.text(`Taxable Value: RM ${tax.taxableValue}`, 14, y);
   y += 6;
-  doc.text(`CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}`, 14, y);
-  y += 6;
-  doc.text(`SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}`, 14, y);
+  doc.text(`SST @ ${tax.sstRate}%: RM ${tax.sst}`, 14, y);
   y += 6;
 
   doc.text(
-    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : `(incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}`,
+    `Shipping: RM ${shipping} ${shipping === 0 ? "(Free)" : `(incl. service tax ${tax.shippingSst})`}`,
     14,
     y
   );
   y += 6;
 
-  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
+  doc.text(`Grand Total: RM ${grandTotal}`, 14, y);
 
   // ===== FOOTER =====
   y += 12;
-  doc.text("Thank you for shopping with KRIA.", 14, y);
+  doc.text("Thank you for shopping with The Sagar's Design House.", 14, y);
   y += 6;
-  doc.text("Keep supporting India handmade products.", 14, y);
+  doc.text("Keep supporting Malaysian handmade products.", 14, y);
   y += 6;
-  doc.text("For support, WhatsApp us at +91 9894414445", 14, y);
+  doc.text("For support, WhatsApp us at +60 12-345 6789", 14, y);
 
   // ===== SAVE =====
-  doc.save(`KRIA_INVOICE_${order.id}.pdf`);
+  doc.save(`SAGARS_INVOICE_${order.id}.pdf`);
 }

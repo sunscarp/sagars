@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCartSidebar } from "@/context/CartSidebarContext";
 import { generateInvoice } from "@/utils/generateInvoice";
-import { orderGstBreakdown } from "@/utils/gst";
+import { orderTaxBreakdown } from "@/utils/tax";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
@@ -67,11 +67,11 @@ type Order = {
 };
 
 const statusStyles: Record<OrderStatus, string> = {
-  placed: "bg-[#F3EDE4] text-[#9A6E50] border border-[#E0D0B8]",
-  processing: "bg-[#F3EDE4] text-[#9A6E50] border border-[#E0D0B8]",
-  shipped: "bg-[#D2693F] text-white",
-  done: "bg-[#C5A059] text-white",
-  cancelled: "bg-[#E8E0D8] text-[#9A6E50]",
+  placed: "bg-[#F1EEE7] text-[#595B53] border border-[#D8D5CD]",
+  processing: "bg-[#F1EEE7] text-[#595B53] border border-[#D8D5CD]",
+  shipped: "bg-[#171813] text-white",
+  done: "bg-[#595B53] text-white",
+  cancelled: "bg-[#D8D5CD] text-[#595B53]",
 };
 
 export default function OrdersPage() {
@@ -190,7 +190,7 @@ export default function OrdersPage() {
 
   const formatDate = (ts: any) =>
     ts?.toDate
-      ? ts.toDate().toLocaleDateString("en-IN", {
+      ? ts.toDate().toLocaleDateString("en-MY", {
           weekday: "long",
           day: "numeric",
           month: "long",
@@ -206,9 +206,9 @@ export default function OrdersPage() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
+        style={{ backgroundColor: "#FFFFFF", color: "#171813" }}
       >
-        <p className="font-semibold" style={{ fontFamily: "'Tenor Sans', serif" }}>
+        <p className="font-semibold" style={{ fontFamily: "var(--font-cormorant)" }}>
           Loading orders...
         </p>
       </div>
@@ -216,13 +216,13 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="px-4 py-10 md:px-10 md:py-14 flex justify-center" style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}>
+    <div className="px-4 py-10 md:px-10 md:py-14 flex justify-center" style={{ backgroundColor: "#FFFFFF", color: "#171813" }}>
       <div className="w-full max-w-5xl">
         {/* Header */}
         <div className="mb-8">
           <h1
             className="text-2xl sm:text-3xl font-semibold"
-            style={{ fontFamily: "'Tenor Sans', serif", color: "#2D2D2D" }}
+            style={{ fontFamily: "var(--font-cormorant)", color: "#171813" }}
           >
             Your Orders
           </h1>
@@ -238,13 +238,13 @@ export default function OrdersPage() {
               className="mx-auto mb-6 object-contain"
               priority
             />
-            <p className="text-sm mb-4 max-w-xs" style={{ color: "#9A6E50" }}>
+            <p className="text-sm mb-4 max-w-xs" style={{ color: "#595B53" }}>
               You have no orders yet. Start shopping to place your first order.
             </p>
             <Link
               href="/shop"
               className="inline-flex items-center justify-center text-white px-5 py-2.5 text-sm font-semibold"
-              style={{ backgroundColor: "#D2693F" }}
+              style={{ backgroundColor: "#171813" }}
             >
               Continue Shopping
             </Link>
@@ -268,13 +268,13 @@ export default function OrdersPage() {
                   ? Math.round((discountAmount / normalTotal) * 100)
                   : 0;
 
-              const gst = orderGstBreakdown(order);
+              const gst = orderTaxBreakdown(order);
 
               return (
                 <div
                   key={order.id}
                   className="p-4 sm:p-6 space-y-4"
-                  style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0" }}
+                  style={{ border: "1px solid #D8D5CD", backgroundColor: "#FFFFFF" }}
                 >
                   {/* Meta */}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
@@ -283,7 +283,7 @@ export default function OrdersPage() {
                         Order ID:{" "}
                         <span className="font-mono">{order.id}</span>
                       </p>
-                      <p className="text-sm" style={{ color: "#9A6E50" }}>
+                      <p className="text-sm" style={{ color: "#595B53" }}>
                         {formatDate(order.createdAt)}
                       </p>
                     </div>
@@ -297,7 +297,7 @@ export default function OrdersPage() {
 
                   {/* Courier Partner */}
                   {order.courierPartner && (
-                    <p className="text-sm" style={{ color: "#9A6E50" }}>
+                    <p className="text-sm" style={{ color: "#595B53" }}>
                       Courier: {order.courierPartner}
                       {order.shippingZone && <> · {order.shippingZone}</>}
                     </p>
@@ -305,8 +305,8 @@ export default function OrdersPage() {
 
                   {/* Customer Details */}
                   {order.customer && (
-                    <div className="mt-3 text-sm space-y-1" style={{ color: "#9A6E50" }}>
-                      <p className="font-semibold" style={{ color: "#2D2D2D" }}>Customer</p>
+                    <div className="mt-3 text-sm space-y-1" style={{ color: "#595B53" }}>
+                      <p className="font-semibold" style={{ color: "#171813" }}>Customer</p>
                       <p>
                         {order.customer.name || ""}
                         {order.customer.email || order.userEmail
@@ -343,10 +343,10 @@ export default function OrdersPage() {
                         <div key={idx} className="space-y-1">
                           <div
                             className="flex items-center justify-between gap-4 text-sm"
-                            style={{ borderBottom: "1px solid #E0D0B8", paddingBottom: "8px" }}
+                            style={{ borderBottom: "1px solid #D8D5CD", paddingBottom: "8px" }}
                           >
                             <div className="flex items-center gap-3 flex-1">
-                               <div className="w-12 h-12 border border-[#E0D0B8] overflow-hidden flex-shrink-0">
+                               <div className="w-12 h-12 border border-[#D8D5CD] overflow-hidden flex-shrink-0">
                                  <ProductImage
                                    src={imgSrc}
                                    size="thumb"
@@ -358,8 +358,8 @@ export default function OrdersPage() {
                                  <p className="font-medium">
                                    {item.product?.ProductName ?? item.product?.Description ?? "Product"} × {item.Quantity}
                                  </p>
-                                 {item.product?.SKU && <p className="text-[10px]" style={{ color: "#B0A38C" }}>{item.product.SKU}</p>}
-                                 <p className="text-xs" style={{ color: "#9A6E50" }}>
+                                 {item.product?.SKU && <p className="text-[10px]" style={{ color: "#9B998F" }}>{item.product.SKU}</p>}
+                                 <p className="text-xs" style={{ color: "#595B53" }}>
                                    ID: {item.ID} • Size: {item.Size || "N/A"}
                                  </p>
                               </div>
@@ -372,13 +372,13 @@ export default function OrdersPage() {
                           {item.isCustomized && (
                             <div
                               className="ml-3 p-2"
-                              style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}
+                              style={{ backgroundColor: "#F1EEE7", border: "1px solid #D8D5CD" }}
                             >
-                              <p className="text-xs" style={{ color: "#D2693F" }}>
+                              <p className="text-xs" style={{ color: "#171813" }}>
                                 Customized: &quot;{item.customizationText}&quot;
                               </p>
                               {custom > 0 && (
-                                <p className="text-xs" style={{ color: "#D2693F" }}>
+                                <p className="text-xs" style={{ color: "#171813" }}>
                                   + <PriceText amount={custom} /> customization fee
                                 </p>
                               )}
@@ -390,36 +390,31 @@ export default function OrdersPage() {
                   </div>
 
                   {/* Total + Discount */}
-                  <div className="space-y-1" style={{ borderTop: "1px solid #E0D0B8", paddingTop: "12px" }}>
+                  <div className="space-y-1" style={{ borderTop: "1px solid #D8D5CD", paddingTop: "12px" }}>
                     {discountAmount > 0 && (
-                      <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
+                      <div className="flex justify-between text-sm" style={{ color: "#595B53" }}>
                         <span>Discount ({discountPercent}%)</span>
                         <span>- <PriceText amount={discountAmount} /></span>
                       </div>
                     )}
 
                     {order.shippingCharge !== undefined && order.shippingCharge > 0 && (
-                      <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
+                      <div className="flex justify-between text-sm" style={{ color: "#595B53" }}>
                         <span>Shipping</span>
                         <PriceText amount={order.shippingCharge} />
                       </div>
                     )}
 
                     {order.shippingCharge !== undefined && order.shippingCharge === 0 && (
-                      <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
+                      <div className="flex justify-between text-sm" style={{ color: "#595B53" }}>
                         <span>Shipping</span>
                         <span>Free</span>
                       </div>
                     )}
 
-                    <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
-                      <span>CGST ({gst.cgstRate}%)</span>
-                      <PriceText amount={gst.cgst} />
-                    </div>
-
-                    <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
-                      <span>SGST ({gst.sgstRate}%)</span>
-                      <PriceText amount={gst.sgst} />
+                    <div className="flex justify-between text-sm" style={{ color: "#595B53" }}>
+                      <span>SST ({gst.sstRate}%)</span>
+                      <PriceText amount={gst.sst} />
                     </div>
 
                     <div className="flex justify-between items-center font-semibold text-lg">
@@ -427,8 +422,8 @@ export default function OrdersPage() {
                       <PriceText amount={order.total} />
                     </div>
 
-                    <p className="text-xs" style={{ color: "#9A6E50" }}>
-                      Prices include GST (CGST {gst.cgstRate}% + SGST {gst.sgstRate}%).
+                    <p className="text-xs" style={{ color: "#595B53" }}>
+                      Prices include SST ({gst.sstRate}%). Shipping includes service tax.
                     </p>
                   </div>
 
@@ -436,7 +431,7 @@ export default function OrdersPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
                     <div
                       className="px-4 py-2 font-medium text-sm flex items-center justify-center"
-                      style={{ border: "1px solid #E0D0B8", backgroundColor: "#F3EDE4", color: "#2D2D2D" }}
+                      style={{ border: "1px solid #D8D5CD", backgroundColor: "#F1EEE7", color: "#171813" }}
                     >
                       <span className="truncate">
                         {order.trackingId && order.trackingId.trim() !== ""
@@ -448,7 +443,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => handleBuyAgain(order.items)}
                       className="px-4 py-2 font-medium text-sm"
-                      style={{ border: "1px solid #E0D0B8", color: "#2D2D2D" }}
+                      style={{ border: "1px solid #D8D5CD", color: "#171813" }}
                     >
                       Buy Again
                     </button>
@@ -456,7 +451,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => generateInvoice(order)}
                       className="px-4 py-2 font-medium text-sm"
-                      style={{ border: "1px solid #E0D0B8", color: "#2D2D2D" }}
+                      style={{ border: "1px solid #D8D5CD", color: "#171813" }}
                     >
                       Download Invoice
                     </button>

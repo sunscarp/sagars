@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
@@ -71,7 +71,7 @@ type InventoryItem = {
 function formatCurrency(n: number | string | undefined) {
   const num = Number(n || 0);
   if (!isFinite(num)) return "";
-  return num.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  return num.toLocaleString("en-MY", { maximumFractionDigits: 0 });
 }
 
 export default function CartPage() {
@@ -361,18 +361,18 @@ export default function CartPage() {
 
   if (loading || loadingItems) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-semibold text-black">
+      <div className="min-h-screen flex items-center justify-center text-[#171813]">
         Loading cart…
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-10 md:px-10 md:py-14 text-black flex justify-center">
-      <div className="w-full max-w-md bg-white/90 border border-gray-200 shadow-sm px-4 py-6">
+    <div className="px-4 py-10 md:px-10 md:py-14 text-[#171813] flex justify-center">
+      <div className="w-full max-w-md bg-white rounded-[22px] border border-[#D8D5CD] shadow-sm px-5 py-6">
         <header className="border-b pb-3 mb-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Cart</h1>
-          <span className="text-xs text-gray-500">
+          <h1 className="text-2xl text-[#171813]" style={{ fontFamily: "var(--font-cormorant)" }}>Cart</h1>
+          <span className="text-xs text-[#595B53]">
             {itemCount} item{itemCount === 1 ? "" : "s"}
           </span>
         </header>
@@ -387,12 +387,12 @@ export default function CartPage() {
               className="mx-auto mb-6 object-contain"
               priority
             />
-            <p className="text-sm text-gray-700 mb-4 max-w-xs">
+            <p className="text-sm text-[#595B53] mb-4 max-w-xs">
               Your cart is empty. Start adding beautiful pieces to your bag.
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center bg-[#D2693F] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#8B4513]"
+              className="inline-flex items-center justify-center rounded-full bg-[#171813] text-white px-7 py-3 text-[11px] font-medium uppercase tracking-[0.12em] hover:opacity-90 transition-opacity"
             >
               Continue Shopping
             </Link>
@@ -400,7 +400,7 @@ export default function CartPage() {
         ) : (
           <>
             <section className="border overflow-hidden mb-4">
-              <div className="px-4 py-3 border-b flex items-center gap-2 text-sm font-semibold tracking-wide uppercase text-gray-700">
+              <div className="px-4 py-3 border-b flex items-center gap-2 text-sm tracking-wide uppercase text-[#171813]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -439,7 +439,7 @@ export default function CartPage() {
                       key={String(it.docId ?? it.ID)}
                       className="px-4 py-4 border-b last:border-b-0 flex gap-3"
                     >
-                      <div className="w-16 h-16 border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+                      <div className="w-16 h-16 rounded-lg border border-[#D8D5CD] overflow-hidden flex items-center justify-center flex-shrink-0 bg-[#F1EEE7]">
                         <Link
                           href={`/product/${encodeURIComponent(
                             getProductSlug(prod)
@@ -460,20 +460,20 @@ export default function CartPage() {
                       <div className="flex-1 flex flex-col justify-between">
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <p className="text-sm font-medium text-gray-900 leading-snug">
+                            <p className="text-[16px] text-[#171813] leading-snug">
                               {prod?.ProductName ?? prod?.Description ?? ""}
                             </p>
                             {it.Size && (
-                              <p className="text-xs" style={{ color: "#9A6E50" }}>
+                              <p className="text-xs" style={{ color: "#595B53" }}>
                                 {it.Color ? `${it.Color} / ` : ""}Size: {it.Size}
                               </p>
                             )}
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-semibold text-gray-900">
+                            <p className="text-sm font-semibold text-[#171813]">
                               <PriceText amount={lineTotal} />
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[#595B53]">
                               <PriceText amount={totalPerItem} /> each
                             </p>
                           </div>
@@ -483,20 +483,20 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() => removeItem(it)}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 rounded-full border border-[#D8D5CD] text-xs font-medium text-[#595B53] bg-white hover:bg-[#F1EEE7] hover:border-[#B0ADA6] transition-colors"
                           >
                             Remove
                           </button>
 
-                          <div className="inline-flex items-center border border-gray-300 overflow-hidden text-sm">
+                          <div className="inline-flex items-center rounded-full border border-[#D8D5CD] overflow-hidden text-sm">
                             <button
                               type="button"
                               onClick={() => changeQuantity(it, -1)}
-                              className="px-3 py-1 bg-white hover:bg-gray-50 text-gray-800"
+                              className="px-3 py-1 bg-white hover:bg-[#F1EEE7] text-[#171813]"
                             >
                               -
                             </button>
-                            <span className="px-3 py-1 text-gray-900 text-sm min-w-[32px] text-center">
+                            <span className="px-3 py-1 text-[#171813] text-sm min-w-[32px] text-center">
                               {it.Quantity}
                             </span>
                             {(() => {
@@ -516,8 +516,8 @@ export default function CartPage() {
                                     changeQuantity(it, +1);
                                   }}
                                   disabled={atMax}
-                                  className={`px-3 py-1 bg-white text-gray-800 ${
-                                    atMax ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-50"
+                                  className={`px-3 py-1 bg-white text-[#171813] ${
+                                    atMax ? "opacity-40 cursor-not-allowed" : "hover:bg-[#F1EEE7]"
                                   }`}
                                 >
                                   +
@@ -535,13 +535,13 @@ export default function CartPage() {
               <div className="px-4 py-3 text-sm space-y-2">
                 <hr className="mb-2" />
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-[#595B53]">Subtotal</span>
                   <span className="font-medium">
                     <PriceText amount={subtotal} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-[#595B53]">Shipping</span>
                   <span className="font-medium">Calculated at checkout</span>
                 </div>
                 <hr className="my-2" />
@@ -551,8 +551,8 @@ export default function CartPage() {
                     <PriceText amount={total} />
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400">
-                  Prices include GST (CGST 1.5% + SGST 1.5%). Shipping calculated at checkout.
+                <p className="text-[11px] text-[#9B998F]">
+                  Prices include SST (10%). Shipping includes service tax.
                 </p>
               </div>
             </section>
@@ -563,22 +563,22 @@ export default function CartPage() {
                 if (!hasSufficientStock()) return;
                 router.push("/checkout");
               }}
-              className="w-full bg-[#D2693F] text-white py-3 text-sm font-semibold tracking-wide hover:bg-[#8B4513]"
+              className="w-full rounded-full bg-[#171813] text-white py-3.5 text-[12px] font-medium uppercase tracking-[0.12em] hover:opacity-90 transition-opacity"
             >
               Proceed to Checkout
             </button>
 
-            <div className="mt-3 text-center text-xs text-gray-500">
+            <div className="mt-3 text-center text-xs text-[#595B53]">
               <Link
                 href="/shop"
-                className="underline underline-offset-2 hover:text-gray-700"
+                className="underline underline-offset-2 hover:text-[#171813]"
               >
                 Continue Shopping
               </Link>
               <span className="mx-1">|</span>
               <Link
                 href="/contact-us"
-                className="underline underline-offset-2 hover:text-gray-700"
+                className="underline underline-offset-2 hover:text-[#171813]"
               >
                 View Policies
               </Link>

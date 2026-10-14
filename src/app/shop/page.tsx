@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, Suspense } from "react";
 import { collection, getDocs } from "firebase/firestore";
@@ -48,7 +48,7 @@ function ShopContent() {
   const search = params.get("search")?.toLowerCase() || "";
 
   const formatCurrency = (n: number) => {
-    return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+    return n.toLocaleString("en-MY", { maximumFractionDigits: 0 });
   };
 
   useEffect(() => {
@@ -91,18 +91,22 @@ function ShopContent() {
   }, [params]);
 
   return (
-    <div className="bg-[#F9F6F0] min-h-screen">
-      <main className="px-4 pt-4 md:pt-8 pb-20 max-w-6xl mx-auto">
-        <div className="mb-1 md:mb-4">
-          <div className="text-sm text-gray-500">Showing {sorted.length} products</div>
+    <div className="bg-[#FFFFFF] min-h-screen">
+      <main className="px-5 sm:px-[3%] pt-8 md:pt-12 pb-24 max-w-[1400px] mx-auto">
+        <div className="mb-6 md:mb-10">
+          <span className="mh-eyebrow">Shop</span>
+          <h1 className="text-[34px] sm:text-[46px] leading-[1.05] text-[#171813] mt-2" style={{ fontFamily: "var(--font-cormorant)" }}>
+            All products
+          </h1>
+          <div className="mt-2 text-[13px] text-[#595B53]">Showing {sorted.length} products</div>
         </div>
 
         {/* Mobile bottom toolbar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#F9F6F0] border-t border-[#E8E0D8]">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FFFFFF] border-t border-[#D8D5CD]">
           <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
             <button
               onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
-              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
+              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#FFFFFF] text-[#171813] px-4 py-3 hover:bg-[#FFFFFF]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
                 <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M10 6h6M6 12h10M8 18h8" />
@@ -114,7 +118,7 @@ function ShopContent() {
               onClick={() => { setShowMobileSort(false); setMobileSubView(null); setShowFilterPopover(s => !s); }}
               aria-expanded={showFilterPopover}
               aria-controls="filter-popover"
-              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
+              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#FFFFFF] text-[#171813] px-4 py-3 hover:bg-[#FFFFFF]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
                 <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M6 12h12M10 19h4" />
@@ -125,24 +129,24 @@ function ShopContent() {
 
           {/* Mobile sort popover */}
           {showMobileSort && (
-            <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8]">
-              <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
+            <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#FFFFFF] shadow-lg p-3 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#D8D5CD]">
+              <div className="text-sm font-semibold mb-2 text-[#171813]">Sort</div>
               <div className="space-y-1">
                 <button
                   onClick={() => { setSort("relevance"); setShowMobileSort(false); }}
-                  className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                 >
                   Relevance
                 </button>
                 <button
                   onClick={() => { setSort("price-asc"); setShowMobileSort(false); }}
-                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-asc" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                 >
                   Price: Low to High
                 </button>
                 <button
                   onClick={() => { setSort("price-desc"); setShowMobileSort(false); }}
-                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-desc" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                 >
                   Price: High to Low
                 </button>
@@ -152,22 +156,22 @@ function ShopContent() {
 
           {/* Mobile filter popover */}
           {showFilterPopover && (
-            <div id="filter-popover" className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
+            <div id="filter-popover" className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#FFFFFF] shadow-lg p-4 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#D8D5CD] max-h-[70vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {mobileSubView && (
-                    <button onClick={() => setMobileSubView(null)} className="text-[#D2693F] text-sm font-medium">← Back</button>
+                    <button onClick={() => setMobileSubView(null)} className="text-[#171813] text-sm font-medium">← Back</button>
                   )}
-                  <div className="text-sm font-semibold text-[#2D2D2D]">{mobileSubView || 'Filters'}</div>
+                  <div className="text-sm font-semibold text-[#171813]">{mobileSubView || 'Filters'}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); setSubcategoryFilter(null); setMobileSubView(null); }}
-                    className="text-sm bg-[#F3EDE4] text-[#2D2D2D] px-2 py-1 cursor-pointer hover:bg-[#E0D0B8]"
+                    className="text-sm bg-[#F1EEE7] text-[#171813] px-2 py-1 cursor-pointer hover:bg-[#D8D5CD]"
                   >
                     Reset
                   </button>
-                  <button onClick={() => { setShowFilterPopover(false); setMobileSubView(null); }} className="text-gray-500 text-sm cursor-pointer">Close</button>
+                  <button onClick={() => { setShowFilterPopover(false); setMobileSubView(null); }} className="text-[#595B53] text-sm cursor-pointer">Close</button>
                 </div>
               </div>
 
@@ -175,7 +179,7 @@ function ShopContent() {
                 <div className="space-y-1">
                   <button
                     onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); setShowFilterPopover(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                    className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#FFFFFF]'}`}
                   >
                     All
                   </button>
@@ -198,11 +202,11 @@ function ShopContent() {
                             setShowFilterPopover(false);
                           }
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${isActive ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                       >
                         <span>{cat.name}</span>
                         {hasSubs && (
-                          <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 text-[#9B998F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         )}
@@ -214,7 +218,7 @@ function ShopContent() {
                     <button
                       key={c}
                       onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); setShowFilterPopover(false); }}
-                      className={`w-full text-left px-3 py-2 text-sm ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                      className={`w-full text-left px-3 py-2 text-sm ${filter === c ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                     >
                       {c}
                     </button>
@@ -229,7 +233,7 @@ function ShopContent() {
                       <button
                         key={sub.name}
                         onClick={() => { setSubcategoryFilter(sub.name); setShowFilterPopover(false); setMobileSubView(null); }}
-                        className={`w-full text-left px-3 py-2 text-sm ${subcategoryFilter === sub.name ? 'bg-[#C5A059] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                        className={`w-full text-left px-3 py-2 text-sm ${subcategoryFilter === sub.name ? 'bg-[#595B53] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                       >
                         {sub.name}
                       </button>
@@ -244,21 +248,21 @@ function ShopContent() {
         <div className="md:flex md:items-start md:gap-6">
           {/* Sidebar - desktop only */}
           <aside className="hidden md:block w-64 shrink-0 md:-ml-6">
-            <div className="bg-[#F9F6F0] border border-[#E8E0D8] p-4 sticky top-20">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
+            <div className="bg-white border border-[#D8D5CD] rounded-[22px] p-5 sticky top-24">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-[11px] uppercase tracking-[0.16em] text-[#595B53] font-medium">Filters</div>
                 <button
                   onClick={() => { setFilter(null); setSort('relevance'); setSelectedSubcategory(null); setSubcategoryFilter(null); }}
-                  className="text-xs text-gray-500 hover:underline"
+                  className="text-xs text-[#595B53] hover:underline"
                 >
                   Reset
                 </button>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <button
                   onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); }}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${filter === null ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                 >
                   All
                 </button>
@@ -271,11 +275,11 @@ function ShopContent() {
                     <div key={cat.id}>
                       <button
                         onClick={() => { if (isActive) { setFilter(null); setSubcategoryFilter(null); } else { setFilter(cat.name); setSelectedSubcategory(cat.name); setSubcategoryFilter(null); } }}
-                        className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between rounded-lg ${isActive ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                       >
                         <span>{cat.name}</span>
                         {hasSubs && (
-                          <svg className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180 text-white/70' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180 text-white/70' : 'text-[#9B998F]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         )}
@@ -286,7 +290,7 @@ function ShopContent() {
                             <button
                               key={sub.name}
                               onClick={() => setSubcategoryFilter(sub.name)}
-                              className={`block w-full text-left px-3 py-1 text-xs transition-colors ${subcategoryFilter === sub.name ? 'text-[#D2693F] font-medium' : 'text-[#2D2D2D] hover:text-[#D2693F]'}`}
+                              className={`block w-full text-left px-3 py-1 text-xs transition-colors ${subcategoryFilter === sub.name ? 'text-[#171813] font-medium' : 'text-[#171813] hover:text-[#171813]'}`}
                             >
                               {sub.name}
                             </button>
@@ -301,7 +305,7 @@ function ShopContent() {
                   <button
                     key={c}
                     onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); }}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors rounded-lg ${filter === c ? 'bg-[#171813] text-white' : 'text-[#171813] hover:bg-[#F1EEE7]'}`}
                   >
                     {c}
                   </button>
@@ -317,11 +321,11 @@ function ShopContent() {
               <div className="relative">
                 <button
                   onClick={() => setSortOpen((s) => !s)}
-                  className="flex items-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-3 py-2 hover:bg-[#F9F6F0] cursor-pointer border border-[#E8E0D8]"
+                  className="flex items-center gap-2 text-sm bg-white text-[#171813] px-3 py-2 hover:bg-[#F1EEE7] cursor-pointer border border-[#D8D5CD] rounded-lg"
                   aria-expanded={sortOpen}
                 >
                   <span>Sort</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[#595B53]">
                     {sort === "price-asc"
                       ? "Price: Low to High"
                       : sort === "price-desc"
@@ -340,22 +344,22 @@ function ShopContent() {
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute mt-2 left-0 bg-[#F9F6F0] border border-[#E0D0B8] shadow-lg p-2 w-56 z-30">
+                  <div className="absolute mt-2 left-0 bg-white border border-[#D8D5CD] shadow-lg p-2 w-56 z-30 rounded-xl">
                     <button
                       onClick={() => { setSort("relevance"); setSortOpen(false); }}
-                      className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                      className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                     >
                       Relevance
                     </button>
                     <button
                       onClick={() => { setSort("price-asc"); setSortOpen(false); }}
-                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-asc" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                     >
                       Price: Low to High
                     </button>
                     <button
                       onClick={() => { setSort("price-desc"); setSortOpen(false); }}
-                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-desc" ? "bg-[#171813] text-white" : "text-[#171813] hover:bg-[#FFFFFF]"}`}
                     >
                       Price: High to Low
                     </button>
@@ -364,31 +368,28 @@ function ShopContent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-9">
                 {sorted.map(p => {
                 const pr = resolvePricing({ Price: (p as any).Price, OriginalPrice: (p as any).OriginalPrice, DiscountPercent: p.DiscountPercent });
                 
                 const generalStock = (p as any).Stock;
                 const outOfStock = (p as any).StockType === "ready_stock" && generalStock !== undefined && Number(generalStock) === 0;
                 const soldOut = !!(p as any).SoldOut || outOfStock;
-                const savePct = pr.discount > 0 ? pr.discount : null;
                 const isNew = (p as any).createdAt && (Date.now() - (p as any).createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
                 return (
-                <Link key={p.ID} href={`/product/${encodeURIComponent(getProductSlug(p))}`} className="block relative p-0 font-light hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden group">
-                  {isNew && (
-                    <span className="absolute top-3 right-3 bg-[#D2693F] text-white text-[10px] font-bold px-2 py-0.5 z-10 uppercase tracking-wider">New</span>
-                  )}
-                  {outOfStock && (
-                    <span className="absolute top-3 left-3 bg-red-200 text-red-800 text-xs font-bold px-3 py-1 z-10">
-                      Out of Stock
-                    </span>
-                  )}
-                  {!outOfStock && soldOut && (
-                    <span className="absolute top-3 left-3 bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 z-10">Sold out</span>
-                  )}
-                  {savePct && !soldOut && (null)}
-                  {p.StockType === "made_to_order" && (null)}
-                  <div className="w-full overflow-hidden aspect-square bg-[#F9F6F0]">
+                <Link key={p.ID} href={`/product/${encodeURIComponent(getProductSlug(p))}`} className="group block min-w-0">
+                  <div className="relative w-full overflow-hidden rounded-[22px] aspect-[3/4] bg-[#F1EEE7]">
+                    {isNew && (
+                      <span className="absolute top-3 left-3 z-10 bg-white text-[#171813] text-[10px] font-medium px-2.5 py-1 uppercase tracking-[0.12em] rounded-full">New</span>
+                    )}
+                    {outOfStock && (
+                      <span className="absolute top-3 left-3 z-10 bg-[#171813] text-white text-[10px] font-medium px-2.5 py-1 uppercase tracking-[0.12em] rounded-full">
+                        Out of stock
+                      </span>
+                    )}
+                    {!outOfStock && soldOut && (
+                      <span className="absolute top-3 left-3 z-10 bg-white text-[#171813] text-[10px] font-medium px-2.5 py-1 uppercase tracking-[0.12em] rounded-full">Sold out</span>
+                    )}
                     <ProductImage
                       src={p.ImageUrl1}
                       srcMedium={(p as any).ImageUrl1Medium}
@@ -398,22 +399,27 @@ function ShopContent() {
                       quality={90}
                       sizes="(min-width: 768px) 25vw, 45vw"
                       alt={p.ProductName}
-                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
                     />
                   </div>
 
-                  <div className="py-3 px-2">
-                    <h3 className="text-sm md:text-base font-medium text-[#2D2D2D] leading-tight">{p.ProductName}</h3>
-                    {(p as any).SKU && <p className="text-[10px] text-[#B0A38C] mt-0.5">{(p as any).SKU}</p>}
-                    <div className="mt-2 flex items-baseline gap-3">
-                      <PriceText amount={pr.selling} className="text-sm md:text-base font-bold text-[#D2693F]" />
-                      {pr.discount > 0 && (
-                        <PriceText amount={pr.original} strikeThrough className="text-sm text-gray-400 line-through" />
-                      )}
+                  <div className="pt-3.5 px-1 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3
+                        className="truncate text-[19px] sm:text-[22px] leading-tight text-[#171813]"
+                        style={{ fontFamily: "var(--font-cormorant)" }}
+                      >
+                        {p.ProductName}
+                      </h3>
+                      {(p as any).SKU && <p className="text-[11px] text-[#9B998F] mt-0.5">{(p as any).SKU}</p>}
+                      {p.IsCustomizable && <p className="text-[11px] text-[#595B53] mt-1">Customisable</p>}
                     </div>
-                    {p.IsCustomizable && (
-                      <p className="text-xs text-[#9A6E50] mt-1">Customisable</p>
-                    )}
+                    <div className="text-right shrink-0">
+                      {pr.discount > 0 && (
+                        <PriceText amount={pr.original} strikeThrough className="block text-[11px] text-[#9B998F] line-through" />
+                      )}
+                      <PriceText amount={pr.selling} className={"block text-[13px] font-bold " + (pr.discount > 0 ? "text-[#C52020]" : "text-[#171813]")} />
+                    </div>
                   </div>
                 </Link>
               )})}
@@ -427,7 +433,7 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F9F6F0] flex items-center justify-center text-[#2D2D2D]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center text-[#171813]">Loading...</div>}>
       <ShopContent />
     </Suspense>
   );

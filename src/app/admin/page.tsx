@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -53,9 +53,9 @@ type Order = {
 const ORDER_STATUSES: OrderStatus[] = ["placed", "processing", "shipped", "done", "cancelled"];
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  placed: "bg-gray-100 text-gray-700",
+  placed: "bg-[#F1EEE7] text-[#595B53]",
   processing: "bg-blue-50 text-blue-700",
-  shipped: "bg-[#F9F6F0] text-[#D2693F]",
+  shipped: "bg-[#FFFFFF] text-[#171813]",
   done: "bg-emerald-50 text-emerald-700",
   cancelled: "bg-red-50 text-red-700",
 };
@@ -133,14 +133,17 @@ export default function AdminPage() {
   };
 
   const buildWhatsAppUrl = (order: Order) => {
-    const phone = order.customer?.phone || "";
-    if (!phone) return "#";
+    const cust = (order.customer || {}) as any;
+    const code = String(cust.phoneCode || "+60").replace(/\D/g, "");
+    let digits = String(cust.fullPhone || cust.phone || "").replace(/\D/g, "");
+    if (digits && !digits.startsWith(code)) digits = code + digits;
+    if (!digits) return "#";
     const msg = whatsappTemplate
       .replace(/{name}/g, order.customer?.name || "Customer")
       .replace(/{orderId}/g, order.id.slice(-8).toUpperCase())
       .replace(/{status}/g, order.status)
-      .replace(/{trackingUrl}/g, order.trackingId ? `https://kria.vercel.app/tracking/${order.trackingId}` : "");
-    return `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
+      .replace(/{trackingUrl}/g, order.trackingId ? `https://thesagarsdesignhouse.com/tracking/${order.trackingId}` : "");
+    return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
   };
 
   // Lock body scroll when mobile sidebar is open
@@ -155,10 +158,10 @@ export default function AdminPage() {
 
   if (authLoading || adminLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F6F0]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading admin panel…</span>
+          <div className="w-8 h-8 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-[#595B53]">Loading admin panel…</span>
         </div>
       </div>
     );
@@ -191,11 +194,11 @@ export default function AdminPage() {
 
   const formatDate = (ts: any) =>
     ts?.toDate
-      ? ts.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+      ? ts.toDate().toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
       : "";
 
   const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(n);
+    new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" }).format(n);
 
   const revenue = orders.reduce((s, o) => s + (o.total || 0), 0);
   const placedOrders = orders.filter((o) => o.status === "placed").length;
@@ -305,17 +308,17 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F9F6F0] flex">
+    <div className="min-h-screen bg-[#FFFFFF] flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-40 bg-[#171813]/40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-[100dvh] h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 lg:translate-x-0 overflow-y-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="p-6 border-b border-gray-100">
-          <h1 className="text-lg font-bold text-[#2D2D2D]" style={{ fontFamily: "var(--font-playfair)" }}>Kria Admin</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Dashboard</p>
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-[100dvh] h-screen w-64 bg-white border-r border-[#E1DFDC] flex flex-col transition-transform duration-200 lg:translate-x-0 overflow-y-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="p-6 border-b border-[#F1EEE7]">
+          <h1 className="text-lg font-bold text-[#171813]" style={{ fontFamily: "var(--font-cormorant)" }}>The Sagar's Design House Admin</h1>
+          <p className="text-xs text-[#9B998F] mt-0.5">Dashboard</p>
         </div>
 
         <nav className="p-3 space-y-1">
@@ -325,8 +328,8 @@ export default function AdminPage() {
               onClick={() => { setTab(item.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 tab === item.id
-                  ? "bg-[#D2693F] text-white"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-[#171813] text-white"
+                  : "text-[#595B53] hover:bg-[#F1EEE7] hover:text-[#171813]"
               }`}
             >
               {item.icon}
@@ -335,7 +338,7 @@ export default function AdminPage() {
           ))}
           <button
             onClick={() => router.push("/")}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors mt-2"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#595B53] hover:bg-[#F1EEE7] hover:text-[#595B53] transition-colors mt-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -348,16 +351,16 @@ export default function AdminPage() {
       {/* Main content */}
       <div className="flex-1 min-w-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-[#E1DFDC] px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-[#F1EEE7]">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 capitalize">{tab}</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-[#171813] capitalize">{tab}</h2>
           </div>
-          <div className="text-xs text-gray-400 hidden sm:block">{user.email}</div>
+          <div className="text-xs text-[#9B998F] hidden sm:block">{user.email}</div>
         </header>
 
         {/* Error */}
@@ -375,39 +378,39 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: "Total Revenue", value: formatCurrency(revenue), color: "text-emerald-600" },
-                  { label: "Total Orders", value: String(orders.length), color: "text-[#D2693F]" },
+                  { label: "Total Orders", value: String(orders.length), color: "text-[#171813]" },
                   { label: "Pending Orders", value: String(placedOrders), color: "text-amber-600" },
                   { label: "Products", value: String(productCount), color: "text-blue-600" },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{stat.label}</p>
+                  <div key={stat.label} className="bg-white rounded-xl border border-[#E1DFDC] p-5">
+                    <p className="text-xs font-medium text-[#595B53] uppercase tracking-wider">{stat.label}</p>
                     <p className={`text-2xl font-bold mt-2 ${stat.color}`}>{stat.value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Orders</h3>
+              <div className="bg-white rounded-xl border border-[#E1DFDC] p-4 sm:p-6">
+                <h3 className="text-sm font-semibold text-[#171813] mb-4">Recent Orders</h3>
                 {orders.length === 0 ? (
-                  <p className="text-sm text-gray-400">No orders yet.</p>
+                  <p className="text-sm text-[#9B998F]">No orders yet.</p>
                 ) : (
                   <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                     <table className="w-full text-sm min-w-[480px]">
                       <thead>
-                        <tr className="border-b border-gray-100">
-                          <th className="text-left py-2 pr-4 font-medium text-gray-500">Order</th>
-                          <th className="text-left py-2 pr-4 font-medium text-gray-500">Customer</th>
-                          <th className="text-left py-2 pr-4 font-medium text-gray-500">Date</th>
-                          <th className="text-left py-2 pr-4 font-medium text-gray-500">Status</th>
-                          <th className="text-right py-2 font-medium text-gray-500">Total</th>
+                        <tr className="border-b border-[#F1EEE7]">
+                          <th className="text-left py-2 pr-4 font-medium text-[#595B53]">Order</th>
+                          <th className="text-left py-2 pr-4 font-medium text-[#595B53]">Customer</th>
+                          <th className="text-left py-2 pr-4 font-medium text-[#595B53]">Date</th>
+                          <th className="text-left py-2 pr-4 font-medium text-[#595B53]">Status</th>
+                          <th className="text-right py-2 font-medium text-[#595B53]">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {orders.slice(0, 5).map((order) => (
-                          <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                          <tr key={order.id} className="border-b border-[#F1EEE7] hover:bg-[#F1EEE7]/50">
                             <td className="py-3 pr-4 font-mono text-xs">{order.id.slice(-8).toUpperCase()}</td>
                             <td className="py-3 pr-4">{order.customer?.name || order.userEmail}</td>
-                            <td className="py-3 pr-4 text-gray-500">{formatDate(order.createdAt)}</td>
+                            <td className="py-3 pr-4 text-[#595B53]">{formatDate(order.createdAt)}</td>
                             <td className="py-3 pr-4">
                               <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[order.status]}`}>
                                 {order.status}
@@ -421,7 +424,7 @@ export default function AdminPage() {
                   </div>
                 )}
                 {orders.length > 5 && (
-                  <button onClick={() => setTab("orders")} className="mt-3 text-xs text-[#D2693F] hover:underline font-medium">
+                  <button onClick={() => setTab("orders")} className="mt-3 text-xs text-[#171813] hover:underline font-medium">
                     View all orders →
                   </button>
                 )}
@@ -445,23 +448,23 @@ export default function AdminPage() {
           {tab === "settings" && (
             <div className="space-y-4">
               <DeliverySettingsManager />
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">WhatsApp Message Template</h3>
-                <p className="text-xs text-gray-500 mb-4">
-                  Used when messaging customers from the Orders tab. Placeholders: <code className="bg-gray-100 px-1 rounded">{`{name}`}</code>, <code className="bg-gray-100 px-1 rounded">{`{orderId}`}</code>, <code className="bg-gray-100 px-1 rounded">{`{status}`}</code>, <code className="bg-gray-100 px-1 rounded">{`{trackingUrl}`}</code>
+              <div className="bg-white rounded-xl border border-[#E1DFDC] p-6">
+                <h3 className="text-sm font-semibold text-[#171813] mb-1">WhatsApp Message Template</h3>
+                <p className="text-xs text-[#595B53] mb-4">
+                  Used when messaging customers from the Orders tab. Placeholders: <code className="bg-[#F1EEE7] px-1 rounded">{`{name}`}</code>, <code className="bg-[#F1EEE7] px-1 rounded">{`{orderId}`}</code>, <code className="bg-[#F1EEE7] px-1 rounded">{`{status}`}</code>, <code className="bg-[#F1EEE7] px-1 rounded">{`{trackingUrl}`}</code>
                 </p>
                 <textarea
                   value={whatsappTemplate}
                   onChange={(e) => setWhatsappTemplate(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg outline-none resize-none focus:border-[#D2693F] transition-colors"
+                  className="w-full px-4 py-3 text-sm border border-[#E1DFDC] rounded-lg outline-none resize-none focus:border-[#171813] transition-colors"
                   placeholder="Hi {name}, thank you for your order #{orderId}! Your order is currently {status}."
                 />
                 <div className="flex items-center gap-3 mt-4">
                   <button
                     onClick={handleSaveTemplate}
                     disabled={templateSaving}
-                    className="px-5 py-2 text-sm font-medium text-white rounded-lg bg-[#D2693F] hover:bg-[#B85A34] disabled:opacity-50 transition-colors"
+                    className="px-5 py-2 text-sm font-medium text-white rounded-lg bg-[#171813] hover:bg-[#171813] disabled:opacity-50 transition-colors"
                   >
                     {templateSaving ? "Saving..." : "Save Template"}
                   </button>
@@ -469,13 +472,13 @@ export default function AdminPage() {
                     <span className="text-xs text-emerald-600 font-medium">Saved!</span>
                   )}
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 mt-4 text-sm text-gray-700">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Preview:</p>
+                <div className="bg-[#F1EEE7] rounded-lg p-4 mt-4 text-sm text-[#595B53]">
+                  <p className="text-xs font-medium text-[#595B53] mb-1">Preview:</p>
                   {whatsappTemplate
                     .replace(/{name}/g, "Customer Name")
                     .replace(/{orderId}/g, "ORD12345")
                     .replace(/{status}/g, "placed")
-                    .replace(/{trackingUrl}/g, "https://kria.vercel.app/tracking/TRACK123")
+                    .replace(/{trackingUrl}/g, "https://thesagarsdesignhouse.com/tracking/TRACK123")
                   }
                 </div>
               </div>
@@ -499,15 +502,15 @@ export default function AdminPage() {
             <div className="space-y-4">
               {fetching ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-[#171813] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-                  <p className="text-gray-500">No orders yet.</p>
+                <div className="text-center py-12 bg-white rounded-xl border border-[#E1DFDC]">
+                  <p className="text-[#595B53]">No orders yet.</p>
                 </div>
               ) : (
                 orders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6">
+                  <div key={order.id} className="bg-white rounded-xl border border-[#E1DFDC] p-5 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-3">
@@ -516,12 +519,12 @@ export default function AdminPage() {
                             {order.status}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
+                        <p className="text-xs text-[#595B53]">{formatDate(order.createdAt)}</p>
                         {order.customer && (
-                          <div className="text-xs text-gray-600 mt-1 space-y-0.5">
-                            <p className="font-medium text-gray-900">{order.customer.name}</p>
+                          <div className="text-xs text-[#595B53] mt-1 space-y-0.5">
+                            <p className="font-medium text-[#171813]">{order.customer.name}</p>
                             {order.customer.email && (
-                              <p className="text-[#D2693F]">{order.customer.email}</p>
+                              <p className="text-[#171813]">{order.customer.email}</p>
                             )}
                             {order.customer.phone && (
                               <p className="flex items-center gap-1.5">
@@ -545,12 +548,12 @@ export default function AdminPage() {
                       </div>
 
                       <div className="flex flex-col gap-2 sm:items-end w-full sm:w-auto">
-                        <p className="text-lg font-bold text-[#D2693F]">{formatCurrency(order.total)}</p>
+                        <p className="text-lg font-bold text-[#171813]">{formatCurrency(order.total)}</p>
                         <select
                           value={order.status}
                           onChange={(e) => handleStatusUpdate(order.id, e.target.value as OrderStatus)}
                           disabled={updatingOrderId === order.id}
-                          className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-xs font-medium bg-white hover:bg-gray-50 disabled:opacity-50"
+                          className="w-full sm:w-auto px-3 py-2 border border-[#E1DFDC] rounded-lg text-xs font-medium bg-white hover:bg-[#F1EEE7] disabled:opacity-50"
                         >
                           {ORDER_STATUSES.map((s) => (
                             <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -562,12 +565,12 @@ export default function AdminPage() {
                             value={trackingEdits[order.id] ?? order.trackingId ?? ""}
                             onChange={(e) => setTrackingEdits((p) => ({ ...p, [order.id]: e.target.value }))}
                             placeholder="Tracking ID"
-                            className="flex-1 sm:w-36 border border-gray-200 rounded-lg px-3 py-2 text-xs"
+                            className="flex-1 sm:w-36 border border-[#E1DFDC] rounded-lg px-3 py-2 text-xs"
                           />
                           <button
                             onClick={() => handleTrackingUpdate(order.id)}
                             disabled={updatingTrackingId === order.id}
-                            className="px-4 py-2 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap"
+                            className="px-4 py-2 text-xs font-medium rounded-lg border border-[#E1DFDC] hover:bg-[#F1EEE7] disabled:opacity-50 whitespace-nowrap"
                           >
                             Save
                           </button>
@@ -575,14 +578,14 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="border-t border-gray-100 pt-3 space-y-2">
+                    <div className="border-t border-[#F1EEE7] pt-3 space-y-2">
                       {order.items.map((item: any, idx: number) => (
                         <div key={idx} className="flex items-center gap-3 text-xs">
                           <ProductImage
                             src={item.product?.ImageUrl1}
                             size="thumb"
                             alt=""
-                            className="w-10 h-10 rounded object-cover bg-gray-100"
+                            className="w-10 h-10 rounded object-cover bg-[#F1EEE7]"
                           />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{item.product?.ProductName || item.product?.Description || "Product"} × {item.Quantity}</p>
@@ -655,61 +658,61 @@ function CustomersTab({ orders }: { orders: Order[] }) {
       Pincode: c.pinCode,
       "Total Orders": c.totalOrders,
       "Total Spent": c.totalSpent,
-      "Last Order": c.lastOrderDate ? new Date(c.lastOrderDate).toLocaleDateString("en-IN") : "",
+      "Last Order": c.lastOrderDate ? new Date(c.lastOrderDate).toLocaleDateString("en-MY") : "",
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Customers");
-    XLSX.writeFile(wb, `kria-customers-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(wb, `sagars-customers-${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{customers.length} unique customers</p>
+        <p className="text-sm text-[#595B53]">{customers.length} unique customers</p>
         <button
           onClick={exportToExcel}
-          className="px-4 py-2 text-sm font-medium rounded-lg bg-[#D2693F] text-white hover:bg-[#B85A34] transition-colors"
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-[#171813] text-white hover:bg-[#171813] transition-colors"
         >
           Export to Excel
         </button>
       </div>
 
       {customers.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <p className="text-gray-500">No customer data yet.</p>
+        <div className="text-center py-12 bg-white rounded-xl border border-[#E1DFDC]">
+          <p className="text-[#595B53]">No customer data yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E1DFDC] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">#</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Email</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Phone</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Address</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">City/State</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Pincode</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-500">Orders</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-500">Total Spent</th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-500">Last Order</th>
+                <tr className="border-b border-[#F1EEE7] bg-[#F1EEE7]">
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">#</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">Name</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">Email</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">Phone</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">Address</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">City/State</th>
+                  <th className="text-left py-3 px-4 font-medium text-[#595B53]">Pincode</th>
+                  <th className="text-center py-3 px-4 font-medium text-[#595B53]">Orders</th>
+                  <th className="text-right py-3 px-4 font-medium text-[#595B53]">Total Spent</th>
+                  <th className="text-right py-3 px-4 font-medium text-[#595B53]">Last Order</th>
                 </tr>
               </thead>
               <tbody>
                 {customers.map((c, i) => (
-                  <tr key={c.email} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="py-3 px-4 text-gray-400">{i + 1}</td>
+                  <tr key={c.email} className="border-b border-[#F1EEE7] hover:bg-[#F1EEE7]/50">
+                    <td className="py-3 px-4 text-[#9B998F]">{i + 1}</td>
                     <td className="py-3 px-4 font-medium">{c.name}</td>
-                    <td className="py-3 px-4 text-[#D2693F]">{c.email}</td>
+                    <td className="py-3 px-4 text-[#171813]">{c.email}</td>
                     <td className="py-3 px-4">{c.phone}</td>
                     <td className="py-3 px-4 max-w-[200px] truncate">{c.address}</td>
                     <td className="py-3 px-4">{c.stateCity}</td>
                     <td className="py-3 px-4">{c.pinCode}</td>
                     <td className="py-3 px-4 text-center font-medium">{c.totalOrders}</td>
-                    <td className="py-3 px-4 text-right font-medium">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(c.totalSpent)}</td>
-                    <td className="py-3 px-4 text-right text-gray-500">{c.lastOrderDate ? new Date(c.lastOrderDate).toLocaleDateString("en-IN") : "-"}</td>
+                    <td className="py-3 px-4 text-right font-medium">{new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" }).format(c.totalSpent)}</td>
+                    <td className="py-3 px-4 text-right text-[#595B53]">{c.lastOrderDate ? new Date(c.lastOrderDate).toLocaleDateString("en-MY") : "-"}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -280,11 +280,11 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#F9F6F0]">
-        <div className="w-8 h-8 border-2 border-[#E0D0B8] border-t-[#D2693F] animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#FFFFFF]">
+        <div className="w-8 h-8 border-2 border-[#D8D5CD] border-t-[#171813] animate-spin" />
         <p
-          className="text-[#6B5A47] tracking-wide"
-          style={{ fontFamily: "Tenor Sans", fontSize: "14px" }}
+          className="text-[#595B53] tracking-wide"
+          style={{ fontFamily: "var(--font-cormorant)", fontSize: "14px" }}
         >
           Loading product...
         </p>
@@ -294,10 +294,10 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F6F0]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
         <p
-          className="text-[#2D2D2D] font-semibold"
-          style={{ fontFamily: "Tenor Sans", fontSize: "18px" }}
+          className="text-[#171813] font-semibold"
+          style={{ fontFamily: "var(--font-cormorant)", fontSize: "18px" }}
         >
           Product not found
         </p>
@@ -517,11 +517,11 @@ export default function ProductPage() {
   return (
     <>
       {/* MAIN PRODUCT SECTION */}
-      <div className="min-h-screen bg-[#F9F6F0] text-black px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-4 lg:pb-20">
+      <div className="min-h-screen bg-[#FFFFFF] text-[#171813] px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-4 lg:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           {/* IMAGE SECTION */}
           <div>
-            <div className="relative w-full aspect-square overflow-hidden border border-[#E9E1D2] shadow-[0_2px_16px_rgba(45,32,20,0.06)] bg-white">
+            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-[22px] bg-[#F1EEE7] border border-[#D8D5CD] shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
               <div
                 className="absolute inset-0 z-10"
                 onMouseMove={(e) => {
@@ -577,10 +577,10 @@ export default function ProductPage() {
                     <button
                       key={i}
                       onClick={() => setImageIndex(i)}
-                      className={`relative w-16 h-16 sm:w-20 sm:h-20 overflow-hidden border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D2693F] focus-visible:ring-offset-2 ${
+                      className={`relative w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-lg border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171813] focus-visible:ring-offset-2 ${
                         i === imageIndex
-                          ? "border-[#D2693F] shadow-[0_2px_8px_rgba(210,105,63,0.35)]"
-                          : "border-[#E9E1D2] hover:border-[#C5A059] opacity-80 hover:opacity-100"
+                          ? "border-[#171813] shadow-[0_2px_8px_rgba(210,105,63,0.35)]"
+                          : "border-[#F1EEE7] hover:border-[#595B53] opacity-80 hover:opacity-100"
                       }`}
                     >
                       <Image
@@ -601,9 +601,9 @@ export default function ProductPage() {
           <div className="px-2 sm:px-0">
             <div className="flex items-start justify-between mb-2 gap-3">
               <h1
-                className="text-[#211A12] leading-tight flex-1"
+                className="text-[#171813] leading-tight flex-1"
                 style={{
-                  fontFamily: 'Tenor Sans',
+                  fontFamily: "var(--font-cormorant)",
                   fontWeight: '600',
                   fontSize: '40px',
                   lineHeight: '1.15',
@@ -616,16 +616,16 @@ export default function ProductPage() {
               <div className="relative block sm:hidden ml-1 flex-shrink-0">
                 <button
                   onClick={handleShare}
-                  className="w-10 h-10 bg-[#F3EDE4] hover:bg-[#E0D0B8] active:scale-95 transition-all duration-150 flex items-center justify-center flex-shrink-0 shadow-sm"
+                  className="w-10 h-10 bg-[#F1EEE7] hover:bg-[#D8D5CD] active:scale-95 transition-all duration-150 flex items-center justify-center flex-shrink-0"
                   style={{ borderRadius: '50%' }}
                   title="Share product"
                 >
-                  <svg className="w-5 h-5 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
                 </button>
                 {shareCopied && (
-                  <div className="absolute top-full mt-2 -right-2 bg-[#2D2D2D] text-white text-xs font-medium px-3 py-1.5 shadow-lg whitespace-nowrap">
+                  <div className="absolute top-full mt-2 -right-2 bg-[#171813] text-white text-xs font-medium px-3 py-1.5 shadow-lg whitespace-nowrap">
                     Link copied
                   </div>
                 )}
@@ -633,49 +633,49 @@ export default function ProductPage() {
             </div>
 
             {product?.SKU && (
-              <p className="text-xs text-[#B0A38C] mt-2">{product.SKU}</p>
+              <p className="text-xs text-[#9B998F] mt-2">{product.SKU}</p>
             )}
             <div className="mt-1">
               <div
-                className="text-[#211A12] flex items-baseline flex-wrap gap-x-3"
+                className="text-[#171813] flex items-baseline flex-wrap gap-x-3"
                 style={{
-                  fontFamily: 'Tenor Sans',
+                  fontFamily: "var(--font-cormorant)",
                   fontWeight: '600',
                   fontSize: '36px'
                 }}
               >
-                <PriceText amount={pricing.selling} className="text-[#211A12]" />
+                <PriceText amount={pricing.selling} className="text-[#171813]" />
                 {pricing.discount > 0 && (
-                  <span className="text-lg text-[#B0A38C] line-through font-normal"><PriceText amount={pricing.original} strikeThrough /></span>
+                  <span className="text-lg text-[#9B998F] line-through font-normal"><PriceText amount={pricing.original} strikeThrough /></span>
                 )}
               </div>
             </div>
 
             {/* Discount */}
             {pricing.discount > 0 && (
-              <p className="inline-block text-xs font-semibold text-[#D2693F] bg-[#FBEDE4] px-2.5 py-1 mt-2 mb-3">
+              <p className="inline-block text-xs font-semibold text-[#171813] bg-[#F1EEE7] px-2.5 py-1 mt-2 mb-3">
                 {pricing.discount}% OFF
               </p>
             )}
 
             {/* Shipping Time */}
             {(product.StockType === "made_to_order" || isVariantFallback || product.DeliveryTime) && (
-              <p className="text-sm text-[#9A6E50] mb-3">
-                <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#9A6E50] hover:text-[#D2693F] transition-colors">Ships</Link> in {isVariantFallback ? (product.FallbackDeliveryTime || "7-10 days") : (product.DeliveryTime || "7-10 days")}
-                {isVariantFallback && <span className="text-xs text-[#9A6E50]/70 ml-1">(made to order for this variant)</span>}
+              <p className="text-sm text-[#595B53] mb-3">
+                <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#595B53] hover:text-[#171813] transition-colors">Ships</Link> in {isVariantFallback ? (product.FallbackDeliveryTime || "7-10 days") : (product.DeliveryTime || "7-10 days")}
+                {isVariantFallback && <span className="text-xs text-[#595B53]/70 ml-1">(made to order for this variant)</span>}
               </p>
             )}
 
             {/* Customisation Section */}
             {product.IsCustomizable && (
-              <div className="mb-4 p-4 bg-white border border-[#E0D0B8] shadow-[0_1px_6px_rgba(45,32,20,0.05)]">
+              <div className="mb-4 p-4 bg-[#F1EEE7] rounded-2xl">
                 <div className="flex items-start gap-2.5 mb-0">
-                  <svg className="w-5 h-5 text-[#D2693F] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[#171813] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <div>
-                    <p className="text-sm font-semibold text-[#D2693F]">Customisation Available</p>
-                    <p className="text-xs text-[#9A6E50] mt-0.5 leading-relaxed">
+                    <p className="text-sm font-semibold text-[#171813]">Customisation Available</p>
+                    <p className="text-xs text-[#595B53] mt-0.5 leading-relaxed">
                       {product.CustomizationNote || "This product can be customised to your preference. Add your requirements in the notes section at checkout."}
                     </p>
                   </div>
@@ -686,16 +686,16 @@ export default function ProductPage() {
             {/* COLOUR SELECTOR */}
             {(product.Colors || []).length > 0 && (
               <div className="mb-4">
-                <p className="mb-2 text-sm text-[#5C5142]">Colour: <span className="font-semibold text-[#211A12]">{selectedColor}</span></p>
+                <p className="mb-2 text-sm text-[#595B53]">Colour: <span className="font-semibold text-[#171813]">{selectedColor}</span></p>
                 <div className="flex gap-2 flex-wrap">
                   {product.Colors!.map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border font-semibold transition-all duration-150 text-sm ${
+                      className={`px-4 py-2 border rounded-lg font-semibold transition-all duration-150 text-sm ${
                         selectedColor === color
-                          ? "bg-[#D2693F] text-white border-[#D2693F] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
-                          : "bg-white border-[#E0D0B8] text-[#2D2D2D] hover:border-[#C5A059] hover:bg-[#FBF8F2]"
+                          ? "bg-[#171813] text-white border-[#171813] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
+                          : "bg-white border-[#D8D5CD] text-[#171813] hover:border-[#595B53] hover:bg-[#FFFFFF]"
                       }`}
                     >
                       {color}
@@ -708,16 +708,16 @@ export default function ProductPage() {
             {/* SIZE SELECTOR (dynamic from product data) */}
             {(product.Sizes || []).length > 0 && (
               <div className="mb-4">
-                <p className="mb-2 text-sm text-[#5C5142]">Size: <span className="font-semibold text-[#211A12]">{selectedSize}</span></p>
+                <p className="mb-2 text-sm text-[#595B53]">Size: <span className="font-semibold text-[#171813]">{selectedSize}</span></p>
                 <div className="flex gap-2 flex-wrap">
                   {product.Sizes!.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border font-semibold transition-all duration-150 text-sm ${
+                      className={`px-4 py-2 border rounded-lg font-semibold transition-all duration-150 text-sm ${
                         selectedSize === size
-                          ? "bg-[#D2693F] text-white border-[#D2693F] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
-                          : "bg-white border-[#E0D0B8] text-[#2D2D2D] hover:border-[#C5A059] hover:bg-[#FBF8F2]"
+                          ? "bg-[#171813] text-white border-[#171813] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
+                          : "bg-white border-[#D8D5CD] text-[#171813] hover:border-[#595B53] hover:bg-[#FFFFFF]"
                       }`}
                     >
                       {size}
@@ -730,7 +730,7 @@ export default function ProductPage() {
             {/* ADD TO CART / QUANTITY STEPPER */}
             <div className="mb-5">
               {availableStock === 0 && !isMadeToOrder && !isVariantFallback && (
-                <p className="text-sm text-[#C0392B] mb-2 font-medium">
+                <p className="text-sm text-[#C52020] mb-2 font-medium">
                   {isGeneralStockProduct ? "Out of stock" : `Out of stock in ${selectedColor ? selectedColor + " / " : ""}size ${selectedSize}`}
                 </p>
               )}
@@ -739,25 +739,25 @@ export default function ProductPage() {
                 <button
                   onClick={() => handleAddToCart(1)}
                   disabled={availableStock === 0 && !isVariantFallback}
-                  className={`absolute inset-0 flex items-center justify-center px-2 transition-all duration-300 ease-in-out ${
+                  className={`absolute inset-0 rounded-full flex items-center justify-center px-2 transition-all duration-300 ease-in-out ${
                     cartQuantity > 0 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
                   } ${
                     availableStock === 0 && !isVariantFallback
-                      ? 'bg-[#E9E1D2] text-[#A79A83] cursor-not-allowed'
-                      : 'bg-[#D2693F] hover:bg-[#B85A34] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
+                      ? 'bg-[#F1EEE7] text-[#9B998F] cursor-not-allowed'
+                      : 'bg-[#171813] hover:bg-[#171813] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
                   }`}
-                  style={{ fontFamily: 'Tenor Sans', fontWeight: '600', fontSize: '14px', letterSpacing: '0.02em' }}
+                  style={{ fontFamily: "var(--font-cormorant)", fontWeight: '600', fontSize: '14px', letterSpacing: '0.02em' }}
                 >
                   {availableStock === 0 && !isVariantFallback ? 'Sold Out' : 'Add to Cart'}
                 </button>
 
                 {/* Quantity stepper */}
-                <div className={`flex items-center border border-[#E0D0B8] bg-white overflow-hidden absolute inset-0 transition-all duration-300 ease-in-out ${
+                <div className={`flex items-center border border-[#D8D5CD] bg-white overflow-hidden rounded-full absolute inset-0 transition-all duration-300 ease-in-out ${
                   cartQuantity > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
                 }`}>
                   <button
                     onClick={handleRemoveFromCart}
-                    className="flex items-center justify-center flex-1 text-[#2D2D2D] hover:bg-[#F3EDE4] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
+                    className="flex items-center justify-center flex-1 text-[#171813] hover:bg-[#F1EEE7] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
                     disabled={cartQuantity <= 0}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -765,14 +765,14 @@ export default function ProductPage() {
                     </svg>
                   </button>
                   <span
-                    className="flex items-center justify-center text-[#211A12] select-none"
-                    style={{ fontFamily: 'Tenor Sans', fontWeight: '700', fontSize: '20px', minWidth: '60px', textAlign: 'center' }}
+                    className="flex items-center justify-center text-[#171813] select-none"
+                    style={{ fontFamily: "var(--font-cormorant)", fontWeight: '700', fontSize: '20px', minWidth: '60px', textAlign: 'center' }}
                   >
                     {cartQuantity}
                   </span>
                   <button
                     onClick={() => handleAddToCart(1)}
-                    className="flex items-center justify-center flex-1 text-[#2D2D2D] hover:bg-[#F3EDE4] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
+                    className="flex items-center justify-center flex-1 text-[#171813] hover:bg-[#F1EEE7] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
                     disabled={!isMadeToOrder && availableStock <= 0}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -789,55 +789,55 @@ export default function ProductPage() {
             </div>
 
               {/* Description */}
-              <div className="mt-6 text-sm text-[#3A3226]">
-                <h3 className="font-semibold text-[#211A12] mb-1.5 tracking-wide">Description</h3>
-                <p className="text-sm text-[#5C5142] leading-relaxed whitespace-pre-line">{product.Description}</p>
+              <div className="mt-6 text-sm text-[#171813]">
+                <h3 className="font-semibold text-[#171813] mb-1.5 tracking-wide">Description</h3>
+                <p className="text-sm text-[#595B53] leading-relaxed whitespace-pre-line">{product.Description}</p>
               </div>
 
               {/* Divider */}
-              <hr className="border-t border-[#E0D0B8] my-5" />
+              <hr className="border-t border-[#D8D5CD] my-5" />
 
               {/* CARE Dropdown */}
               <div>
                 <button
                   type="button"
                   onClick={() => setCareOpen(!careOpen)}
-                  className="w-full flex items-center justify-between text-sm font-semibold text-[#211A12] py-1.5 tracking-wide"
+                  className="w-full flex items-center justify-between text-sm font-semibold text-[#171813] py-1.5 tracking-wide"
                 >
                   <span>CARE</span>
-                  <svg className={`w-4 h-4 text-[#9A6E50] transition-transform duration-200 ${careOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 text-[#595B53] transition-transform duration-200 ${careOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {careOpen && (
-                  <p className="text-sm text-[#5C5142] leading-relaxed whitespace-pre-line mt-2">{product.Care || 'No care instructions available.'}</p>
+                  <p className="text-sm text-[#595B53] leading-relaxed whitespace-pre-line mt-2">{product.Care || 'No care instructions available.'}</p>
                 )}
               </div>
 
               {/* Divider */}
-              <hr className="border-t border-[#E0D0B8] my-5" />
+              <hr className="border-t border-[#D8D5CD] my-5" />
 
               {/* QUESTIONS? Dropdown */}
               <div>
                 <button
                   type="button"
                   onClick={() => setQuestionsOpen(!questionsOpen)}
-                  className="w-full flex items-center justify-between text-sm font-semibold text-[#211A12] py-1.5 tracking-wide"
+                  className="w-full flex items-center justify-between text-sm font-semibold text-[#171813] py-1.5 tracking-wide"
                 >
                   <span>QUESTIONS?</span>
-                  <svg className={`w-4 h-4 text-[#9A6E50] transition-transform duration-200 ${questionsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 text-[#595B53] transition-transform duration-200 ${questionsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {questionsOpen && (
-                  <p className="text-sm text-[#5C5142] leading-relaxed mt-2">
-                    Please reach out to us on <a href="https://wa.me/919894414445" target="_blank" rel="noopener noreferrer" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">WhatsApp</a> or email us at <a href="mailto:support@kriastore.in" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">support@kriastore.in</a> and we'll be happy to help.
+                  <p className="text-sm text-[#595B53] leading-relaxed mt-2">
+                    Please reach out to us on <a href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" className="underline text-[#171813] hover:text-[#171813] transition-colors">WhatsApp</a> or email us at <a href="mailto:support@thesagarsdesignhouse.com" className="underline text-[#171813] hover:text-[#171813] transition-colors">support@thesagarsdesignhouse.com</a> and we'll be happy to help.
                   </p>
                 )}
               </div>
 
               {/* Divider */}
-              <hr className="border-t border-[#E0D0B8] my-5" />
+              <hr className="border-t border-[#D8D5CD] my-5" />
 
               {/* Social Share — full width, icons + underlined text */}
               <div className="space-y-3">
@@ -845,7 +845,7 @@ export default function ProductPage() {
                   href={`https://www.facebook.com/sharer/sharer.php?u=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#6B5A47] hover:text-[#D2693F] transition-colors"
+                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   <span className="text-xs underline underline-offset-2">Share on Facebook</span>
@@ -854,7 +854,7 @@ export default function ProductPage() {
                   href={`https://wa.me/?text=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#6B5A47] hover:text-[#D2693F] transition-colors"
+                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                   <span className="text-xs underline underline-offset-2">Share on WhatsApp</span>
@@ -862,48 +862,48 @@ export default function ProductPage() {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="flex items-center gap-3 text-[#6B5A47] hover:text-[#D2693F] transition-colors"
+                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                   <span className="text-xs underline underline-offset-2">{shareCopied ? 'Link Copied!' : 'Copy Link'}</span>
                 </button>
                 <a
                   href={`mailto:?subject=${typeof window !== 'undefined' ? encodeURIComponent(document.title) : ''}&body=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
-                  className="flex items-center gap-3 text-[#6B5A47] hover:text-[#D2693F] transition-colors"
+                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                   <span className="text-xs underline underline-offset-2">Share via Email</span>
                 </a>
               </div>
 
-              <div className="space-y-3 mt-5 pt-5 border-t border-[#E0D0B8]">
+              <div className="space-y-3 mt-5 pt-5 border-t border-[#D8D5CD]">
                 <div className="flex items-center space-x-3">
-                  <span className="w-8 h-8 bg-[#F3EDE4] flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-[#D2693F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="w-8 h-8 bg-[#F1EEE7] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </span>
                   <span
-                    className="text-[#3A3226]"
+                    className="text-[#171813]"
                     style={{
-                      fontFamily: 'Tenor Sans',
+                      fontFamily: "var(--font-cormorant)",
                       fontWeight: '400',
                       fontSize: '13px'
                     }}
                   >
-                    PAN India & Worldwide Shipping
+                    PAN Malaysia & Worldwide Shipping
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="w-8 h-8 bg-[#F3EDE4] flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-[#D2693F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="w-8 h-8 bg-[#F1EEE7] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-7V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </span>
                   <span
-                    className="text-[#3A3226]"
+                    className="text-[#171813]"
                     style={{
-                      fontFamily: 'Tenor Sans',
+                      fontFamily: "var(--font-cormorant)",
                       fontWeight: '400',
                       fontSize: '13px'
                     }}
@@ -919,8 +919,8 @@ export default function ProductPage() {
 
       {/* SIMILAR PRODUCTS */}
       {similarProducts.length > 0 && (
-        <div className="mt-4 lg:mt-10 pt-6 pb-8 lg:pb-16 border-t border-[#E0D0B8] px-1 sm:px-8 lg:px-12">
-          <h3 className="text-sm lg:text-base font-semibold text-[#211A12] tracking-wide mb-4">Similar Products</h3>
+        <div className="mt-4 lg:mt-10 pt-6 pb-8 lg:pb-16 border-t border-[#D8D5CD] px-1 sm:px-8 lg:px-12">
+          <h3 className="text-[24px] lg:text-[28px] text-[#171813] mb-5" style={{ fontFamily: "var(--font-cormorant)" }}>Similar Products</h3>
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 lg:grid lg:grid-cols-4 lg:gap-5 lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0">
             {similarProducts.map((sp) => (
               <button
@@ -929,7 +929,7 @@ export default function ProductPage() {
                 onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(sp))}`)}
                 className="flex-shrink-0 w-[140px] lg:w-auto snap-start text-left group"
               >
-                <div className="w-full aspect-square overflow-hidden border border-[#E9E1D2] mb-2">
+                <div className="w-full aspect-[3/4] overflow-hidden rounded-[22px] bg-[#F1EEE7] mb-2">
                   <ProductImage
                     src={(sp as any).ImageUrl1}
                     srcMedium={(sp as any).ImageUrl1Medium}
@@ -939,10 +939,10 @@ export default function ProductPage() {
                     className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <p className="text-sm text-[#2D2D2D] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
+                <p className="text-sm text-[#171813] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
                 <PriceText
                   amount={resolvePricing({ Price: sp.Price, OriginalPrice: (sp as any).OriginalPrice, DiscountPercent: sp.DiscountPercent }).selling}
-                  className="text-sm font-bold text-[#211A12] mt-1"
+                  className="text-sm font-bold text-[#171813] mt-1"
                 />
               </button>
             ))}
@@ -952,21 +952,21 @@ export default function ProductPage() {
 
       {/* STYLE IT WITH */}
       {relatedProducts.length > 0 && (
-        <div className="relative z-10 bg-white text-black pl-8 pr-8 sm:pl-16 sm:pr-16 lg:pl-32 lg:pr-32 pt-0 pb-12 -mt-16">
-          <hr className="border-t border-[#E9E1D2] mb-6" />
+        <div className="relative z-10 bg-white text-[#171813] pl-8 pr-8 sm:pl-16 sm:pr-16 lg:pl-32 lg:pr-32 pt-0 pb-12 -mt-16">
+          <hr className="border-t border-[#F1EEE7] mb-6" />
           <h2
-            className="text-[#211A12] mb-5"
-            style={{ fontFamily: 'Tenor Sans', fontWeight: '600', fontSize: '26px' }}
+            className="text-[#171813] mb-5"
+            style={{ fontFamily: "var(--font-cormorant)", fontWeight: '600', fontSize: '26px' }}
           >
             Style It With
           </h2>
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 lg:grid-cols-4 sm:gap-5">
             {relatedProducts.map((rp) => (
-              <div key={rp.ID} className="flex-shrink-0 w-1/2 sm:w-auto snap-start text-black transition px-1">
+              <div key={rp.ID} className="flex-shrink-0 w-1/2 sm:w-auto snap-start text-[#171813] transition px-1">
                 <button
                   type="button"
                   onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(rp))}`)}
-                  className="cursor-pointer block w-full overflow-hidden border border-[#EFE9DC] shadow-[0_1px_8px_rgba(45,32,20,0.05)] hover:shadow-[0_6px_18px_rgba(45,32,20,0.12)] hover:-translate-y-0.5 transition-all duration-300"
+                  className="cursor-pointer block w-full overflow-hidden rounded-[22px] bg-[#F1EEE7] transition-all duration-300"
                   aria-label={`View ${(rp as any).ProductName || rp.Description}`}
                 >
                   <ProductImage
@@ -980,8 +980,8 @@ export default function ProductPage() {
                 </button>
 
                 <div className="flex flex-col items-start mt-2.5">
-                  <p className="text-sm font-medium text-[#2D2D2D] leading-snug">{(rp as any).ProductName || rp.Description}</p>
-                  <PriceText amount={resolvePricing({ Price: rp.Price, OriginalPrice: (rp as any).OriginalPrice, DiscountPercent: rp.DiscountPercent }).selling} className="font-bold text-base text-[#211A12] mt-1" />
+                  <p className="text-sm font-medium text-[#171813] leading-snug">{(rp as any).ProductName || rp.Description}</p>
+                  <PriceText amount={resolvePricing({ Price: rp.Price, OriginalPrice: (rp as any).OriginalPrice, DiscountPercent: rp.DiscountPercent }).selling} className="font-bold text-base text-[#171813] mt-1" />
                 </div>
               </div>
             ))}
@@ -994,13 +994,13 @@ export default function ProductPage() {
           onClick={() => setShowSizeChart(false)}
         >
           <div
-            className="relative bg-white shadow-2xl max-w-2xl w-full p-5"
+            className="relative bg-white rounded-[22px] shadow-2xl max-w-2xl w-full p-5"
             onClick={(e) => e.stopPropagation()} // prevents closing when clicking image
           >
             {/* Close button */}
             <button
               onClick={() => setShowSizeChart(false)}
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#F3EDE4] hover:bg-[#E0D0B8] text-[#2D2D2D] text-lg font-bold transition-colors"
+              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#F1EEE7] hover:bg-[#D8D5CD] text-[#171813] text-lg font-bold transition-colors"
             >
               ✕
             </button>

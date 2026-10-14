@@ -8,10 +8,10 @@ type RichTextEditorProps = {
   minHeight?: number;
 };
 
-const TOOLBAR_CLS = "p-1.5 border border-gray-200 bg-gray-50 rounded-t-lg flex items-center gap-0.5 flex-wrap";
-const BTN_CLS = "p-1.5 rounded hover:bg-gray-200 text-gray-700 text-sm font-medium transition-colors min-w-[30px] flex items-center justify-center touch-manipulation";
-const ACTIVE_BTN_CLS = "p-1.5 rounded bg-gray-200 text-gray-900 text-sm font-medium min-w-[30px] flex items-center justify-center touch-manipulation";
-const EDITOR_CLS = "border border-t-0 border-gray-200 rounded-b-lg px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all overflow-y-auto";
+const TOOLBAR_CLS = "p-1.5 border border-[#E1DFDC] bg-[#F1EEE7] rounded-t-lg flex items-center gap-0.5 flex-wrap";
+const BTN_CLS = "p-1.5 rounded hover:bg-[#E1DFDC] text-[#595B53] text-sm font-medium transition-colors min-w-[30px] flex items-center justify-center touch-manipulation";
+const ACTIVE_BTN_CLS = "p-1.5 rounded bg-[#E1DFDC] text-[#171813] text-sm font-medium min-w-[30px] flex items-center justify-center touch-manipulation";
+const EDITOR_CLS = "border border-t-0 border-[#E1DFDC] rounded-b-lg px-4 py-3 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all overflow-y-auto";
 
 export default function RichTextEditor({ value, onChange, minHeight = 180 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -160,7 +160,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /><circle cx="2" cy="6" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="18" r="1" fill="currentColor" stroke="none" /></svg>
           </button>
-          <span className="w-px h-5 bg-gray-300 mx-1" />
+          <span className="w-px h-5 bg-[#D8D5CD] mx-1" />
           <button
             type="button"
             title="Insert Link"
@@ -176,7 +176,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-40 px-2 py-1 text-xs border border-gray-300 rounded"
+                className="w-40 px-2 py-1 text-xs border border-[#D8D5CD] rounded"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") { e.preventDefault(); applyLink(e as any); }
@@ -185,14 +185,14 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
               />
               <button
                 type="button"
-                className="text-xs px-2 py-1 bg-[#D2693F] text-white rounded touch-manipulation"
+                className="text-xs px-2 py-1 bg-[#171813] text-white rounded touch-manipulation"
                 onPointerDown={applyLink}
               >
                 OK
               </button>
               <button
                 type="button"
-                className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded touch-manipulation"
+                className="text-xs px-2 py-1 bg-[#E1DFDC] text-[#595B53] rounded touch-manipulation"
                 onPointerDown={cancelLink}
               >
                 ✕
@@ -203,7 +203,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
         <button
           type="button"
           onClick={() => setIsPreview(!isPreview)}
-          className="text-xs px-3 py-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors shrink-0"
+          className="text-xs px-3 py-1.5 text-[#595B53] hover:text-[#595B53] hover:bg-[#F1EEE7] rounded transition-colors shrink-0"
         >
           {isPreview ? "Edit" : "Preview"}
         </button>

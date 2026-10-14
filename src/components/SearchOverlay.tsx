@@ -142,24 +142,24 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
       {/* Mobile: full height from top. Desktop: centered panel */}
       <div
-        className={`relative z-10 w-full h-full sm:h-auto sm:max-w-2xl sm:mx-auto sm:mt-[10vh] bg-[#F9F6F0] flex flex-col transition-all duration-300 ${
+        className={`relative z-10 w-full h-full sm:h-auto sm:max-w-2xl sm:mx-auto sm:mt-[10vh] bg-[#FFFFFF] flex flex-col transition-all duration-300 ${
           visible
             ? "translate-y-0 opacity-100"
             : "-translate-y-4 opacity-0"
-        } sm:max-h-[80vh] sm:border sm:border-[#E0D0B8]`}
+        } sm:max-h-[80vh] sm:border sm:border-[#D8D5CD]`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#E0D0B8] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#D8D5CD] flex-shrink-0">
           <h2
-            className="text-lg sm:text-xl text-[#2D2D2D]"
-            style={{ fontFamily: "'Tenor Sans', serif" }}
+            className="text-lg sm:text-xl text-[#171813]"
+            style={{ fontFamily: "var(--font-cormorant)" }}
           >
             Search
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors text-xl leading-none"
+            className="w-8 h-8 flex items-center justify-center text-[#171813] hover:bg-[#F1EEE7] transition-colors text-xl leading-none"
             aria-label="Close search"
           >
             ×
@@ -167,27 +167,27 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
 
         {/* Search Input */}
-        <div className="px-5 sm:px-6 py-3 border-b border-[#E0D0B8] flex-shrink-0">
+        <div className="px-5 sm:px-6 py-3 border-b border-[#D8D5CD] flex-shrink-0">
           <input
             ref={inputRef}
             type="text"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search for products..."
-            className="w-full py-3 px-0 text-base sm:text-lg bg-transparent text-[#2D2D2D] placeholder:text-[#999] focus:outline-none"
+            className="w-full py-3 px-0 text-base sm:text-lg bg-transparent text-[#171813] placeholder:text-[#999] focus:outline-none"
           />
         </div>
 
         {/* Results */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pb-6 sm:pb-6">
           {isSearching && (
-            <p className="py-8 text-center text-[#2D2D2D] opacity-60">
+            <p className="py-8 text-center text-[#171813] opacity-60">
               Searching...
             </p>
           )}
 
           {!searchTerm.trim() && !isSearching && (
-            <div className="py-16 flex flex-col items-center gap-3 text-[#2D2D2D] opacity-40">
+            <div className="py-16 flex flex-col items-center gap-3 text-[#171813] opacity-40">
               <svg
                 className="w-14 h-14"
                 fill="none"
@@ -203,7 +203,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               </svg>
               <p
                 className="text-base"
-                style={{ fontFamily: "'Tenor Sans', serif" }}
+                style={{ fontFamily: "var(--font-cormorant)" }}
               >
                 Start typing to search products
               </p>
@@ -214,14 +214,14 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             !isSearching &&
             results.length === 0 &&
             loaded && (
-              <div className="py-12 text-center text-[#2D2D2D]">
+              <div className="py-12 text-center text-[#171813]">
                 <p className="text-base font-medium mb-1">No products found</p>
                 <p className="text-sm opacity-60">Try a different term</p>
               </div>
             )}
 
           {!isSearching && results.length > 0 && (
-            <div className="divide-y divide-[#E0D0B8]">
+            <div className="divide-y divide-[#D8D5CD]">
               {results.map((product) => {
                 const pricing = resolvePricing({
                   Price: product.Price,
@@ -235,7 +235,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                     key={product.id}
                     href={`/product/${slug}`}
                     onClick={onClose}
-                    className="flex items-center gap-4 py-4 hover:bg-[#F3EDE4] transition-colors -mx-5 sm:-mx-6 px-5 sm:px-6"
+                    className="flex items-center gap-4 py-4 hover:bg-[#F1EEE7] transition-colors -mx-5 sm:-mx-6 px-5 sm:px-6"
                   >
                     <ProductImage
                       src={product.ImageUrl1 as string}
@@ -243,15 +243,15 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                       srcThumb={product.ImageUrl1Thumb as string}
                       size="thumb"
                       alt={productName(product)}
-                      className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 border border-[#E0D0B8] overflow-hidden"
+                      className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 border border-[#D8D5CD] overflow-hidden"
                     />
                     <div className="min-w-0">
-                      <p className="text-sm sm:text-base text-[#2D2D2D] truncate">
+                      <p className="text-sm sm:text-base text-[#171813] truncate">
                         {productName(product)}
                       </p>
                       <PriceText
                         amount={pricing.selling}
-                        className="text-sm text-[#D2693F] mt-1"
+                        className="text-sm text-[#171813] mt-1"
                       />
                     </div>
                   </Link>

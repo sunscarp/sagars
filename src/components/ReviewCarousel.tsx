@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useReviews, type Review } from "@/hooks/useReviews";
@@ -7,8 +7,8 @@ import ProductImage from "@/components/ProductImage";
 function ReviewCard({ review }: { review: Review }) {
   const hasImage = !!review.image;
   return (
-    <div className="h-full bg-[#F9F6F0] border border-[#E8E0D8] shadow-sm flex flex-col overflow-hidden">
-      <div className="relative w-full aspect-square overflow-hidden bg-white border-b border-[#E8E0D8]">
+    <div className="h-full bg-[#FFFFFF] border border-[#D8D5CD] shadow-sm flex flex-col overflow-hidden">
+      <div className="relative w-full aspect-square overflow-hidden bg-white border-b border-[#D8D5CD]">
         {hasImage ? (
           <ProductImage
             src={review.image}
@@ -17,16 +17,16 @@ function ReviewCard({ review }: { review: Review }) {
             className="w-full h-full"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-[#D2693F]/10 text-[#D2693F] font-semibold text-5xl">
+          <div className="w-full h-full flex items-center justify-center bg-[#171813]/10 text-[#171813] font-semibold text-5xl">
             {(review.name || "K").charAt(0).toUpperCase()}
           </div>
         )}
       </div>
       <div className="p-4 sm:p-5 flex flex-col flex-1">
-        <p className="text-[#2D2D2D] text-xs sm:text-sm leading-relaxed flex-1">
+        <p className="text-[#171813] text-xs sm:text-sm leading-relaxed flex-1">
           &ldquo;{review.text}&rdquo;
         </p>
-        <span className="text-[#D2693F] font-semibold text-xs sm:text-sm mt-3">
+        <span className="text-[#171813] font-semibold text-xs sm:text-sm mt-3">
           — {review.name}
         </span>
       </div>
@@ -77,22 +77,22 @@ export default function ReviewCarousel() {
   }, [reviews.length]);
 
   return (
-    <section className="pt-6 pb-16 text-[#2D2D2D]">
+    <section className="pt-6 pb-16 text-[#171813]">
       <h2
         className="text-2xl sm:text-3xl md:text-4xl text-center mb-16"
-        style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+        style={{ fontFamily: "var(--font-cormorant)", fontWeight: 600 }}
       >
         Customer Reviews
       </h2>
 
       {reviews.length === 0 ? (
-        <p className="text-center text-sm text-[#9A6E50] tracking-wide">No reviews yet.</p>
+        <p className="text-center text-sm text-[#595B53] tracking-wide">No reviews yet.</p>
       ) : (
         <div className="relative">
           {canScrollLeft && (
             <button
               onClick={() => scrollByOne("left")}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[#F9F6F0] text-[#2D2D2D] p-3 shadow-lg border border-[#E8E0D8]"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[#FFFFFF] text-[#171813] p-3 shadow-lg border border-[#D8D5CD]"
             >
               ‹
             </button>
@@ -101,7 +101,7 @@ export default function ReviewCarousel() {
           {canScrollRight && (
             <button
               onClick={() => scrollByOne("right")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[#F9F6F0] text-[#2D2D2D] p-3 shadow-lg border border-[#E8E0D8]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[#FFFFFF] text-[#171813] p-3 shadow-lg border border-[#D8D5CD]"
             >
               ›
             </button>

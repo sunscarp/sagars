@@ -9,13 +9,13 @@ export default function PriceText({
 }) {
   const num = Number(amount || 0);
   if (!isFinite(num)) return null;
-  const formatted = num.toLocaleString("en-IN", {
+  const formatted = num.toLocaleString("en-MY", {
     maximumFractionDigits: strikeThrough ? 0 : 2,
     minimumFractionDigits: strikeThrough ? 0 : 2,
   });
   return (
     <span className={className}>
-      <span className="text-[0.7em] align-baseline mr-0.5">Rs.</span>
+      <span className="text-[0.7em] align-baseline mr-0.5">RM</span>
       <span>{formatted}</span>
     </span>
   );

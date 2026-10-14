@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -55,13 +55,13 @@ export default function CategoryCarousel({
 
   return (
     <section className="space-y-6">
-      <h2 className="text-3xl font-extrabold text-[#2D2D2D]">{title}</h2>
+      <h2 className="text-3xl font-extrabold text-[#171813]">{title}</h2>
 
       <div className="relative flex items-center">
         {canSlide && (
           <button 
             onClick={() => move(-4)} 
-            className="text-3xl px-2 text-[#2D2D2D] hover:text-[#D2693F] transition-colors"
+            className="text-3xl px-2 text-[#171813] hover:text-[#171813] transition-colors"
           >
             ‹
           </button>
@@ -72,9 +72,9 @@ export default function CategoryCarousel({
             <Link
               key={p.ID}
               href={`/product/${encodeURIComponent(getProductSlug(p))}`}
-              className="border border-[#E8E0D8] bg-white p-4 font-bold hover:shadow-lg hover:border-[#C5A059] transition text-[#2D2D2D]"
+              className="border border-[#D8D5CD] bg-white p-4 font-bold hover:shadow-lg hover:border-[#595B53] transition text-[#171813]"
             >
-              <div className="aspect-square border border-[#E8E0D8] mb-3 overflow-hidden">
+              <div className="aspect-square border border-[#D8D5CD] mb-3 overflow-hidden">
                 <ProductImage
                   src={p.ImageUrl1}
                   srcMedium={(p as any).ImageUrl1Medium}
@@ -84,8 +84,8 @@ export default function CategoryCarousel({
                   className="w-full h-full"
                 />
               </div>
-              <div className="truncate text-[#2D2D2D]">{p.Description}</div>
-              <PriceText amount={resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }).selling} className="mt-1 text-[#D2693F] font-semibold" />
+              <div className="truncate text-[#171813]">{p.Description}</div>
+              <PriceText amount={resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }).selling} className="mt-1 text-[#171813] font-semibold" />
             </Link>
           ))}
         </div>
@@ -93,7 +93,7 @@ export default function CategoryCarousel({
         {canSlide && (
           <button 
             onClick={() => move(4)} 
-            className="text-3xl px-2 text-[#2D2D2D] hover:text-[#D2693F] transition-colors"
+            className="text-3xl px-2 text-[#171813] hover:text-[#171813] transition-colors"
           >
             ›
           </button>

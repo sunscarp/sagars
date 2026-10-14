@@ -17,7 +17,7 @@ const fetch = require('node-fetch');
           customer: {
             name: 'Test Customer',
             email: process.env.CONTACT_RECEIVER || process.env.EMAIL_USER,
-            phone: '+911234567890',
+            phone: '+601234567890',
             address: 'Test Street, Test City',
           },
           items: [

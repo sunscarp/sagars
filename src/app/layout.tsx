@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tenor_Sans, Playfair_Display, Great_Vibes, Montserrat, Alex_Brush } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -8,53 +8,35 @@ import { CartSidebarProvider } from "@/context/CartSidebarContext";
 import SiteShell from "@/components/SiteShell";
 
 
-const tenorSans = Tenor_Sans({
-  variable: "--font-tenor-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "700"],
 });
 
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["400", "700"],
-});
-
-const greatVibes = Great_Vibes({
-  variable: "--font-great-vibes",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const alexBrush = Alex_Brush({
-  variable: "--font-alex-brush",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Kria | Handcrafted Artisanal Jewellery & Home Decor",
+  title: "The Sagar's Design House",
   description:
-    "Kria brings you premium handcrafted terracotta jewellery, artisanal home decor, and hand-painted silk sarees — made with love by Indian artisans.",
+    "The Sagar's Design House brings you premium handcrafted terracotta jewellery, artisanal home decor, and hand-painted silk sarees — made with love by Malaysian artisans.",
   keywords: [
     "handcrafted jewellery",
     "terracotta jewellery",
     "home decor",
     "hand-painted silk sarees",
-    "artisanal Indian crafts",
-    "Kria",
+    "artisanal Malaysian crafts",
+    "The Sagar's Design House",
   ],
   openGraph: {
-    title: "Kria | Handcrafted Artisanal Jewellery & Home Decor",
+    title: "The Sagar's Design House",
     description:
       "Premium handcrafted terracotta jewellery, artisanal home decor, and hand-painted silk sarees.",
-    siteName: "Kria",
+    siteName: "The Sagar's Design House",
     type: "website",
   },
   icons: {
@@ -80,8 +62,7 @@ export default function RootLayout({
 
       </head>
       <body
-      className={`${tenorSans.variable} ${playfairDisplay.variable} ${greatVibes.variable} ${montserrat.variable} ${alexBrush.variable} antialiased min-h-screen bg-[#F9F6F0] text-[#2D2D2D]`}
-  style={{ fontFamily: "'Tenor Sans', var(--font-tenor-sans), sans-serif" }}
+      className={`${dmSans.variable} ${cormorantGaramond.variable} antialiased min-h-screen bg-white text-[#171813]`}
 >
 
         <AuthProvider>
