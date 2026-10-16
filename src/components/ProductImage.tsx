@@ -64,6 +64,12 @@ export default function ProductImage({
     return src || fallback;
   };
 
+  const fitClass = objectFit
+    ? objectFit.startsWith("object-")
+      ? objectFit
+      : `object-${objectFit}`
+    : OBJECT_CLASS[size];
+
   if (fill) {
     return (
       <div className={`relative ${className || ""}`} onClick={onClick}>
@@ -74,7 +80,7 @@ export default function ProductImage({
           sizes={sizes || SIZE_DEFAULTS[size]}
           quality={quality}
           priority={priority}
-          className={objectFit || OBJECT_CLASS[size]}
+          className={fitClass}
           onError={onError}
         />
       </div>

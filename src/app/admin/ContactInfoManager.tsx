@@ -13,8 +13,8 @@ export default function ContactInfoManager() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (info && !draft) setDraft({ ...info });
-  }, [info]);
+    if (!loading && !draft) setDraft({ ...info });
+  }, [loading, info, draft]);
 
   if (loading || !draft) {
     return (

@@ -13,6 +13,12 @@
   --line-light: #e1dfdc;
   --sale: #c52020;
 
+  /* Ocean / editorial tokens */
+  --navy: #0e2432;
+  --navy-deep: #0b1f2e;
+  --mist: #6a7684;
+  --ivory: #f7f4ee;
+
   /* Semantic aliases kept for compatibility */
   --primary: #171813;
   --primary-dark: #000000;
@@ -153,6 +159,51 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 
+/* Hero scroll indicator — subtle vertical line pulse */
+@keyframes hero-scroll-line {
+  0% { transform: scaleY(0.25); transform-origin: top; opacity: 0.4; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(0.25); transform-origin: top; opacity: 0.4; }
+}
+.hero-scroll-line {
+  animation: hero-scroll-line 2.2s ease-in-out infinite;
+}
+
+/* Product page stock pill (Mahaniya style) */
+.mh-stock-dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mh-stock-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.4;
+  animation: mh-stock-radar 1.8s ease-out infinite;
+}
+.mh-stock-in { background: #55b875; }
+.mh-stock-low { background: #e5ad38; }
+.mh-stock-out { background: #d94343; }
+.mh-stock-out::after { animation: none; opacity: 0; }
+@keyframes mh-stock-radar {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .hero-scroll-line {
+    animation: none;
+  }
 }

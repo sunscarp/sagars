@@ -19,6 +19,14 @@ import ImageEditor from "@/components/ImageEditor";
 
 type Item = { id: string; [k: string]: any };
 
+export type ProductImageField =
+  | "ImageUrl1"
+  | "ImageUrl2"
+  | "ImageUrl3"
+  | "ImageUrl4"
+  | "ImageUrl5"
+  | "ImageUrl6";
+
 export type FormState = {
   ProductName: string;
   Description: string;
@@ -32,6 +40,15 @@ export type FormState = {
   ImageUrl3: string;
   ImageUrl3Medium: string;
   ImageUrl3Thumb: string;
+  ImageUrl4: string;
+  ImageUrl4Medium: string;
+  ImageUrl4Thumb: string;
+  ImageUrl5: string;
+  ImageUrl5Medium: string;
+  ImageUrl5Thumb: string;
+  ImageUrl6: string;
+  ImageUrl6Medium: string;
+  ImageUrl6Thumb: string;
   Price: string;
   Category: string;
   Subcategory: string;
@@ -65,12 +82,12 @@ function ImageUploadField({
   onFileSelect,
 }: {
   label: string;
-  fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3";
+  fieldName: ProductImageField;
   value: string;
   isUploading: boolean;
-  onUpload: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
-  onRemove: (fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
-  onFileSelect: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
+  onUpload: (file: File, fieldName: ProductImageField) => void;
+  onRemove: (fieldName: ProductImageField) => void;
+  onFileSelect: (file: File, fieldName: ProductImageField) => void;
 }) {
   return (
     <div className="flex flex-col">
@@ -139,9 +156,9 @@ function ProductForm({
   categories: string[];
   categoryObjects: { id: string; name: string }[];
   subcategories: { name: string; categoryId: string }[];
-  uploadingField: "ImageUrl1" | "ImageUrl2" | "ImageUrl3" | null;
-  onUpload: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
-  onFileSelect: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
+  uploadingField: ProductImageField | null;
+  onUpload: (file: File, fieldName: ProductImageField) => void;
+  onFileSelect: (file: File, fieldName: ProductImageField) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }) {
@@ -195,10 +212,30 @@ function ProductForm({
         {/* ── Images ── */}
         <section className="space-y-4">
           <h4 className={SECTION_TITLE_CLS}>Images</h4>
-          <div className="grid grid-cols-3 gap-4">
-            <ImageUploadField label="Main" fieldName="ImageUrl1" value={form.ImageUrl1} isUploading={uploadingField === "ImageUrl1"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl1Medium" as any, ""); updateForm("ImageUrl1Thumb" as any, ""); }} onFileSelect={onFileSelect} />
-            <ImageUploadField label="Gallery 1" fieldName="ImageUrl2" value={form.ImageUrl2} isUploading={uploadingField === "ImageUrl2"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl2Medium" as any, ""); updateForm("ImageUrl2Thumb" as any, ""); }} onFileSelect={onFileSelect} />
-            <ImageUploadField label="Gallery 2" fieldName="ImageUrl3" value={form.ImageUrl3} isUploading={uploadingField === "ImageUrl3"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl3Medium" as any, ""); updateForm("ImageUrl3Thumb" as any, ""); }} onFileSelect={onFileSelect} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {([
+              { field: "ImageUrl1", label: "Main" },
+              { field: "ImageUrl2", label: "Gallery 1" },
+              { field: "ImageUrl3", label: "Gallery 2" },
+              { field: "ImageUrl4", label: "Gallery 3" },
+              { field: "ImageUrl5", label: "Gallery 4" },
+              { field: "ImageUrl6", label: "Gallery 5" },
+            ] as { field: ProductImageField; label: string }[]).map(({ field, label }) => (
+              <ImageUploadField
+                key={field}
+                label={label}
+                fieldName={field}
+                value={form[field]}
+                isUploading={uploadingField === field}
+                onUpload={onUpload}
+                onRemove={(f) => {
+                  updateForm(f, "");
+                  updateForm(`${f}Medium` as any, "");
+                  updateForm(`${f}Thumb` as any, "");
+                }}
+                onFileSelect={onFileSelect}
+              />
+            ))}
           </div>
         </section>
 
@@ -489,7 +526,7 @@ export default function InventoryTable() {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editorFile, setEditorFile] = useState<File | null>(null);
-  const [editorFieldName, setEditorFieldName] = useState<"ImageUrl1" | "ImageUrl2" | "ImageUrl3" | null>(null);
+  const [editorFieldName, setEditorFieldName] = useState<ProductImageField | null>(null);
 
   const emptyForm: FormState = {
     ProductName: "",
@@ -504,6 +541,15 @@ export default function InventoryTable() {
     ImageUrl3: "",
     ImageUrl3Medium: "",
     ImageUrl3Thumb: "",
+    ImageUrl4: "",
+    ImageUrl4Medium: "",
+    ImageUrl4Thumb: "",
+    ImageUrl5: "",
+    ImageUrl5Medium: "",
+    ImageUrl5Thumb: "",
+    ImageUrl6: "",
+    ImageUrl6Medium: "",
+    ImageUrl6Thumb: "",
     Price: "",
     Category: CATEGORIES[0] || "",
     Subcategory: "",
@@ -524,7 +570,7 @@ export default function InventoryTable() {
   };
 
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [uploadingField, setUploadingField] = useState<"ImageUrl1" | "ImageUrl2" | "ImageUrl3" | null>(null);
+  const [uploadingField, setUploadingField] = useState<ProductImageField | null>(null);
 
   function updateForm<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((s) => ({ ...s, [k]: v }));
@@ -532,13 +578,13 @@ export default function InventoryTable() {
 
   const handleFileUpload = useCallback(async (
     file: File,
-    fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3"
+    fieldName: ProductImageField
   ) => {
     setUploadingField(fieldName);
     try {
       const productId = editingId || `new-${Date.now()}`;
-      const slot = fieldName === "ImageUrl1" ? 1 : fieldName === "ImageUrl2" ? 2 : 3;
-      const result = await uploadProductImage(file, productId, slot as 1 | 2 | 3);
+      const slot = Number(fieldName.replace("ImageUrl", ""));
+      const result = await uploadProductImage(file, productId, slot);
       updateForm(fieldName, result.url);
       const mediumKey = `${fieldName}Medium` as keyof FormState;
       const thumbKey = `${fieldName}Thumb` as keyof FormState;
@@ -615,6 +661,15 @@ export default function InventoryTable() {
         ImageUrl3: form.ImageUrl3 || "",
         ImageUrl3Medium: form.ImageUrl3Medium || "",
         ImageUrl3Thumb: form.ImageUrl3Thumb || "",
+        ImageUrl4: form.ImageUrl4 || "",
+        ImageUrl4Medium: form.ImageUrl4Medium || "",
+        ImageUrl4Thumb: form.ImageUrl4Thumb || "",
+        ImageUrl5: form.ImageUrl5 || "",
+        ImageUrl5Medium: form.ImageUrl5Medium || "",
+        ImageUrl5Thumb: form.ImageUrl5Thumb || "",
+        ImageUrl6: form.ImageUrl6 || "",
+        ImageUrl6Medium: form.ImageUrl6Medium || "",
+        ImageUrl6Thumb: form.ImageUrl6Thumb || "",
         Price: form.PricingMode === "price" && form.Price ? Number(form.Price) : undefined,
         Category: form.Category || "",
         Subcategory: form.Subcategory || "",
@@ -661,6 +716,15 @@ export default function InventoryTable() {
       ImageUrl3: item.ImageUrl3 ?? "",
       ImageUrl3Medium: item.ImageUrl3Medium ?? "",
       ImageUrl3Thumb: item.ImageUrl3Thumb ?? "",
+      ImageUrl4: item.ImageUrl4 ?? "",
+      ImageUrl4Medium: item.ImageUrl4Medium ?? "",
+      ImageUrl4Thumb: item.ImageUrl4Thumb ?? "",
+      ImageUrl5: item.ImageUrl5 ?? "",
+      ImageUrl5Medium: item.ImageUrl5Medium ?? "",
+      ImageUrl5Thumb: item.ImageUrl5Thumb ?? "",
+      ImageUrl6: item.ImageUrl6 ?? "",
+      ImageUrl6Medium: item.ImageUrl6Medium ?? "",
+      ImageUrl6Thumb: item.ImageUrl6Thumb ?? "",
       Price: item.Price ? String(item.Price) : "",
       Category: item.Category ?? item.Product ?? CATEGORIES[0] ?? "",
       Subcategory: item.Subcategory ?? "",
@@ -704,6 +768,15 @@ export default function InventoryTable() {
         ImageUrl3: form.ImageUrl3 || "",
         ImageUrl3Medium: form.ImageUrl3Medium || "",
         ImageUrl3Thumb: form.ImageUrl3Thumb || "",
+        ImageUrl4: form.ImageUrl4 || "",
+        ImageUrl4Medium: form.ImageUrl4Medium || "",
+        ImageUrl4Thumb: form.ImageUrl4Thumb || "",
+        ImageUrl5: form.ImageUrl5 || "",
+        ImageUrl5Medium: form.ImageUrl5Medium || "",
+        ImageUrl5Thumb: form.ImageUrl5Thumb || "",
+        ImageUrl6: form.ImageUrl6 || "",
+        ImageUrl6Medium: form.ImageUrl6Medium || "",
+        ImageUrl6Thumb: form.ImageUrl6Thumb || "",
         Price: form.PricingMode === "price" && form.Price ? Number(form.Price) : null,
         Category: form.Category || "",
         Subcategory: form.Subcategory || "",
@@ -741,7 +814,7 @@ export default function InventoryTable() {
     subcategories: allSubcategories,
     uploadingField,
     onUpload: handleFileUpload,
-    onFileSelect: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => {
+    onFileSelect: (file: File, fieldName: ProductImageField) => {
       setEditorFile(file);
       setEditorFieldName(fieldName);
     },
@@ -771,7 +844,7 @@ export default function InventoryTable() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
             {filteredItems.map((it) => {
-              const img = it?.ImageUrl1 || it?.ImageUrl2 || it?.ImageUrl3 || "/placeholder.png";
+              const img = it?.ImageUrl1 || it?.ImageUrl2 || it?.ImageUrl3 || it?.ImageUrl4 || it?.ImageUrl5 || it?.ImageUrl6 || "/placeholder.png";
               return (
               <div key={it.id ?? it.ID ?? it.Product} className="group relative bg-white rounded-xl border border-[#E1DFDC] shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="relative aspect-[4/3] bg-[#F1EEE7]">

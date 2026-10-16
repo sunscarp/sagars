@@ -8,6 +8,7 @@ import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
 import { getProductSlug } from "@/utils/productSlug";
+import { useCategories } from "@/hooks/useCategories";
 
 interface Product {
   id?: string;
@@ -38,6 +39,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const [visible, setVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { categories } = useCategories();
 
   useEffect(() => {
     if (open) {
@@ -76,15 +78,8 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
       }
       const lower = term.toLowerCase();
       const filtered = allProducts.filter((p) => {
-        const fields = [
-          p.ProductName,
-          p.Description,
-          p.Category,
-          p.Product,
-        ];
-        return fields.some(
-          (f) => f && f.toString().toLowerCase().includes(lower)
-        );
+        const fields = [p.ProductName, p.Description, p.Category, p.Product];
+        return fields.some((f) => f && f.toString().toLowerCase().includes(lower));
       });
       setResults(filtered);
       setIsSearching(false);
@@ -98,6 +93,17 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
       setIsSearching(true);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => filterProducts(term), 300);
+    },
+    [filterProducts]
+  );
+
+  const applyChip = useCallback(
+    (term: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      setSearchTerm(term);
+      setIsSearching(true);
+      filterProducts(term);
+      inputRef.current?.focus();
     },
     [filterProducts]
   );
@@ -131,135 +137,167 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const productName = (p: Product) =>
     p.ProductName || p.Description || p.Product || "Unnamed Product";
 
+  const chips = categories.slice(0, 4).map((c) => c.name);
+  const trimmed = searchTerm.trim();
+
+  let statusText = "";
+  if (isSearching) statusText = "Searching…";
+  else if (trimmed && results.length > 0) statusText = `Matching products (${results.length})`;
+  else if (trimmed && loaded && results.length === 0)
+    statusText = "No matching products. Try another name or fabric.";
+
   return (
     <div
-      className={`fixed inset-0 z-[200] transition-opacity duration-200 ${
-        visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 z-[200] ${visible ? "pointer-events-auto" : "pointer-events-none"}`}
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/50" />
-
-      {/* Mobile: full height from top. Desktop: centered panel */}
+      {/* Scrim */}
       <div
-        className={`relative z-10 w-full h-full sm:h-auto sm:max-w-2xl sm:mx-auto sm:mt-[10vh] bg-[#FFFFFF] flex flex-col transition-all duration-300 ${
-          visible
-            ? "translate-y-0 opacity-100"
-            : "-translate-y-4 opacity-0"
-        } sm:max-h-[80vh] sm:border sm:border-[#D8D5CD]`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#D8D5CD] flex-shrink-0">
-          <h2
-            className="text-lg sm:text-xl text-[#171813]"
-            style={{ fontFamily: "var(--font-cormorant)" }}
-          >
-            Search
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-[#171813] hover:bg-[#F1EEE7] transition-colors text-xl leading-none"
-            aria-label="Close search"
-          >
-            ×
-          </button>
-        </div>
+        className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
-        {/* Search Input */}
-        <div className="px-5 sm:px-6 py-3 border-b border-[#D8D5CD] flex-shrink-0">
+      {/* Panel — centered card just below the header */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search products"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          top: "calc(var(--navbar-height, 68px) + 20px)",
+          width: "min(860px, calc(100% - 32px))",
+          maxHeight: "calc(100dvh - var(--navbar-height, 68px) - 40px)",
+          borderRadius: 28,
+        }}
+        className={`absolute left-1/2 -translate-x-1/2 overflow-auto border border-[#a9a9a9] bg-white px-5 pb-7 pt-9 text-[#111] shadow-none transition-all duration-300 ease-out sm:px-[30px] ${
+          visible ? "translate-y-0 opacity-100" : "-translate-y-2.5 opacity-0"
+        }`}
+      >
+        {/* Close */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close search"
+          className="absolute right-3 top-2 flex h-10 w-10 items-center justify-center transition-colors hover:bg-[#f1eee7]"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+
+        {/* Search form */}
+        <form
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            filterProducts(searchTerm);
+          }}
+          className="flex items-center gap-4 border-b border-[#dedede] pb-4 transition-colors duration-200 focus-within:border-[#111] sm:gap-5"
+        >
+          <button
+            type="submit"
+            aria-label="Search"
+            className="flex h-11 w-11 flex-none items-center justify-center text-[#111]"
+          >
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 28 28" aria-hidden>
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="m18.5 18.5 7 7" />
+            </svg>
+          </button>
+          <label htmlFor="mhh-query" className="sr-only">
+            Search products
+          </label>
           <input
+            id="mhh-query"
             ref={inputRef}
-            type="text"
+            type="search"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search for products..."
-            className="w-full py-3 px-0 text-base sm:text-lg bg-transparent text-[#171813] placeholder:text-[#999] focus:outline-none"
+            placeholder="Search products"
+            autoComplete="off"
+            maxLength={80}
+            className="min-w-0 flex-1 border-0 bg-transparent py-2 text-[18px] leading-normal text-[#111] outline-none placeholder:text-[#999] focus:outline-none sm:text-[22px]"
           />
+        </form>
+
+        {/* Suggested searches */}
+        <div aria-label="Suggested searches" className="flex flex-wrap gap-3 pt-5">
+          {chips.map((chip) => (
+            <button
+              key={chip}
+              type="button"
+              onClick={() => applyChip(chip)}
+              className="min-w-[90px] flex-1 rounded-full border border-[#999] px-3.5 py-2 text-center text-[13px] leading-tight text-[#111] transition-colors hover:border-[#111] sm:text-sm"
+            >
+              {chip}
+            </button>
+          ))}
+          <Link
+            href="/shop"
+            onClick={onClose}
+            className="min-w-[90px] flex-1 rounded-full border border-[#e22424] px-3.5 py-2 text-center text-[13px] leading-tight text-[#111] transition-colors hover:border-[#111] sm:text-sm"
+          >
+            Sale
+          </Link>
         </div>
+
+        {/* Status */}
+        {statusText && (
+          <p role="status" aria-live="polite" className="mt-4 text-sm text-[#666]">
+            {statusText}
+          </p>
+        )}
 
         {/* Results */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pb-6 sm:pb-6">
-          {isSearching && (
-            <p className="py-8 text-center text-[#171813] opacity-60">
-              Searching...
-            </p>
-          )}
+        {!isSearching && results.length > 0 && (
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {results.map((product) => {
+              const pricing = resolvePricing({
+                Price: product.Price,
+                OriginalPrice: product.OriginalPrice,
+                DiscountPercent: product.DiscountPercent,
+              });
+              const slug = encodeURIComponent(getProductSlug(product));
 
-          {!searchTerm.trim() && !isSearching && (
-            <div className="py-16 flex flex-col items-center gap-3 text-[#171813] opacity-40">
-              <svg
-                className="w-14 h-14"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="square"
-                  strokeLinejoin="miter"
-                  strokeWidth={1.5}
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-              <p
-                className="text-base"
-                style={{ fontFamily: "var(--font-cormorant)" }}
-              >
-                Start typing to search products
-              </p>
-            </div>
-          )}
-
-          {searchTerm.trim() &&
-            !isSearching &&
-            results.length === 0 &&
-            loaded && (
-              <div className="py-12 text-center text-[#171813]">
-                <p className="text-base font-medium mb-1">No products found</p>
-                <p className="text-sm opacity-60">Try a different term</p>
-              </div>
-            )}
-
-          {!isSearching && results.length > 0 && (
-            <div className="divide-y divide-[#D8D5CD]">
-              {results.map((product) => {
-                const pricing = resolvePricing({
-                  Price: product.Price,
-                  OriginalPrice: product.OriginalPrice,
-                  DiscountPercent: product.DiscountPercent,
-                });
-                const slug = encodeURIComponent(getProductSlug(product));
-
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/product/${slug}`}
-                    onClick={onClose}
-                    className="flex items-center gap-4 py-4 hover:bg-[#F1EEE7] transition-colors -mx-5 sm:-mx-6 px-5 sm:px-6"
-                  >
-                    <ProductImage
-                      src={product.ImageUrl1 as string}
-                      srcMedium={product.ImageUrl1Medium as string}
-                      srcThumb={product.ImageUrl1Thumb as string}
-                      size="thumb"
-                      alt={productName(product)}
-                      className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 border border-[#D8D5CD] overflow-hidden"
+              return (
+                <Link
+                  key={product.id}
+                  href={`/product/${slug}`}
+                  onClick={onClose}
+                  className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-[#f7f6f4]"
+                >
+                  <ProductImage
+                    src={product.ImageUrl1 as string}
+                    srcMedium={product.ImageUrl1Medium as string}
+                    srcThumb={product.ImageUrl1Thumb as string}
+                    size="thumb"
+                    alt={productName(product)}
+                    className="relative h-[84px] w-16 flex-none overflow-hidden rounded-[10px] border border-[#e5e5e5]"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-[15px] leading-snug text-[#111] [overflow-wrap:anywhere]">
+                      {productName(product)}
+                    </span>
+                    <PriceText
+                      amount={pricing.selling}
+                      className="mt-1 block text-[13px] font-bold text-[#111]"
                     />
-                    <div className="min-w-0">
-                      <p className="text-sm sm:text-base text-[#171813] truncate">
-                        {productName(product)}
-                      </p>
-                      <PriceText
-                        amount={pricing.selling}
-                        className="text-sm text-[#171813] mt-1"
-                      />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  </span>
+                </Link>
+              );
+            })}
+
+            <Link
+              href="/shop"
+              onClick={onClose}
+              className="col-span-full py-3 text-center text-sm text-[#111] underline underline-offset-[5px]"
+            >
+              View all products
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

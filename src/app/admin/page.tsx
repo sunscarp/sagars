@@ -23,12 +23,13 @@ import MarqueeManager from "./MarqueeManager";
 import DeliverySettingsManager from "./DeliverySettingsManager";
 import PoliciesManager from "./PoliciesManager";
 import ContactInfoManager from "./ContactInfoManager";
+import HeroManager from "./HeroManager";
 import ReviewsManager from "./ReviewsManager";
 import FinancesTab from "./FinancesTab";
 import ProductImage from "@/components/ProductImage";
 import * as XLSX from "xlsx";
 
-type AdminTab = "overview" | "products" | "categories" | "reviews" | "orders" | "customers" | "finances" | "marquee" | "settings" | "policies" | "contact";
+type AdminTab = "overview" | "products" | "categories" | "reviews" | "orders" | "customers" | "finances" | "marquee" | "hero" | "settings" | "policies" | "contact";
 
 type OrderStatus = "placed" | "processing" | "shipped" | "done" | "cancelled";
 
@@ -278,6 +279,17 @@ export default function AdminPage() {
       ),
     },
     {
+      id: "hero",
+      label: "Hero",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="8.5" cy="9.5" r="1.5" />
+        </svg>
+      ),
+    },
+    {
       id: "settings",
       label: "Settings",
       icon: (
@@ -443,6 +455,9 @@ export default function AdminPage() {
 
           {/* ── MARQUEE ── */}
           {tab === "marquee" && <MarqueeManager />}
+
+          {/* ── HERO ── */}
+          {tab === "hero" && <HeroManager />}
 
           {/* ── SETTINGS ── */}
           {tab === "settings" && (

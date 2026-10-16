@@ -33,7 +33,7 @@ async function postToCloudinary(
 export async function uploadProductImage(
   file: File,
   productId: string,
-  slot: 1 | 2 | 3
+  slot: number
 ): Promise<UploadResult> {
   return postToCloudinary(file, `products/${productId}/image${slot}`);
 }

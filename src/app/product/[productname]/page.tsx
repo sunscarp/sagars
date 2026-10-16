@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import ReviewCarousel from "@/components/ReviewCarousel";
 import {
   collection,
   query,
@@ -12,7 +10,6 @@ import {
   onSnapshot,
   addDoc,
   updateDoc,
-  deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase";
@@ -36,12 +33,21 @@ type Product = {
   ImageUrl1?: string;
   ImageUrl2?: string;
   ImageUrl3?: string;
+  ImageUrl4?: string;
+  ImageUrl5?: string;
+  ImageUrl6?: string;
   ImageUrl1Medium?: string;
   ImageUrl1Thumb?: string;
   ImageUrl2Medium?: string;
   ImageUrl2Thumb?: string;
   ImageUrl3Medium?: string;
   ImageUrl3Thumb?: string;
+  ImageUrl4Medium?: string;
+  ImageUrl4Thumb?: string;
+  ImageUrl5Medium?: string;
+  ImageUrl5Thumb?: string;
+  ImageUrl6Medium?: string;
+  ImageUrl6Thumb?: string;
   Stock?: number;
   Category?: string;
   StockType?: string;
@@ -62,7 +68,7 @@ export default function ProductPage() {
   const { productname } = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { addItem, removeItem } = useCart();
+  const { addItem } = useCart();
   const { openCart } = useCartSidebar();
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
@@ -73,12 +79,16 @@ export default function ProductPage() {
   const [selectedColor, setSelectedColor] = useState("");
   const [imageIndex, setImageIndex] = useState(0);
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [cartQuantity, setCartQuantity] = useState(0);
   const [cartQuantityForVariant, setCartQuantityForVariant] = useState<Record<string, number>>({});
+  const [qty, setQty] = useState(1);
+  const [descOpen, setDescOpen] = useState(true);
   const [careOpen, setCareOpen] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
   const [showAdded, setShowAdded] = useState(false);
 
   // Fetch product
@@ -255,11 +265,17 @@ export default function ProductPage() {
       product.ImageUrl1 || "/placeholder.png",
       product.ImageUrl2,
       product.ImageUrl3,
+      product.ImageUrl4,
+      product.ImageUrl5,
+      product.ImageUrl6,
     ].filter(Boolean) as string[];
     const meds = [
       product.ImageUrl1Medium,
       product.ImageUrl2Medium,
       product.ImageUrl3Medium,
+      product.ImageUrl4Medium,
+      product.ImageUrl5Medium,
+      product.ImageUrl6Medium,
     ];
     if (imgs.length <= 1) return;
     const preload = (idx: number) => {
@@ -280,11 +296,11 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#FFFFFF]">
-        <div className="w-8 h-8 border-2 border-[#D8D5CD] border-t-[#171813] animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white">
+        <div className="w-8 h-8 border-2 border-[#e1dfdc] border-t-black animate-spin" />
         <p
-          className="text-[#595B53] tracking-wide"
-          style={{ fontFamily: "var(--font-cormorant)", fontSize: "14px" }}
+          className="text-[#7a7a7a] tracking-wide"
+          style={{ fontFamily: "var(--font-body)", fontSize: "14px" }}
         >
           Loading product...
         </p>
@@ -294,10 +310,10 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <p
-          className="text-[#171813] font-semibold"
-          style={{ fontFamily: "var(--font-cormorant)", fontSize: "18px" }}
+          className="text-black font-semibold"
+          style={{ fontFamily: "var(--font-heading)", fontSize: "18px" }}
         >
           Product not found
         </p>
@@ -305,11 +321,16 @@ export default function ProductPage() {
     );
   }
 
-  const images = [
-    product.ImageUrl1 || "/placeholder.png",
-    product.ImageUrl2,
-    product.ImageUrl3,
-  ].filter(Boolean) as string[];
+  const imageSlots = [
+    { full: product.ImageUrl1 || "/placeholder.png", medium: product.ImageUrl1Medium, thumb: product.ImageUrl1Thumb },
+    { full: product.ImageUrl2, medium: product.ImageUrl2Medium, thumb: product.ImageUrl2Thumb },
+    { full: product.ImageUrl3, medium: product.ImageUrl3Medium, thumb: product.ImageUrl3Thumb },
+    { full: product.ImageUrl4, medium: product.ImageUrl4Medium, thumb: product.ImageUrl4Thumb },
+    { full: product.ImageUrl5, medium: product.ImageUrl5Medium, thumb: product.ImageUrl5Thumb },
+    { full: product.ImageUrl6, medium: product.ImageUrl6Medium, thumb: product.ImageUrl6Thumb },
+  ].filter((s) => !!s.full) as { full: string; medium?: string; thumb?: string }[];
+
+  const images = imageSlots.map((s) => s.full);
 
   // Check if this product uses general stock (no sizes defined, or Purses/Earrings)
   const currentCategory = (product as any).Category || (product as any).Product || "";
@@ -321,6 +342,7 @@ export default function ProductPage() {
   const isMadeToOrder = product.StockType === "made_to_order";
 
   const pricing = resolvePricing({ Price: product.Price, OriginalPrice: (product as any).OriginalPrice, DiscountPercent: product.DiscountPercent });
+  const onSale = pricing.discount > 0;
 
   // Get available stock for selected size (accounting for items already in cart)
   const getAvailableStock = () => {
@@ -371,9 +393,13 @@ export default function ProductPage() {
   const isVariantFallback = !isMadeToOrder && !hasVariantStock && (product.Stock ?? 0) > 0;
 
   const availableStock = getAvailableStock();
+  const isSoldOut = availableStock === 0 && !isMadeToOrder && !isVariantFallback;
+  const isLowStock = !isSoldOut && !isMadeToOrder && availableStock > 0 && availableStock <= 5;
+  const stockClass = isSoldOut ? "mh-stock-out" : isLowStock ? "mh-stock-low" : "mh-stock-in";
+  const stockLabel = isSoldOut ? "Out of stock" : isLowStock ? `Only ${availableStock} left` : "In stock";
 
   const handleAddToCart = async (addQty?: number) => {
-    const qty = addQty ?? 1;
+    const quantity = addQty ?? 1;
 
     // Check stock availability (skip for made-to-order and fallback variants)
     if (!isMadeToOrder && !isVariantFallback) {
@@ -383,7 +409,7 @@ export default function ProductPage() {
         return;
       }
 
-      if (qty > effectiveStock) {
+      if (quantity > effectiveStock) {
         alert(isGeneralStockProduct
           ? `Only ${effectiveStock} items available`
           : `Only ${effectiveStock} items available in size ${selectedSize}`
@@ -399,7 +425,7 @@ export default function ProductPage() {
           type: "ADD_TO_CART",
           payload: {
             productId: product.ID,
-            quantity: qty,
+            quantity: quantity,
             size: selectedSize,
           },
           redirectTo: "/shop",
@@ -431,63 +457,29 @@ export default function ProductPage() {
       const prevQty = snap.docs[0].data().Quantity || 0;
 
       await updateDoc(docRef, {
-        Quantity: prevQty + qty,
+        Quantity: prevQty + quantity,
         ["Added On"]: serverTimestamp(),
       });
-      setCartQuantity(prevQty + qty);
+      setCartQuantity(prevQty + quantity);
     } else {
       await addDoc(cartRef, {
         ID: product.ID,
-        Quantity: qty,
+        Quantity: quantity,
         Size: sizeToUse,
         Color: colorToUse,
         UserMail: user.email,
         ["Added On"]: serverTimestamp(),
       });
-      setCartQuantity(qty);
+      setCartQuantity(quantity);
     }
 
-    for (let i = 0; i < qty; i++) {
+    for (let i = 0; i < quantity; i++) {
       addItem(String(product.ID));
     }
 
     setShowAdded(true);
     setTimeout(() => setShowAdded(false), 2000);
     openCart();
-  };
-
-  const handleRemoveFromCart = async () => {
-    if (!user?.email || !db || cartQuantity <= 0) return;
-
-    const cartRef = collection(db!, "Cart");
-    const sizeToUse = isGeneralStockProduct ? "One Size" : selectedSize;
-    const colorToUse = selectedColor || "";
-    const q = query(
-      cartRef,
-      where("UserMail", "==", user.email),
-      where("ID", "==", product.ID),
-      where("Size", "==", sizeToUse),
-      where("Color", "==", colorToUse)
-    );
-
-    const snap = await getDocs(q);
-    if (snap.empty) return;
-
-    const docRef = snap.docs[0].ref;
-    const prevQty = snap.docs[0].data().Quantity || 0;
-
-    if (prevQty <= 1) {
-      await deleteDoc(docRef);
-      setCartQuantity(0);
-      removeItem(String(product.ID));
-    } else {
-      await updateDoc(docRef, {
-        Quantity: prevQty - 1,
-        ["Added On"]: serverTimestamp(),
-      });
-      setCartQuantity(prevQty - 1);
-      removeItem(String(product.ID));
-    }
   };
 
   const handleShare = async () => {
@@ -514,413 +506,367 @@ export default function ProductPage() {
     }
   };
 
+  const toggleAccordion = (key: "desc" | "custom" | "care" | "questions") => {
+    setDescOpen(key === "desc" ? !descOpen : false);
+    setCustomOpen(key === "custom" ? !customOpen : false);
+    setCareOpen(key === "care" ? !careOpen : false);
+    setQuestionsOpen(key === "questions" ? !questionsOpen : false);
+  };
+
+  const PlusMinus = ({ open }: { open: boolean }) => (
+    <svg
+      className="w-3.5 h-3.5 text-[#404040] flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      {open ? (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      )}
+    </svg>
+  );
+
+  const saleBadge = onSale ? (
+    <span className="absolute top-5 left-5 z-[4] bg-white text-black/45 rounded-[20px] px-3 py-1.5 text-[14px] font-medium leading-normal shadow-[0_4px_4px_rgba(0,0,0,0.15)]">
+      Sale!
+    </span>
+  ) : null;
+
   return (
     <>
       {/* MAIN PRODUCT SECTION */}
-      <div className="min-h-screen bg-[#FFFFFF] text-[#171813] px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-4 lg:pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
-          {/* IMAGE SECTION */}
-          <div>
-            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-[22px] bg-[#F1EEE7] border border-[#D8D5CD] shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-              <div
-                className="absolute inset-0 z-10"
-                onMouseMove={(e) => {
-                  const el = e.currentTarget.parentElement!;
-                  const rect = el.getBoundingClientRect();
-                  const x = ((e.clientX - rect.left) / rect.width) * 100;
-                  const y = ((e.clientY - rect.top) / rect.height) * 100;
-                  const lens = el.querySelector(".magnifier-lens") as HTMLElement;
-                  if (lens) {
-                    lens.style.setProperty("--zoom-x", x + "%");
-                    lens.style.setProperty("--zoom-y", y + "%");
-                    lens.style.opacity = "1";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  const lens = e.currentTarget.parentElement!.querySelector(".magnifier-lens") as HTMLElement;
-                  if (lens) lens.style.opacity = "0";
-                }}
-                onClick={(e) => {
-                  if (('ontouchstart' in window) || navigator.maxTouchPoints > 0) {
-                    setZoomImage(images[imageIndex] || "/placeholder.png");
-                    setZoomLoaded(false);
-                  }
-                }}
-              />
-              <ProductImage
-                src={images[imageIndex] || "/placeholder.png"}
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                size="full"
-                quality={90}
-                alt={product.Description}
-                priority={imageIndex === 0}
-                className="w-full h-full"
-              />
-              <div
-                className="magnifier-lens absolute inset-0 z-20 pointer-events-none opacity-0 transition-opacity duration-150"
-                style={{
-                  backgroundImage: `url(${images[imageIndex]})`,
-                  backgroundSize: "250%",
-                  backgroundPosition: "var(--zoom-x, 50%) var(--zoom-y, 50%)",
-                  backgroundRepeat: "no-repeat",
-                }}
-              />
-            </div>
-
-            {/* THUMBNAIL STRIP */}
-            {images.length > 1 && (
-              <div className="flex gap-3 mt-4 justify-center">
-                {images.map((img, i) => {
-                  const thumbUrl = i === 0 ? product.ImageUrl1Thumb : i === 1 ? product.ImageUrl2Thumb : product.ImageUrl3Thumb;
-                  const medUrl = i === 0 ? product.ImageUrl1Medium : i === 1 ? product.ImageUrl2Medium : product.ImageUrl3Medium;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setImageIndex(i)}
-                      className={`relative w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-lg border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171813] focus-visible:ring-offset-2 ${
-                        i === imageIndex
-                          ? "border-[#171813] shadow-[0_2px_8px_rgba(210,105,63,0.35)]"
-                          : "border-[#F1EEE7] hover:border-[#595B53] opacity-80 hover:opacity-100"
-                      }`}
-                    >
-                      <Image
-                        src={thumbUrl || medUrl || img}
-                        alt={`Thumbnail ${i + 1}`}
-                        fill
-                        sizes="80px"
-                        className="object-cover"
-                      />
-                    </button>
-                  );
-                })}
+      <div className="min-h-screen bg-white text-black">
+        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-4 pb-16 lg:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-[54%_42%] gap-10 items-start">
+            {/* IMAGE SECTION */}
+            <div>
+              {/* Desktop: 2-column image grid */}
+              <div className="hidden md:grid grid-cols-2 gap-3">
+                {images.map((img, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => { setZoomImage(img); setZoomLoaded(false); }}
+                    className="relative w-full aspect-[3/4] overflow-hidden rounded-lg bg-[#f7f7f7] cursor-zoom-in"
+                  >
+                    {i === 0 && saleBadge}
+                    <ProductImage
+                      src={img}
+                      sizes="(min-width: 1024px) 27vw, 45vw"
+                      size="full"
+                      quality={90}
+                      alt={`${product.Description} ${i + 1}`}
+                      priority={i === 0}
+                      className="w-full h-full"
+                    />
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
 
-          {/* DETAILS */}
-          <div className="px-2 sm:px-0">
-            <div className="flex items-start justify-between mb-2 gap-3">
-              <h1
-                className="text-[#171813] leading-tight flex-1"
-                style={{
-                  fontFamily: "var(--font-cormorant)",
-                  fontWeight: '600',
-                  fontSize: '40px',
-                  lineHeight: '1.15',
-                  letterSpacing: '-0.01em'
-                }}
-              >
-                {(product as any).ProductName ? (product as any).ProductName : product.Description}
-              </h1>
-              {/* Share button: only visible on mobile */}
-              <div className="relative block sm:hidden ml-1 flex-shrink-0">
+              {/* Mobile: main image + horizontal thumbnail strip */}
+              <div className="md:hidden">
                 <button
-                  onClick={handleShare}
-                  className="w-10 h-10 bg-[#F1EEE7] hover:bg-[#D8D5CD] active:scale-95 transition-all duration-150 flex items-center justify-center flex-shrink-0"
-                  style={{ borderRadius: '50%' }}
-                  title="Share product"
+                  type="button"
+                  onClick={() => { setZoomImage(images[imageIndex]); setZoomLoaded(false); }}
+                  className="relative block w-full aspect-[4/5] overflow-hidden rounded-[12px] bg-[#f7f7f7]"
                 >
-                  <svg className="w-5 h-5 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
+                  {saleBadge}
+                  <ProductImage
+                    src={images[imageIndex] || "/placeholder.png"}
+                    sizes="100vw"
+                    size="full"
+                    quality={90}
+                    alt={product.Description}
+                    priority={imageIndex === 0}
+                    className="w-full h-full"
+                  />
                 </button>
-                {shareCopied && (
-                  <div className="absolute top-full mt-2 -right-2 bg-[#171813] text-white text-xs font-medium px-3 py-1.5 shadow-lg whitespace-nowrap">
-                    Link copied
+                {images.length > 1 && (
+                  <div className="flex gap-2.5 mt-3 overflow-x-auto scrollbar-hide">
+                    {images.map((img, i) => {
+                      const thumbUrl = imageSlots[i]?.thumb;
+                      const medUrl = imageSlots[i]?.medium;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setImageIndex(i)}
+                          className={`relative w-[82px] h-[82px] flex-shrink-0 overflow-hidden rounded-[6px] border transition-all duration-200 ${
+                            i === imageIndex
+                              ? "border-[#666] opacity-100 scale-[1.04]"
+                              : "border-transparent opacity-[0.68]"
+                          }`}
+                        >
+                          <Image
+                            src={thumbUrl || medUrl || img}
+                            alt={`Thumbnail ${i + 1}`}
+                            fill
+                            sizes="82px"
+                            className="object-cover"
+                          />
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </div>
 
-            {product?.SKU && (
-              <p className="text-xs text-[#9B998F] mt-2">{product.SKU}</p>
-            )}
-            <div className="mt-1">
-              <div
-                className="text-[#171813] flex items-baseline flex-wrap gap-x-3"
-                style={{
-                  fontFamily: "var(--font-cormorant)",
-                  fontWeight: '600',
-                  fontSize: '36px'
-                }}
-              >
-                <PriceText amount={pricing.selling} className="text-[#171813]" />
-                {pricing.discount > 0 && (
-                  <span className="text-lg text-[#9B998F] line-through font-normal"><PriceText amount={pricing.original} strikeThrough /></span>
-                )}
-              </div>
-            </div>
+            {/* DETAILS */}
+            <div className="w-full">
+              <div className="w-full bg-[#F7F7F7] rounded-[30px] px-6 sm:px-10 pt-8 sm:pt-10 pb-10">
+                {/* TITLE */}
+                <h1
+                  className="text-black"
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: 500,
+                    fontSize: "36px",
+                    lineHeight: 1.1,
+                    letterSpacing: "-1.1px",
+                  }}
+                >
+                  {(product as any).ProductName ? (product as any).ProductName : product.Description}
+                </h1>
 
-            {/* Discount */}
-            {pricing.discount > 0 && (
-              <p className="inline-block text-xs font-semibold text-[#171813] bg-[#F1EEE7] px-2.5 py-1 mt-2 mb-3">
-                {pricing.discount}% OFF
-              </p>
-            )}
-
-            {/* Shipping Time */}
-            {(product.StockType === "made_to_order" || isVariantFallback || product.DeliveryTime) && (
-              <p className="text-sm text-[#595B53] mb-3">
-                <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#595B53] hover:text-[#171813] transition-colors">Ships</Link> in {isVariantFallback ? (product.FallbackDeliveryTime || "7-10 days") : (product.DeliveryTime || "7-10 days")}
-                {isVariantFallback && <span className="text-xs text-[#595B53]/70 ml-1">(made to order for this variant)</span>}
-              </p>
-            )}
-
-            {/* Customisation Section */}
-            {product.IsCustomizable && (
-              <div className="mb-4 p-4 bg-[#F1EEE7] rounded-2xl">
-                <div className="flex items-start gap-2.5 mb-0">
-                  <svg className="w-5 h-5 text-[#171813] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-semibold text-[#171813]">Customisation Available</p>
-                    <p className="text-xs text-[#595B53] mt-0.5 leading-relaxed">
-                      {product.CustomizationNote || "This product can be customised to your preference. Add your requirements in the notes section at checkout."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* COLOUR SELECTOR */}
-            {(product.Colors || []).length > 0 && (
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-[#595B53]">Colour: <span className="font-semibold text-[#171813]">{selectedColor}</span></p>
-                <div className="flex gap-2 flex-wrap">
-                  {product.Colors!.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-lg font-semibold transition-all duration-150 text-sm ${
-                        selectedColor === color
-                          ? "bg-[#171813] text-white border-[#171813] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
-                          : "bg-white border-[#D8D5CD] text-[#171813] hover:border-[#595B53] hover:bg-[#FFFFFF]"
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SIZE SELECTOR (dynamic from product data) */}
-            {(product.Sizes || []).length > 0 && (
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-[#595B53]">Size: <span className="font-semibold text-[#171813]">{selectedSize}</span></p>
-                <div className="flex gap-2 flex-wrap">
-                  {product.Sizes!.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-lg font-semibold transition-all duration-150 text-sm ${
-                        selectedSize === size
-                          ? "bg-[#171813] text-white border-[#171813] shadow-[0_2px_6px_rgba(210,105,63,0.3)]"
-                          : "bg-white border-[#D8D5CD] text-[#171813] hover:border-[#595B53] hover:bg-[#FFFFFF]"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ADD TO CART / QUANTITY STEPPER */}
-            <div className="mb-5">
-              {availableStock === 0 && !isMadeToOrder && !isVariantFallback && (
-                <p className="text-sm text-[#C52020] mb-2 font-medium">
-                  {isGeneralStockProduct ? "Out of stock" : `Out of stock in ${selectedColor ? selectedColor + " / " : ""}size ${selectedSize}`}
+                {/* PRICE */}
+                <p
+                  className="mt-3 flex items-baseline flex-wrap gap-x-3 text-[20px] tracking-[0.8px] text-[#111]"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  {onSale && (
+                    <span className="text-[#a6a6a6] line-through text-[17px]">
+                      <PriceText amount={pricing.original} />
+                    </span>
+                  )}
+                  <PriceText amount={pricing.selling} className="text-[#111]" />
                 </p>
-              )}
-              <div className="relative" style={{ height: '54px', width: '350px', maxWidth: '100%' }}>
-                {/* Add to Cart */}
+
+                {/* STOCK STATUS */}
+                <div className="flex items-center gap-2.5 mt-2.5 mb-4 text-[16px] text-black" style={{ fontFamily: "var(--font-body)" }}>
+                  <span className={`mh-stock-dot ${stockClass}`} />
+                  <span>{stockLabel}</span>
+                </div>
+
+                {/* COLOUR SELECTOR */}
+                {(product.Colors || []).length > 0 && (
+                  <div className="mb-4">
+                    <p className="mb-2.5 text-[14px] font-medium text-[#111]">Colour: <span className="text-[#404040]">{selectedColor}</span></p>
+                    <div className="flex gap-2 flex-wrap">
+                      {product.Colors!.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => { setSelectedColor(color); setQty(1); }}
+                          className={`min-w-[50px] h-[42px] px-2.5 rounded-lg border text-[14px] font-medium transition-all duration-150 ${
+                            selectedColor === color
+                              ? "border-[#111] border-[1.5px] scale-[1.03] text-black bg-white"
+                              : "border-[#d4d4d4] bg-white text-[#111] hover:border-[#777]"
+                          }`}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* SIZE SELECTOR (dynamic from product data) */}
+                {(product.Sizes || []).length > 0 && (
+                  <div className="mb-4">
+                    <p className="mb-2.5 text-[14px] font-medium text-[#111]">Size: <span className="text-[#404040]">{selectedSize}</span></p>
+                    <div className="flex gap-2 flex-wrap">
+                      {product.Sizes!.map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => { setSelectedSize(size); setQty(1); }}
+                          className={`min-w-[50px] h-[42px] px-2.5 rounded-lg border text-[14px] font-medium transition-all duration-150 ${
+                            selectedSize === size
+                              ? "border-[#111] border-[1.5px] scale-[1.03] text-black bg-white"
+                              : "border-[#d4d4d4] bg-white text-[#111] hover:border-[#777]"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* QUANTITY */}
+                <p className="text-[16px] font-medium text-black mb-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                  Quantity
+                </p>
+                <div className="inline-flex items-center justify-center w-[150px] max-w-full h-12 border border-[#dddddd] rounded-full overflow-hidden bg-transparent">
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    disabled={qty <= 1}
+                    className="w-[50px] h-[46px] text-[20px] leading-none text-black hover:bg-black/5 active:scale-90 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                  >
+                    −
+                  </button>
+                  <span className="flex-1 text-center text-[16px] font-medium text-black select-none">{qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => q + 1)}
+                    disabled={!isMadeToOrder && qty >= availableStock}
+                    className="w-[50px] h-[46px] text-[20px] leading-none text-black hover:bg-black/5 active:scale-90 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* ADD TO CART */}
                 <button
-                  onClick={() => handleAddToCart(1)}
-                  disabled={availableStock === 0 && !isVariantFallback}
-                  className={`absolute inset-0 rounded-full flex items-center justify-center px-2 transition-all duration-300 ease-in-out ${
-                    cartQuantity > 0 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-                  } ${
-                    availableStock === 0 && !isVariantFallback
-                      ? 'bg-[#F1EEE7] text-[#9B998F] cursor-not-allowed'
-                      : 'bg-[#171813] hover:bg-[#171813] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
+                  onClick={() => handleAddToCart(qty)}
+                  disabled={isSoldOut}
+                  className={`mt-3.5 w-full min-h-[52px] rounded-full flex items-center justify-center px-5 text-[15px] font-medium uppercase tracking-[1px] transition-colors ${
+                    isSoldOut
+                      ? "bg-[#b3b3b3] text-white cursor-not-allowed"
+                      : "bg-black text-white hover:bg-black active:scale-[0.99]"
                   }`}
-                  style={{ fontFamily: "var(--font-cormorant)", fontWeight: '600', fontSize: '14px', letterSpacing: '0.02em' }}
                 >
-                  {availableStock === 0 && !isVariantFallback ? 'Sold Out' : 'Add to Cart'}
+                  {isSoldOut ? "Sold out" : "Add to cart"}
                 </button>
-
-                {/* Quantity stepper */}
-                <div className={`flex items-center border border-[#D8D5CD] bg-white overflow-hidden rounded-full absolute inset-0 transition-all duration-300 ease-in-out ${
-                  cartQuantity > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-                }`}>
-                  <button
-                    onClick={handleRemoveFromCart}
-                    className="flex items-center justify-center flex-1 text-[#171813] hover:bg-[#F1EEE7] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                    disabled={cartQuantity <= 0}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
-                  </button>
-                  <span
-                    className="flex items-center justify-center text-[#171813] select-none"
-                    style={{ fontFamily: "var(--font-cormorant)", fontWeight: '700', fontSize: '20px', minWidth: '60px', textAlign: 'center' }}
-                  >
-                    {cartQuantity}
-                  </span>
-                  <button
-                    onClick={() => handleAddToCart(1)}
-                    className="flex items-center justify-center flex-1 text-[#171813] hover:bg-[#F1EEE7] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                    disabled={!isMadeToOrder && availableStock <= 0}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              {showAdded && (
-                <div className="text-[#2E7D4F] text-sm mt-2">
-                  Added to Cart!
-                </div>
-              )}
-            </div>
-
-              {/* Description */}
-              <div className="mt-6 text-sm text-[#171813]">
-                <h3 className="font-semibold text-[#171813] mb-1.5 tracking-wide">Description</h3>
-                <p className="text-sm text-[#595B53] leading-relaxed whitespace-pre-line">{product.Description}</p>
-              </div>
-
-              {/* Divider */}
-              <hr className="border-t border-[#D8D5CD] my-5" />
-
-              {/* CARE Dropdown */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setCareOpen(!careOpen)}
-                  className="w-full flex items-center justify-between text-sm font-semibold text-[#171813] py-1.5 tracking-wide"
-                >
-                  <span>CARE</span>
-                  <svg className={`w-4 h-4 text-[#595B53] transition-transform duration-200 ${careOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {careOpen && (
-                  <p className="text-sm text-[#595B53] leading-relaxed whitespace-pre-line mt-2">{product.Care || 'No care instructions available.'}</p>
+                {showAdded && (
+                  <p className="text-[#2E7D4F] text-sm mt-2.5">Added to Cart!</p>
                 )}
+
+                {/* SHARE */}
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShareOpen((v) => !v)}
+                    className="flex items-center gap-3 text-[#424242]"
+                  >
+                    <svg className="w-6 h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span className="text-[20px] font-medium" style={{ fontFamily: "var(--font-body)" }}>Share</span>
+                  </button>
+                  {shareOpen && (
+                    <div className="mt-3 space-y-3">
+                      <a
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-[#595B53] hover:text-black transition-colors"
+                      >
+                        <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        <span className="text-xs underline underline-offset-2">Share on Facebook</span>
+                      </a>
+                      <a
+                        href={`https://wa.me/?text=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-[#595B53] hover:text-black transition-colors"
+                      >
+                        <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        <span className="text-xs underline underline-offset-2">Share on WhatsApp</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleShare}
+                        className="flex items-center gap-3 text-[#595B53] hover:text-black transition-colors"
+                      >
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        <span className="text-xs underline underline-offset-2">{shareCopied ? 'Link Copied!' : 'Copy Link'}</span>
+                      </button>
+                      <a
+                        href={`mailto:?subject=${typeof window !== 'undefined' ? encodeURIComponent(document.title) : ''}&body=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
+                        className="flex items-center gap-3 text-[#595B53] hover:text-black transition-colors"
+                      >
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        <span className="text-xs underline underline-offset-2">Share via Email</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Divider */}
-              <hr className="border-t border-[#D8D5CD] my-5" />
+              {/* ACCORDION CARD */}
+              <div className="mt-3 bg-[#F7F7F7] rounded-[19px] px-5 pt-3 pb-4">
+                {/* Description */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleAccordion("desc")}
+                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
+                  >
+                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Description</span>
+                    <PlusMinus open={descOpen} />
+                  </button>
+                  {descOpen && (
+                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed whitespace-pre-line" style={{ fontFamily: "var(--font-body)" }}>
+                      {product.Description}
+                    </p>
+                  )}
+                </div>
 
-              {/* QUESTIONS? Dropdown */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setQuestionsOpen(!questionsOpen)}
-                  className="w-full flex items-center justify-between text-sm font-semibold text-[#171813] py-1.5 tracking-wide"
-                >
-                  <span>QUESTIONS?</span>
-                  <svg className={`w-4 h-4 text-[#595B53] transition-transform duration-200 ${questionsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {questionsOpen && (
-                  <p className="text-sm text-[#595B53] leading-relaxed mt-2">
-                    Please reach out to us on <a href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" className="underline text-[#171813] hover:text-[#171813] transition-colors">WhatsApp</a> or email us at <a href="mailto:support@thesagarsdesignhouse.com" className="underline text-[#171813] hover:text-[#171813] transition-colors">support@thesagarsdesignhouse.com</a> and we'll be happy to help.
-                  </p>
+                {/* Customisation */}
+                {product.IsCustomizable && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion("custom")}
+                      className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
+                    >
+                      <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Customisation</span>
+                      <PlusMinus open={customOpen} />
+                    </button>
+                    {customOpen && (
+                      <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                        {product.CustomizationNote || "This product can be customised to your preference. Add your requirements in the notes section at checkout."}
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
 
-              {/* Divider */}
-              <hr className="border-t border-[#D8D5CD] my-5" />
-
-              {/* Social Share — full width, icons + underlined text */}
-              <div className="space-y-3">
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  <span className="text-xs underline underline-offset-2">Share on Facebook</span>
-                </a>
-                <a
-                  href={`https://wa.me/?text=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                  <span className="text-xs underline underline-offset-2">Share on WhatsApp</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                  <span className="text-xs underline underline-offset-2">{shareCopied ? 'Link Copied!' : 'Copy Link'}</span>
-                </button>
-                <a
-                  href={`mailto:?subject=${typeof window !== 'undefined' ? encodeURIComponent(document.title) : ''}&body=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
-                  className="flex items-center gap-3 text-[#595B53] hover:text-[#171813] transition-colors"
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                  <span className="text-xs underline underline-offset-2">Share via Email</span>
-                </a>
-              </div>
-
-              <div className="space-y-3 mt-5 pt-5 border-t border-[#D8D5CD]">
-                <div className="flex items-center space-x-3">
-                  <span className="w-8 h-8 bg-[#F1EEE7] flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                  <span
-                    className="text-[#171813]"
-                    style={{
-                      fontFamily: "var(--font-cormorant)",
-                      fontWeight: '400',
-                      fontSize: '13px'
-                    }}
+                {/* Care */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleAccordion("care")}
+                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
                   >
-                    PAN Malaysia & Worldwide Shipping
-                  </span>
+                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Care</span>
+                    <PlusMinus open={careOpen} />
+                  </button>
+                  {careOpen && (
+                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed whitespace-pre-line" style={{ fontFamily: "var(--font-body)" }}>
+                      {product.Care || 'No care instructions available.'}
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="w-8 h-8 bg-[#F1EEE7] flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-[#171813]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-7V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </span>
-                  <span
-                    className="text-[#171813]"
-                    style={{
-                      fontFamily: "var(--font-cormorant)",
-                      fontWeight: '400',
-                      fontSize: '13px'
-                    }}
+
+                {/* Questions */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleAccordion("questions")}
+                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
                   >
-                    Secure payment processing through Razorpay
-                  </span>
+                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Questions?</span>
+                    <PlusMinus open={questionsOpen} />
+                  </button>
+                  {questionsOpen && (
+                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                      Please reach out to us on <a href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" className="underline text-black">WhatsApp</a> or email us at <a href="mailto:support@thesagarsdesignhouse.com" className="underline text-black">support@thesagarsdesignhouse.com</a> and we'll be happy to help.
+                    </p>
+                  )}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
+      </div>
 
       {/* SIMILAR PRODUCTS */}
       {similarProducts.length > 0 && (
-        <div className="mt-4 lg:mt-10 pt-6 pb-8 lg:pb-16 border-t border-[#D8D5CD] px-1 sm:px-8 lg:px-12">
-          <h3 className="text-[24px] lg:text-[28px] text-[#171813] mb-5" style={{ fontFamily: "var(--font-cormorant)" }}>Similar Products</h3>
+        <div className="mx-auto max-w-[1240px] mt-4 lg:mt-10 pt-8 pb-8 lg:pb-16 border-t border-[#e1dfdc] px-5 sm:px-8">
+          <h3 className="text-[24px] lg:text-[28px] text-black mb-5" style={{ fontFamily: "var(--font-heading)" }}>Similar Products</h3>
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 lg:grid lg:grid-cols-4 lg:gap-5 lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0">
             {similarProducts.map((sp) => (
               <button
@@ -929,7 +875,7 @@ export default function ProductPage() {
                 onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(sp))}`)}
                 className="flex-shrink-0 w-[140px] lg:w-auto snap-start text-left group"
               >
-                <div className="w-full aspect-[3/4] overflow-hidden rounded-[22px] bg-[#F1EEE7] mb-2">
+                <div className="w-full aspect-[3/4] overflow-hidden rounded-[8px] bg-[#f7f7f7] mb-2">
                   <ProductImage
                     src={(sp as any).ImageUrl1}
                     srcMedium={(sp as any).ImageUrl1Medium}
@@ -939,10 +885,10 @@ export default function ProductPage() {
                     className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <p className="text-sm text-[#171813] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
+                <p className="text-sm text-black leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
                 <PriceText
                   amount={resolvePricing({ Price: sp.Price, OriginalPrice: (sp as any).OriginalPrice, DiscountPercent: sp.DiscountPercent }).selling}
-                  className="text-sm font-bold text-[#171813] mt-1"
+                  className="text-sm font-bold text-black mt-1"
                 />
               </button>
             ))}
@@ -952,21 +898,21 @@ export default function ProductPage() {
 
       {/* STYLE IT WITH */}
       {relatedProducts.length > 0 && (
-        <div className="relative z-10 bg-white text-[#171813] pl-8 pr-8 sm:pl-16 sm:pr-16 lg:pl-32 lg:pr-32 pt-0 pb-12 -mt-16">
-          <hr className="border-t border-[#F1EEE7] mb-6" />
+        <div className="relative z-10 mx-auto max-w-[1240px] bg-white text-black px-5 sm:px-8 pt-0 pb-12">
+          <hr className="border-t border-[#e1dfdc] mb-6" />
           <h2
-            className="text-[#171813] mb-5"
-            style={{ fontFamily: "var(--font-cormorant)", fontWeight: '600', fontSize: '26px' }}
+            className="text-black mb-5"
+            style={{ fontFamily: "var(--font-heading)", fontWeight: '600', fontSize: '26px' }}
           >
             Style It With
           </h2>
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 lg:grid-cols-4 sm:gap-5">
             {relatedProducts.map((rp) => (
-              <div key={rp.ID} className="flex-shrink-0 w-1/2 sm:w-auto snap-start text-[#171813] transition px-1">
+              <div key={rp.ID} className="flex-shrink-0 w-1/2 sm:w-auto snap-start text-black transition px-1">
                 <button
                   type="button"
                   onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(rp))}`)}
-                  className="cursor-pointer block w-full overflow-hidden rounded-[22px] bg-[#F1EEE7] transition-all duration-300"
+                  className="cursor-pointer block w-full overflow-hidden rounded-[8px] bg-[#f7f7f7] transition-all duration-300"
                   aria-label={`View ${(rp as any).ProductName || rp.Description}`}
                 >
                   <ProductImage
@@ -980,8 +926,8 @@ export default function ProductPage() {
                 </button>
 
                 <div className="flex flex-col items-start mt-2.5">
-                  <p className="text-sm font-medium text-[#171813] leading-snug">{(rp as any).ProductName || rp.Description}</p>
-                  <PriceText amount={resolvePricing({ Price: rp.Price, OriginalPrice: (rp as any).OriginalPrice, DiscountPercent: rp.DiscountPercent }).selling} className="font-bold text-base text-[#171813] mt-1" />
+                  <p className="text-sm font-medium text-black leading-snug">{(rp as any).ProductName || rp.Description}</p>
+                  <PriceText amount={resolvePricing({ Price: rp.Price, OriginalPrice: (rp as any).OriginalPrice, DiscountPercent: rp.DiscountPercent }).selling} className="font-bold text-base text-black mt-1" />
                 </div>
               </div>
             ))}
@@ -990,7 +936,7 @@ export default function ProductPage() {
       )}
       {showSizeChart && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+          className="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
           onClick={() => setShowSizeChart(false)}
         >
           <div
@@ -1000,7 +946,7 @@ export default function ProductPage() {
             {/* Close button */}
             <button
               onClick={() => setShowSizeChart(false)}
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#F1EEE7] hover:bg-[#D8D5CD] text-[#171813] text-lg font-bold transition-colors"
+              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#f2f0ed] hover:bg-[#e1dfdc] text-black text-lg font-bold transition-colors"
             >
               ✕
             </button>
@@ -1018,7 +964,7 @@ export default function ProductPage() {
 
       {zoomImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center px-4"
+          className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-sm flex items-center justify-center px-4"
           onClick={() => { setZoomImage(null); setZoomLoaded(false); }}
         >
           <div
@@ -1045,8 +991,6 @@ export default function ProductPage() {
           </div>
         </div>
       )}
-
-      {/* <ReviewCarousel /> removed as per request */}
     </>
   );
 }
