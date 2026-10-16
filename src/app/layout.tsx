@@ -55,15 +55,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
-
       </head>
       <body
-      className={`${dmSans.variable} ${cormorantGaramond.variable} antialiased min-h-screen bg-white text-[#171813]`}
->
+        suppressHydrationWarning
+        className={`${dmSans.variable} ${cormorantGaramond.variable} antialiased min-h-screen bg-white text-[#171813]`}
+      >
+        <script dangerouslySetInnerHTML={{ __html: "if (typeof document !== 'undefined') { document.documentElement.classList.add('js-reveal'); }" }} />
 
         <AuthProvider>
           <CartProvider>

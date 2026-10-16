@@ -53,3 +53,11 @@ export async function uploadCategoryImage(file: File): Promise<string> {
   const result = await postToCloudinary(file, "categories");
   return result.url;
 }
+
+export async function uploadHomeImage(
+  file: File,
+  folder: string = "homepage"
+): Promise<string> {
+  const result = await postToCloudinary(file, folder);
+  return result.url;
+}
