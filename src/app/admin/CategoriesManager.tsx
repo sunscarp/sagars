@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useCategories, Category, FONT_OPTIONS, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
+import { useCategories, Category, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
 import { uploadCategoryImage } from "@/utils/uploadImage";
+
+// Uniform presentation values used across every category.
+const UNIFORM_BG_COLOR = "#F1EEE7";
+const UNIFORM_FONT = "var(--font-cormorant)";
+const UNIFORM_TEXT_SIZE = 4;
 
 export default function CategoriesManager() {
   const { categories, loading, addCategory, removeCategory, updateCategory, addSubcategory, removeSubcategory, updateSubcategory } = useCategories();
@@ -11,21 +16,15 @@ export default function CategoriesManager() {
   // Add form
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState("");
-  const [newBgColor, setNewBgColor] = useState("#F1EEE7");
-  const [newMainTextFont, setNewMainTextFont] = useState("var(--font-cormorant)");
-  const [newMainTextSize, setNewMainTextSize] = useState(4);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editImage, setEditImage] = useState("");
-  const [editMainText, setEditMainText] = useState("");
-  const [editBgColor, setEditBgColor] = useState("#F1EEE7");
-  const [editMainTextFont, setEditMainTextFont] = useState("var(--font-cormorant)");
-  const [editMainTextSize, setEditMainTextSize] = useState(4);
   const [editOrder, setEditOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Subcategory state
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
@@ -45,12 +44,9 @@ export default function CategoriesManager() {
       return;
     }
     try {
-      await addCategory(newName.trim(), newImage.trim(), undefined, newBgColor, newMainTextFont, newMainTextSize);
+      await addCategory(newName.trim(), newImage.trim());
       setNewName("");
       setNewImage("");
-      setNewBgColor("#F1EEE7");
-      setNewMainTextFont("var(--font-cormorant)");
-      setNewMainTextSize(4);
     } catch (err: any) {
       setError(err.message || "Failed to add category");
     }
@@ -70,10 +66,6 @@ export default function CategoriesManager() {
     setEditingId(cat.id);
     setEditName(cat.name);
     setEditImage(cat.image || "");
-    setEditMainText(cat.mainText || "");
-    setEditBgColor(cat.bgColor || "#F1EEE7");
-    setEditMainTextFont(cat.mainTextFont || "var(--font-cormorant)");
-    setEditMainTextSize(cat.mainTextSize || 4);
     setEditOrder(cat.order);
   };
 
@@ -94,12 +86,11 @@ export default function CategoriesManager() {
       const updates: Record<string, any> = {
         name: editName.trim(),
         image: editImage.trim(),
-        bgColor: editBgColor,
-        mainTextFont: editMainTextFont,
-        mainTextSize: editMainTextSize,
+        bgColor: UNIFORM_BG_COLOR,
+        mainTextFont: UNIFORM_FONT,
+        mainTextSize: UNIFORM_TEXT_SIZE,
         order: editOrder,
       };
-      if (editMainText.trim()) updates.mainText = editMainText.trim();
       await updateCategory(editingId, updates);
       setEditingId(null);
     } catch (err: any) {
@@ -164,36 +155,6 @@ export default function CategoriesManager() {
     }
   };
 
-  function PreviewCard({ bgColor, name, mainText, mainTextFont, mainTextSize }: { bgColor: string; name: string; mainText?: string; mainTextFont: string; mainTextSize: number }) {
-    return (
-      <div className="sm:col-span-2 mt-2">
-        <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-2">Preview</label>
-        <div className="flex gap-6 items-start flex-wrap">
-          <div>
-            <div className="text-[10px] text-[#9B998F] text-center mb-1.5 font-medium">Mobile</div>
-            <div className="w-[180px] aspect-[3/4] flex flex-col items-center justify-center p-2 border border-[#E1DFDC] rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
-              <div className="border border-[#171813]/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
-                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#171813] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
-                  {mainText || name}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] text-[#9B998F] text-center mb-1.5 font-medium">Desktop</div>
-            <div className="w-[260px] aspect-[3/4] flex flex-col items-center justify-center p-4 border border-[#E1DFDC] rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
-              <div className="border border-[#171813]/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
-                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#171813] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
-                  {mainText || name}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {error && (
@@ -206,56 +167,27 @@ export default function CategoriesManager() {
       {/* Add form */}
       <div className="bg-white rounded-xl border border-[#E1DFDC] p-6">
         <h3 className="text-sm font-semibold text-[#171813] mb-4">Add New Category</h3>
-        <form onSubmit={handleAdd} className="space-y-3">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Category name"
-              className="flex-1 rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-4 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-            />
-            <input
-              type="text"
-              value={newImage}
-              onChange={(e) => setNewImage(e.target.value)}
-              placeholder="Image URL (optional)"
-              className="rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-4 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-            />
-            <div className="flex items-center gap-2 shrink-0">
-              <label className="text-[10px] font-semibold text-[#595B53] uppercase tracking-wider">Bg</label>
-              <input
-                type="color"
-                value={newBgColor}
-                onChange={(e) => setNewBgColor(e.target.value)}
-                className="w-9 h-9 rounded border border-[#E1DFDC] cursor-pointer"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-lg bg-[#171813] text-white text-sm font-semibold hover:bg-[#171813] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
-            >
-              Add Category
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={newMainTextFont}
-              onChange={(e) => setNewMainTextFont(e.target.value)}
-              className="rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-            >
-              {FONT_OPTIONS.map(f => (
-                <option key={f.value} value={f.value}>{f.label}</option>
-              ))}
-            </select>
-            <select
-              value={newMainTextSize}
-              onChange={(e) => setNewMainTextSize(Number(e.target.value))}
-              className="rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-3 py-2 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-            >
-              {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
-            </select>
-          </div>
+        <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Category name"
+            className="flex-1 rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-4 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
+          />
+          <input
+            type="text"
+            value={newImage}
+            onChange={(e) => setNewImage(e.target.value)}
+            placeholder="Image URL (optional)"
+            className="flex-1 rounded-lg border border-[#E1DFDC] bg-[#F1EEE7]/50 px-4 py-2.5 text-sm text-[#171813] placeholder-[#9B998F] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
+          />
+          <button
+            type="submit"
+            className="px-6 py-2.5 rounded-lg bg-[#171813] text-white text-sm font-semibold hover:bg-[#171813] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
+          >
+            Add Category
+          </button>
         </form>
       </div>
 
@@ -304,67 +236,55 @@ export default function CategoriesManager() {
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Background Color</label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={editBgColor}
-                              onChange={(e) => setEditBgColor(e.target.value)}
-                              className="w-9 h-9 rounded border border-[#E1DFDC] cursor-pointer shrink-0"
-                            />
-                            <input
-                              type="text"
-                              value={editBgColor}
-                              onChange={(e) => setEditBgColor(e.target.value)}
-                              className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all font-mono"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Main Font</label>
-                          <select
-                            value={editMainTextFont}
-                            onChange={(e) => setEditMainTextFont(e.target.value)}
-                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-                          >
-                            {FONT_OPTIONS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Main Size</label>
-                          <select
-                            value={editMainTextSize}
-                            onChange={(e) => setEditMainTextSize(Number(e.target.value))}
-                            className="w-full rounded-lg border border-[#E1DFDC] bg-white px-3.5 py-2.5 text-sm text-[#171813] focus:outline-none focus:ring-2 focus:ring-[#595B53]/40 focus:border-[#595B53] transition-all"
-                          >
-                            {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
-                          </select>
-                        </div>
-
                       </div>
 
-                    {/* Image Upload */}
+                    {/* Image */}
                     <div className="mt-4">
-                      <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-1.5">Image</label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleImageUpload(file);
-                          }}
-                          disabled={uploadingImg}
-                          className="text-sm"
-                        />
-                        {uploadingImg && <span className="text-xs text-[#9B998F]">Uploading...</span>}
-                      </div>
-                      {editImage && (
-                        <div className="mt-2 w-32 h-40 relative border rounded overflow-hidden">
-                          <img src={editImage} alt="Category" className="w-full h-full object-cover" />
+                      <label className="block text-[10px] font-semibold text-[#595B53] uppercase tracking-wider mb-2">Image</label>
+                      <div className="flex items-start gap-4">
+                        <div className="w-24 h-32 rounded-lg border border-[#E1DFDC] bg-[#F1EEE7] overflow-hidden flex items-center justify-center shrink-0">
+                          {editImage ? (
+                            <img src={editImage} alt="Category preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <svg className="w-7 h-7 text-[#C4C1B9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21zm10.5-11.25h.008v.008h-.008V9.75z" />
+                            </svg>
+                          )}
                         </div>
-                      )}
+                        <div className="flex flex-col gap-2">
+                          <input
+                            ref={fileInputRef}
+                            id="category-image-input"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={uploadingImg}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <label
+                            htmlFor="category-image-input"
+                            className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[#E1DFDC] text-sm font-medium text-[#171813] transition-colors ${uploadingImg ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-[#F1EEE7]"}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v12m0-12l-4.5 4.5M12 3l4.5 4.5M4.5 20.25h15" />
+                            </svg>
+                            {uploadingImg ? "Uploading..." : editImage ? "Change image" : "Choose file"}
+                          </label>
+                          {editImage && !uploadingImg && (
+                            <button
+                              type="button"
+                              onClick={() => setEditImage("")}
+                              className="text-xs text-red-500 hover:text-red-700 transition-colors self-start"
+                            >
+                              Remove image
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Actions */}

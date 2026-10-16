@@ -37,34 +37,51 @@ type Product = {
 };
 
 function CategoryCard({ cat }: { cat: Category }) {
+  const hasImage = !!cat.image;
   return (
     <Link
       href={`/shop?category=${encodeURIComponent(cat.name)}`}
-      className="group block overflow-hidden rounded-[22px]"
+      className="group relative block aspect-[3/4] overflow-hidden rounded-[22px]"
+      style={hasImage ? undefined : { backgroundColor: cat.bgColor || '#F1EEE7' }}
     >
-      <div
-        className="relative aspect-[3/4] flex flex-col"
-        style={{ backgroundColor: cat.bgColor || '#F1EEE7' }}
-      >
-        {cat.image && (
-          <div className="relative flex-1 overflow-hidden">
-            <Image
-              src={cat.image}
-              alt={cat.name}
-              fill
-              className="object-cover transition-all duration-500 group-hover:blur-sm"
-              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-            />
-          </div>
-        )}
-        <div className="flex items-center justify-center p-4 text-center min-h-[80px]">
-          <span
-            style={{ fontFamily: cat.mainTextFont || "var(--font-dm-sans)", wordBreak: 'keep-all' }}
-            className={"text-[#171813] leading-[1.05] max-w-full " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}
-          >
-            {cat.name}
-          </span>
-        </div>
+      {hasImage && (
+        <Image
+          src={cat.image!}
+          alt={cat.name}
+          fill
+          className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.04] group-hover:blur-sm"
+          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+        />
+      )}
+      {hasImage && (
+        <div
+          className="absolute inset-0 z-[1] opacity-90 transition-opacity duration-700 group-hover:opacity-100"
+          style={{
+            background:
+              "radial-gradient(120% 90% at 50% 50%, rgba(23,24,19,0.55) 0%, rgba(23,24,19,0.18) 55%, rgba(23,24,19,0.45) 100%)",
+          }}
+        />
+      )}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-4 text-center">
+        <span
+          className={
+            "text-[10px] uppercase tracking-[0.28em] " +
+            (hasImage ? "text-white/75" : "text-[#595B53]")
+          }
+          style={{ fontFamily: "var(--font-body)" }}
+        >
+          Collection
+        </span>
+        <span
+          className={
+            "leading-[1.08] max-w-full " +
+            (hasImage ? "text-white " : "text-[#171813] ") +
+            (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])
+          }
+          style={{ fontFamily: cat.mainTextFont || "var(--font-heading)", wordBreak: 'keep-all' }}
+        >
+          {cat.name}
+        </span>
       </div>
     </Link>
   );
