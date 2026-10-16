@@ -20,6 +20,7 @@ import { resolvePricing } from "@/utils/pricing";
 import { getProductSlug, parseProductSlug } from "@/utils/productSlug";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
+import { usePolicies } from "@/hooks/usePolicies";
 import Image from "next/image";
 
 type Product = {
@@ -70,6 +71,7 @@ export default function ProductPage() {
   const { user } = useAuth();
   const { addItem } = useCart();
   const { openCart } = useCartSidebar();
+  const { policies } = usePolicies();
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
   const [zoomLoaded, setZoomLoaded] = useState(false);
@@ -85,10 +87,9 @@ export default function ProductPage() {
   const [cartQuantity, setCartQuantity] = useState(0);
   const [cartQuantityForVariant, setCartQuantityForVariant] = useState<Record<string, number>>({});
   const [qty, setQty] = useState(1);
-  const [descOpen, setDescOpen] = useState(true);
-  const [careOpen, setCareOpen] = useState(false);
-  const [questionsOpen, setQuestionsOpen] = useState(false);
-  const [customOpen, setCustomOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [shippingOpen, setShippingOpen] = useState(false);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const [showAdded, setShowAdded] = useState(false);
 
   // Fetch product
@@ -294,6 +295,18 @@ export default function ProductPage() {
     if (nextIdx !== prevIdx) preload(prevIdx);
   }, [imageIndex, product]);
 
+  // Close the size guide / zoom overlays on Escape.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowSizeChart(false);
+        setZoomImage(null);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white">
@@ -397,6 +410,25 @@ export default function ProductPage() {
   const isLowStock = !isSoldOut && !isMadeToOrder && availableStock > 0 && availableStock <= 5;
   const stockClass = isSoldOut ? "mh-stock-out" : isLowStock ? "mh-stock-low" : "mh-stock-in";
   const stockLabel = isSoldOut ? "Out of stock" : isLowStock ? `Only ${availableStock} left` : "In stock";
+
+  // Only show the description separately when it differs from the display name.
+  const displayName = (product as any).ProductName || product.Description;
+  const showDescription = !!(product as any).ProductName && product.Description !== (product as any).ProductName;
+
+  // Production / delivery estimate, sourced from existing product configuration.
+  const deliveryRaw = isMadeToOrder
+    ? (product.DeliveryTime || "")
+    : isVariantFallback
+    ? ((product as any).FallbackDeliveryTime || "")
+    : (product.DeliveryTime || "");
+  const deliveryText = deliveryRaw
+    ? (isMadeToOrder || isVariantFallback ? `Made to order: ${deliveryRaw}` : `Delivery: ${deliveryRaw}`)
+    : "";
+
+  // Disclaimer content reuses the existing product-accuracy terms.
+  const disclaimerSections = policies.tos.sections.filter((s) =>
+    /accuracy|pricing/i.test(s.heading)
+  );
 
   const handleAddToCart = async (addQty?: number) => {
     const quantity = addQty ?? 1;
@@ -506,25 +538,14 @@ export default function ProductPage() {
     }
   };
 
-  const toggleAccordion = (key: "desc" | "custom" | "care" | "questions") => {
-    setDescOpen(key === "desc" ? !descOpen : false);
-    setCustomOpen(key === "custom" ? !customOpen : false);
-    setCareOpen(key === "care" ? !careOpen : false);
-    setQuestionsOpen(key === "questions" ? !questionsOpen : false);
-  };
-
-  const PlusMinus = ({ open }: { open: boolean }) => (
+  const Chevron = ({ open }: { open: boolean }) => (
     <svg
-      className="w-3.5 h-3.5 text-[#404040] flex-shrink-0"
+      className={`w-4 h-4 text-[#171813] flex-shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
     >
-      {open ? (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-      ) : (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      )}
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
     </svg>
   );
 
@@ -538,8 +559,8 @@ export default function ProductPage() {
     <>
       {/* MAIN PRODUCT SECTION */}
       <div className="min-h-screen bg-white text-black">
-        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-4 pb-16 lg:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-[54%_42%] gap-10 items-start">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 pt-4 pb-16 lg:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-[55%_1fr] gap-10 lg:gap-16 items-start">
             {/* IMAGE SECTION */}
             <div>
               {/* Desktop: 2-column image grid */}
@@ -615,55 +636,78 @@ export default function ProductPage() {
             </div>
 
             {/* DETAILS */}
-            <div className="w-full">
-              <div className="w-full bg-[#F7F7F7] rounded-[30px] px-6 sm:px-10 pt-8 sm:pt-10 pb-10">
+            <div className="w-full max-w-[560px]">
+              <div>
                 {/* TITLE */}
                 <h1
-                  className="text-black"
+                  className="text-[#171813]"
                   style={{
                     fontFamily: "var(--font-heading)",
                     fontWeight: 500,
-                    fontSize: "36px",
+                    fontSize: "38px",
                     lineHeight: 1.1,
-                    letterSpacing: "-1.1px",
+                    letterSpacing: "-0.5px",
                   }}
                 >
-                  {(product as any).ProductName ? (product as any).ProductName : product.Description}
+                  {displayName}
                 </h1>
 
+                {/* DESCRIPTION */}
+                {showDescription && (
+                  <p
+                    className="mt-4 text-[15px] leading-[1.7] text-[#6b6b6b]"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {product.Description}
+                  </p>
+                )}
+
                 {/* PRICE */}
-                <p
-                  className="mt-3 flex items-baseline flex-wrap gap-x-3 text-[20px] tracking-[0.8px] text-[#111]"
+                <div
+                  className="mt-6 flex items-baseline flex-wrap gap-x-3"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   {onSale && (
-                    <span className="text-[#a6a6a6] line-through text-[17px]">
+                    <span className="text-[#a6a6a6] line-through text-[16px]">
                       <PriceText amount={pricing.original} />
                     </span>
                   )}
-                  <PriceText amount={pricing.selling} className="text-[#111]" />
+                  <PriceText
+                    amount={pricing.selling}
+                    className="text-[#171813] text-[19px] tracking-[0.04em]"
+                  />
+                </div>
+                <p
+                  className="mt-1 text-[12px] text-[#9b998f]"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  Inclusive of all taxes
                 </p>
 
                 {/* STOCK STATUS */}
-                <div className="flex items-center gap-2.5 mt-2.5 mb-4 text-[16px] text-black" style={{ fontFamily: "var(--font-body)" }}>
+                <div className="flex items-center gap-2.5 mt-2.5 text-[14px] text-[#6b6b6b]" style={{ fontFamily: "var(--font-body)" }}>
                   <span className={`mh-stock-dot ${stockClass}`} />
                   <span>{stockLabel}</span>
                 </div>
 
                 {/* COLOUR SELECTOR */}
                 {(product.Colors || []).length > 0 && (
-                  <div className="mb-4">
-                    <p className="mb-2.5 text-[14px] font-medium text-[#111]">Colour: <span className="text-[#404040]">{selectedColor}</span></p>
-                    <div className="flex gap-2 flex-wrap">
+                  <div className="mt-8">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <p className="text-[13px] uppercase tracking-[0.12em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Colour</p>
+                    </div>
+                    <p className="mt-1.5 text-[14px] text-[#6b6b6b]" style={{ fontFamily: "var(--font-body)" }}>{selectedColor}</p>
+                    <div className="flex gap-2 flex-wrap mt-3">
                       {product.Colors!.map((color) => (
                         <button
                           key={color}
                           onClick={() => { setSelectedColor(color); setQty(1); }}
-                          className={`min-w-[50px] h-[42px] px-2.5 rounded-lg border text-[14px] font-medium transition-all duration-150 ${
+                          className={`h-[44px] px-4 rounded-[2px] border text-[13px] tracking-[0.03em] transition-colors ${
                             selectedColor === color
-                              ? "border-[#111] border-[1.5px] scale-[1.03] text-black bg-white"
-                              : "border-[#d4d4d4] bg-white text-[#111] hover:border-[#777]"
+                              ? "border-[#171813] bg-[#171813] text-white"
+                              : "border-[#D8D5CD] bg-transparent text-[#171813] hover:border-[#171813]"
                           }`}
+                          style={{ fontFamily: "var(--font-body)" }}
                         >
                           {color}
                         </button>
@@ -674,18 +718,29 @@ export default function ProductPage() {
 
                 {/* SIZE SELECTOR (dynamic from product data) */}
                 {(product.Sizes || []).length > 0 && (
-                  <div className="mb-4">
-                    <p className="mb-2.5 text-[14px] font-medium text-[#111]">Size: <span className="text-[#404040]">{selectedSize}</span></p>
-                    <div className="flex gap-2 flex-wrap">
+                  <div className="mt-8">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-[13px] uppercase tracking-[0.12em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Size</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowSizeChart(true)}
+                        className="text-[12px] tracking-[0.04em] text-[#6b6b6b] underline underline-offset-4 hover:text-[#171813] transition-colors"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        Size Guide
+                      </button>
+                    </div>
+                    <div className="flex gap-2 flex-wrap mt-3">
                       {product.Sizes!.map((size) => (
                         <button
                           key={size}
                           onClick={() => { setSelectedSize(size); setQty(1); }}
-                          className={`min-w-[50px] h-[42px] px-2.5 rounded-lg border text-[14px] font-medium transition-all duration-150 ${
+                          className={`min-w-[56px] h-[48px] px-3 rounded-[2px] border text-[13px] uppercase tracking-[0.06em] transition-colors ${
                             selectedSize === size
-                              ? "border-[#111] border-[1.5px] scale-[1.03] text-black bg-white"
-                              : "border-[#d4d4d4] bg-white text-[#111] hover:border-[#777]"
+                              ? "border-[#171813] bg-[#171813] text-white"
+                              : "border-[#D8D5CD] bg-transparent text-[#171813] hover:border-[#171813]"
                           }`}
+                          style={{ fontFamily: "var(--font-body)" }}
                         >
                           {size}
                         </button>
@@ -695,37 +750,44 @@ export default function ProductPage() {
                 )}
 
                 {/* QUANTITY */}
-                <p className="text-[16px] font-medium text-black mb-2.5" style={{ fontFamily: "var(--font-body)" }}>
-                  Quantity
-                </p>
-                <div className="inline-flex items-center justify-center w-[150px] max-w-full h-12 border border-[#dddddd] rounded-full overflow-hidden bg-transparent">
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    disabled={qty <= 1}
-                    className="w-[50px] h-[46px] text-[20px] leading-none text-black hover:bg-black/5 active:scale-90 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                  >
-                    −
-                  </button>
-                  <span className="flex-1 text-center text-[16px] font-medium text-black select-none">{qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => q + 1)}
-                    disabled={!isMadeToOrder && qty >= availableStock}
-                    className="w-[50px] h-[46px] text-[20px] leading-none text-black hover:bg-black/5 active:scale-90 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                  >
-                    +
-                  </button>
+                <div className="mt-8">
+                  <p className="text-[13px] uppercase tracking-[0.12em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Quantity</p>
+                  <div className="inline-flex items-center border border-[#D8D5CD] rounded-[2px] h-12 mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
+                      disabled={qty <= 1}
+                      className="w-12 h-full flex items-center justify-center text-[18px] leading-none text-[#171813] hover:bg-black/[0.04] transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      −
+                    </button>
+                    <span className="w-14 text-center text-[15px] text-[#171813] select-none" style={{ fontFamily: "var(--font-body)" }}>{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => q + 1)}
+                      disabled={!isMadeToOrder && qty >= availableStock}
+                      className="w-12 h-full flex items-center justify-center text-[18px] leading-none text-[#171813] hover:bg-black/[0.04] transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
+
+                {/* PRODUCTION / DELIVERY */}
+                {deliveryText && (
+                  <p className="mt-6 text-[13px] text-[#6b6b6b]" style={{ fontFamily: "var(--font-body)" }}>
+                    {deliveryText}
+                  </p>
+                )}
 
                 {/* ADD TO CART */}
                 <button
                   onClick={() => handleAddToCart(qty)}
                   disabled={isSoldOut}
-                  className={`mt-3.5 w-full min-h-[52px] rounded-full flex items-center justify-center px-5 text-[15px] font-medium uppercase tracking-[1px] transition-colors ${
+                  className={`mt-6 w-full min-h-[48px] rounded-[2px] flex items-center justify-center px-5 text-[12px] font-medium uppercase tracking-[0.16em] transition-colors ${
                     isSoldOut
                       ? "bg-[#b3b3b3] text-white cursor-not-allowed"
-                      : "bg-black text-white hover:bg-black active:scale-[0.99]"
+                      : "bg-[#171813] text-white hover:bg-[#2b2c26]"
                   }`}
                 >
                   {isSoldOut ? "Sold out" : "Add to cart"}
@@ -735,16 +797,16 @@ export default function ProductPage() {
                 )}
 
                 {/* SHARE */}
-                <div className="mt-4">
+                <div className="mt-6">
                   <button
                     type="button"
                     onClick={() => setShareOpen((v) => !v)}
-                    className="flex items-center gap-3 text-[#424242]"
+                    className="flex items-center gap-2.5 text-[#6b6b6b] hover:text-[#171813] transition-colors"
                   >
-                    <svg className="w-6 h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    <span className="text-[20px] font-medium" style={{ fontFamily: "var(--font-body)" }}>Share</span>
+                    <span className="text-[13px] uppercase tracking-[0.12em]" style={{ fontFamily: "var(--font-body)" }}>Share</span>
                   </button>
                   {shareOpen && (
                     <div className="mt-3 space-y-3">
@@ -786,77 +848,94 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              {/* ACCORDION CARD */}
-              <div className="mt-3 bg-[#F7F7F7] rounded-[19px] px-5 pt-3 pb-4">
-                {/* Description */}
-                <div>
+              {/* ACCORDIONS */}
+              <div className="mt-10 border-t border-[#D8D5CD]">
+                {/* PRODUCT DETAILS */}
+                <div className="border-b border-[#D8D5CD]">
                   <button
                     type="button"
-                    onClick={() => toggleAccordion("desc")}
-                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
+                    onClick={() => setDetailsOpen((v) => !v)}
+                    aria-expanded={detailsOpen}
+                    aria-controls="accordion-product-details"
+                    className="w-full flex items-center justify-between gap-3 py-4 text-left"
                   >
-                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Description</span>
-                    <PlusMinus open={descOpen} />
+                    <span className="text-[14px] uppercase tracking-[0.1em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Product details</span>
+                    <Chevron open={detailsOpen} />
                   </button>
-                  {descOpen && (
-                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed whitespace-pre-line" style={{ fontFamily: "var(--font-body)" }}>
-                      {product.Description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Customisation */}
-                {product.IsCustomizable && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => toggleAccordion("custom")}
-                      className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
-                    >
-                      <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Customisation</span>
-                      <PlusMinus open={customOpen} />
-                    </button>
-                    {customOpen && (
-                      <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
-                        {product.CustomizationNote || "This product can be customised to your preference. Add your requirements in the notes section at checkout."}
-                      </p>
+                  <div
+                    id="accordion-product-details"
+                    hidden={!detailsOpen}
+                    className="pb-5 -mt-1 space-y-3 text-[14px] leading-[1.7] text-[#6b6b6b]"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {product.Description && <p className="whitespace-pre-line">{product.Description}</p>}
+                    {product.Material && (
+                      <p><span className="text-[#171813]">Material:</span> {product.Material}</p>
+                    )}
+                    {product.Care && (
+                      <p className="whitespace-pre-line"><span className="text-[#171813]">Care:</span> {product.Care}</p>
+                    )}
+                    {product.IsCustomizable && (
+                      <p>{product.CustomizationNote || "This product can be customised to your preference. Add your requirements in the notes section at checkout."}</p>
                     )}
                   </div>
+                </div>
+
+                {/* SHIPPING, PACKAGING & RETURNS */}
+                <div className="border-b border-[#D8D5CD]">
+                  <button
+                    type="button"
+                    onClick={() => setShippingOpen((v) => !v)}
+                    aria-expanded={shippingOpen}
+                    aria-controls="accordion-shipping"
+                    className="w-full flex items-center justify-between gap-3 py-4 text-left"
+                  >
+                    <span className="text-[14px] uppercase tracking-[0.1em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Shipping, packaging &amp; returns</span>
+                    <Chevron open={shippingOpen} />
+                  </button>
+                  <div
+                    id="accordion-shipping"
+                    hidden={!shippingOpen}
+                    className="pb-5 -mt-1 space-y-4 text-[14px] leading-[1.7] text-[#6b6b6b]"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {[...policies.shippingPolicy.sections, ...policies.refundPolicy.sections].map((s, i) => (
+                      <div key={i} className="space-y-1">
+                        <p className="text-[12px] uppercase tracking-[0.06em] text-[#171813]">{s.heading}</p>
+                        <div dangerouslySetInnerHTML={{ __html: s.body }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DISCLAIMER */}
+                {disclaimerSections.length > 0 && (
+                  <div className="border-b border-[#D8D5CD]">
+                    <button
+                      type="button"
+                      onClick={() => setDisclaimerOpen((v) => !v)}
+                      aria-expanded={disclaimerOpen}
+                      aria-controls="accordion-disclaimer"
+                      className="w-full flex items-center justify-between gap-3 py-4 text-left"
+                    >
+                      <span className="text-[14px] uppercase tracking-[0.1em] text-[#171813]" style={{ fontFamily: "var(--font-body)" }}>Disclaimer</span>
+                      <Chevron open={disclaimerOpen} />
+                    </button>
+                    <div
+                      id="accordion-disclaimer"
+                      hidden={!disclaimerOpen}
+                      className="pb-5 -mt-1 space-y-4 text-[14px] leading-[1.7] text-[#6b6b6b]"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      {disclaimerSections.map((s, i) => (
+                        <div key={i} className="space-y-1">
+                          <p className="text-[12px] uppercase tracking-[0.06em] text-[#171813]">{s.heading}</p>
+                          <div dangerouslySetInnerHTML={{ __html: s.body }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-
-                {/* Care */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion("care")}
-                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
-                  >
-                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Care</span>
-                    <PlusMinus open={careOpen} />
-                  </button>
-                  {careOpen && (
-                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed whitespace-pre-line" style={{ fontFamily: "var(--font-body)" }}>
-                      {product.Care || 'No care instructions available.'}
-                    </p>
-                  )}
-                </div>
-
-                {/* Questions */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion("questions")}
-                    className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
-                  >
-                    <span className="text-[18px] text-[#404040]" style={{ fontFamily: "var(--font-body)" }}>Questions?</span>
-                    <PlusMinus open={questionsOpen} />
-                  </button>
-                  {questionsOpen && (
-                    <p className="pb-3 pr-5 text-[15px] text-[#4D4D4D] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
-                      Please reach out to us on <a href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" className="underline text-black">WhatsApp</a> or email us at <a href="mailto:support@thesagarsdesignhouse.com" className="underline text-black">support@thesagarsdesignhouse.com</a> and we'll be happy to help.
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -938,6 +1017,9 @@ export default function ProductPage() {
         <div
           className="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
           onClick={() => setShowSizeChart(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Size guide"
         >
           <div
             className="relative bg-white rounded-[22px] shadow-2xl max-w-2xl w-full p-5"
@@ -946,6 +1028,7 @@ export default function ProductPage() {
             {/* Close button */}
             <button
               onClick={() => setShowSizeChart(false)}
+              aria-label="Close size guide"
               className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#f2f0ed] hover:bg-[#e1dfdc] text-black text-lg font-bold transition-colors"
             >
               ✕
