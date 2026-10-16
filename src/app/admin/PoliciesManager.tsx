@@ -13,7 +13,7 @@ const PAGE_KEYS: { key: keyof PoliciesData; label: string }[] = [
   { key: "cancellationRefund", label: "Cancellation & Refund" },
   { key: "shippingReturn", label: "Shipping & Return" },
   { key: "faq", label: "FAQs" },
-  { key: "whatMakesKriaSpecial", label: "What Makes The Sagar's Design House Special" },
+  { key: "whatMakesUsSpecial", label: "What Makes The Sagar's Design House Special" },
   { key: "productCare", label: "Product Care" },
 ];
 

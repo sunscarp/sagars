@@ -24,7 +24,7 @@ export type PoliciesData = {
   cancellationRefund: PolicyPage;
   shippingReturn: PolicyPage;
   faq: PolicyPage;
-  whatMakesKriaSpecial: PolicyPage;
+  whatMakesUsSpecial: PolicyPage;
   productCare: PolicyPage;
 };
 
@@ -136,7 +136,7 @@ const DEFAULT_POLICIES: PoliciesData = {
       { heading: "Can terracotta jewellery designs be customized?", body: "<p>Yes — we offer customization in color, shape, and size. Message us on Instagram or through our website to discuss your requirements.</p>" },
     ],
   },
-  whatMakesKriaSpecial: {
+  whatMakesUsSpecial: {
     title: "What Makes The Sagar's Design House Special",
     subtitle: "Discover the essence of The Sagar's Design House — where tradition meets timeless artistry.",
     sections: [

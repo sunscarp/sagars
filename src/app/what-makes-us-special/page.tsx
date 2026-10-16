@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { usePolicies } from "@/hooks/usePolicies";
 
-export default function WhatMakesKriaSpecialPage() {
+export default function WhatMakesUsSpecialPage() {
   const router = useRouter();
   const { policies, loading } = usePolicies();
-  const page = policies.whatMakesKriaSpecial;
+  const page = policies.whatMakesUsSpecial;
 
   return (
     <div className="px-4 py-10 md:px-10 md:py-14 text-[#171813] flex justify-center">

@@ -52,7 +52,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-[13px]">
               <li><a href="/about-us" className="hover:underline">About us</a></li>
-              <li><a href="/what-makes-kria-special" className="hover:underline">What makes The Sagar's Design House special</a></li>
+              <li><a href="/what-makes-us-special" className="hover:underline">What makes The Sagar's Design House special</a></li>
               <li><a href="/product-care" className="hover:underline">Product care</a></li>
               <li><a href="/orders" className="hover:underline">Track your order</a></li>
             </ul>
