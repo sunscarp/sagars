@@ -88,19 +88,19 @@ export default function ContactInfoManager() {
           <h3 className="text-sm font-semibold text-[#595B53] mb-3">Social Links</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram — Terracotta Jewellery</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram #1</label>
               <input type="url" value={draft.instagramJewellery} onChange={(e) => update("instagramJewellery", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram — Home Decor</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Instagram #2</label>
               <input type="url" value={draft.instagramHomeDecor} onChange={(e) => update("instagramHomeDecor", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook — Terracotta Jewellery</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook #1</label>
               <input type="url" value={draft.facebookJewellery} onChange={(e) => update("facebookJewellery", e.target.value)} className={INPUT_CLS} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook — Home Decor</label>
+              <label className="block text-xs font-semibold text-[#595B53] uppercase tracking-wider mb-1">Facebook #2</label>
               <input type="url" value={draft.facebookHomeDecor} onChange={(e) => update("facebookHomeDecor", e.target.value)} className={INPUT_CLS} />
             </div>
           </div>
